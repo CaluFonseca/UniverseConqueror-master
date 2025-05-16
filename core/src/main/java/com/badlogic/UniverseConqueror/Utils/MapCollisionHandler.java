@@ -131,7 +131,7 @@ public class MapCollisionHandler {
         fixtureDef.filter.categoryBits = categoryBits;
         fixtureDef.filter.maskBits = -1;
 
-        body.createFixture(fixtureDef);
+        Fixture fixture = body.createFixture(fixtureDef);
 
         // Adjustment for rendering/debug purposes
         body.setUserData(new Rectangle(
@@ -140,7 +140,7 @@ public class MapCollisionHandler {
             widthPx,
             heightPx
         ));
-
+        fixture.setUserData("map");
         shape.dispose();
         return body;
     }

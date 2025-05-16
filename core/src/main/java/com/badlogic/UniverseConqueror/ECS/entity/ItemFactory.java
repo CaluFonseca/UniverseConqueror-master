@@ -27,10 +27,7 @@ public class ItemFactory {
     }
 
     public Entity createEntity(PooledEngine engine, World world) {
-        // Create a new entity
         entity = engine.createEntity();
-        System.out.println("Criando entidade para o item: " + name);
-        // Create and add position component
         PositionComponent position = engine.createComponent(PositionComponent.class);
         position.position.set(x, y);
         entity.add(position);
@@ -38,6 +35,7 @@ public class ItemFactory {
         TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
         transformComponent.position.set(x, y,0);  // Defina a posição para o item
         entity.add(transformComponent);
+
         // Create and add Texture component (for visual representation)
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
         textureComponent.texture = itemTexture;  // Atribui a textura do item.

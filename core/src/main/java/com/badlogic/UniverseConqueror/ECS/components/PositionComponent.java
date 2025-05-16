@@ -11,6 +11,6 @@ public class PositionComponent implements Component {
     }
 
     public PositionComponent() {
-        // posição inicial em (0, 0)
+
     }
 }

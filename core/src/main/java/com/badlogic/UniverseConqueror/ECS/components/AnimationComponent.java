@@ -50,7 +50,6 @@ public class AnimationComponent implements Component {
         if (frames.isEmpty()) {
             return null;
         }
-        System.out.println("Falha ao carregar animação: " + basePath);
         Animation<TextureRegion> anim = new Animation<>(frameDuration, frames);
         if (basePath.contains("Death") || basePath.contains("Hurt") || basePath.contains("SuperAttack") ||
                 basePath.contains("fastMove") || basePath.contains("Defense") || basePath.contains("DefenseInjured")) {

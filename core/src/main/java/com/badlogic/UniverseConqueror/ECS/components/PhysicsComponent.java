@@ -10,6 +10,6 @@ public class PhysicsComponent implements Component {
     public Vector2 velocity = new Vector2();  // Velocidade física
     public float mass = 1f;  // Massa do corpo (opcional)
 
-    // Construtores, getters e setters podem ser adicionados conforme necessário
+
 
 }

@@ -28,7 +28,7 @@ public class RenderItemSystem extends EntitySystem {
     public void update(float deltaTime) {
 
         batch.setProjectionMatrix(camera.combined);
-        System.out.println("Iniciando renderização...");
+   //     System.out.println("Iniciando renderização...");
 
         // Inicia a renderização
         batch.begin();

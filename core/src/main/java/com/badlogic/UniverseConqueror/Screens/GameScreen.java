@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.ContactListener.ContactListenerWrapper;
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
@@ -12,6 +13,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -72,8 +74,18 @@ public class GameScreen implements Screen {
     private ItemCollectionSystem itemCollectionSystem;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
+    private BulletSystem bulletSystem; // BulletSystem para renderizar as balas
+    private BulletRenderSystem bulletRenderSystem;
     private Rectangle playerBounds;
     private float centerX, centerY;
+    private BulletMovementSystem bulletMovementSystem;
+
+    // Crosshair
+    private Texture crosshairTexture;
+    private Vector2 crosshairPosition;
+    private float crosshairScale = 0.03f;
+    private float crosshairWidth, crosshairHeight;
+
     // Constructor
     public GameScreen(GameLauncher game) {
         this.game = game;
@@ -84,7 +96,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        //  engine = new PooledEngine();
+
         initializeAssets();
         initializeWorld();
         initializeCamera();
@@ -95,82 +107,102 @@ public class GameScreen implements Screen {
         initializeInputProcessor();
         createContactListener();
     }
-
-    private void initializeAssets() {
-        cameraOnTexture = new TextureRegion(new Texture("camera_on.png"));
-        cameraOffTexture = new TextureRegion(new Texture("camera_off.png"));
+    private void initializeInputProcessor() {
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(cameraInputSystem.getInputAdapter());
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+    private void createContactListener() {
+        // Cria o MyContactListener e configura o contact listener para o mundo Box2D
+//        MyContactListener myContactListener = new MyContactListener(engine, itemCollectionSystem,healthSystem);
+//        world.setContactListener(myContactListener);
+        ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem,world);
+        world.setContactListener(contactListenerWrapper);
     }
 
-    private void initializeWorld() {
-        world = new World(new Vector2(0, -9.8f), true);
-        debugRenderer = new Box2DDebugRenderer();
-        map = new TmxMapLoader().load("mapa.tmx");
-        mapRenderer = new IsometricTiledMapRenderer(map);
-        //  collisionHandler = new MapCollisionHandler(map, Constants.PPM, world);
-        this.collisionHandler = new MapCollisionHandler(map, "Collisions", "Jumpable");
-        collisionHandler.createBox2DBodies(world);
-        shapeRenderer = new ShapeRenderer();
 
-
-        //   System.out.println("Total de corpos no mundo após carregar colisões: " + world.getBodyCount());
-        //   System.out.println("Mapa carregado: " + map);
-        //  System.out.println("Corpos no mundo: " + world.getBodyCount());
+    private void updateCameraPosition() {
+        PositionComponent pos = player.getComponent(PositionComponent.class);
+        if (cameraInputSystem.isFollowingPlayer() && pos != null) {
+            camera.position.set(pos.position.x, pos.position.y, 0);
+        }
+        camera.update();
     }
 
-    private void initializePlayer() {
-
-        AnimationComponent tempAnim = new AnimationComponent();
-        tempAnim.init();
-        ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = tempAnim.animations;
-
-        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
-        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
-        int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
-        int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
-
-        float mapPixelWidth = mapWidthInTiles * tilePixelWidth;
-        float mapPixelHeight = mapHeightInTiles * tilePixelHeight;
-        centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
-        centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
-        ObjectMap<String, Sound> sounds = new ObjectMap<>();
-
-        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), anims, sounds, world);
-        player.add(new PositionComponent());
-        player.add(new VelocityComponent());
-        //  System.out.println("Jogador criado: " + player);
+    private void updateUI(float delta) {
+        stage.act();
+        stage.draw();
+        updateTimer(delta);
+        updateCameraIcon();
+        updateCameraPosition();
+    }
+    private void updateCameraIcon() {
+        // Alterna o ícone da câmera dependendo do estado
+        if (cameraInputSystem.isFollowingPlayer()) {
+            cameraIconImage.setDrawable(new TextureRegionDrawable(cameraOnTexture));
+        } else {
+            cameraIconImage.setDrawable(new TextureRegionDrawable(cameraOffTexture));
+        }
     }
 
-    private void initializeSystems() {
-        //engine = new PooledEngine();
-        cameraInputSystem = new CameraInputSystem(camera);
-        engine.addSystem(new PlayerInputSystem(world, joystick));
-        engine.addSystem(new MovementSystem());
-        engine.addSystem(new AnimationSystem());
-        engine.addSystem(new JumpSystem(world));
-        engine.addSystem(new PhysicsSystem(world));
-        engine.addSystem(cameraInputSystem);
-        engine.addSystem(new CameraSystem(camera, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class),
-            map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class)));
-        engine.addSystem(new RenderSystem(new SpriteBatch(), camera));
-        attackSystem= new AttackSystem();
-        attackSystem.setEngine(engine);
-        healthSystem= new HealthSystem( null, // deathSound
-            null, // hurtSound
-            currentHealth -> healthLabel.setText("Health: " + currentHealth));
-        healthSystem.setEngine(engine);
-        engine.addSystem(attackSystem);
-        itemCollectionSystem = new ItemCollectionSystem(playerBounds, itemsLabel,attackSystem,healthSystem);
 
-        engine.addSystem(itemCollectionSystem);
-        engine.addSystem(new HealthSystem(null, null, currentHealth -> healthLabel.setText("Health: " + currentHealth)));
-//        engine.addSystem(new HealthSystem(
-////            null, // deathSound
-////            null, // hurtSound
-////            currentHealth -> healthLabel.setText("Health: " + currentHealth)
-////        ));
+    private void updateTimer(float delta) {
+        playingTimer.update(delta);
+        float elapsed = playingTimer.getTime();
+        int hours = (int) (elapsed / 3600);
+        int minutes = (int) ((elapsed % 3600) / 60);
+        int seconds = (int) (elapsed % 60);
+        String timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        timerLabel.setText(timeFormatted);
     }
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        world.step(1 / 60f, 6, 2);
+
+        updateUI(delta);
+        // Verifica se jogador morreu após o update dos sistemas
+        HealthComponent health = healthMapper.get(player);
+        triggerGameOver(health);
+
+        healthLabel.setText("Health: " + health.currentHealth);
+        itemsLabel.setText("Items: " + itemCollectionSystem.getCollectedCount());
+        attackPowerLabel.setText("Attack: " + attackSystem.getRemainingAttackPower());
+        // Inicia o SpriteBatch
+        SpriteBatch batch = new SpriteBatch();
+        batch.begin();  // Começa a renderização
+
+        // Renderiza as balas diretamente aqui
+        bulletRenderSystem.update(delta);
+
+        batch.end();  // Finaliza a renderização
+
+        renderWorld();
+        stage.draw();
+
+    }
+    private void initializeItems() {
+        ArrayList<ItemFactory> items = new ArrayList<>();
+
+        items.add(new ItemFactory("Vida", centerX + 100, centerY, "item.png"));
+        items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, "bullet_item.png"));
+        items.add(new ItemFactory("SuperAtaque", centerX + 250, centerY + 70, "fireball_logo.png"));
+
+        // Adiciona cada item à engine
+        for (ItemFactory item : items)  {
+            engine.addEntity(item.createEntity(engine, world));
+        }
+        SpriteBatch batchItem = new SpriteBatch();
+        engine.addSystem(new RenderItemSystem(batchItem, camera));
+
+    }
+
 
     private void initializeUI() {
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         font = new BitmapFont();
 
@@ -251,103 +283,91 @@ public class GameScreen implements Screen {
         footerTable.add(attackBox).pad(10).left();
         footerTable.add(itemsBox).pad(10).left();
     }
-
     private void initializeCamera() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.zoom = 1.0f;
 
     }
-
-    private void initializeInputProcessor() {
-        InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(cameraInputSystem.getInputAdapter());
-        Gdx.input.setInputProcessor(multiplexer);
+    private void initializeAssets() {
+        cameraOnTexture = new TextureRegion(new Texture("camera_on.png"));
+        cameraOffTexture = new TextureRegion(new Texture("camera_off.png"));
     }
 
-    private void initializeItems() {
-        ArrayList<ItemFactory> items = new ArrayList<>();
-
-        items.add(new ItemFactory("Vida", centerX + 100, centerY, "item.png"));
-        items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, "bullet_item.png"));
-        items.add(new ItemFactory("SuperAtaque", centerX + 250, centerY + 70, "fireball_logo.png"));
-
-        // Adiciona cada item à engine
-        for (ItemFactory item : items)  {
-            engine.addEntity(item.createEntity(engine, world));
-        }
-        SpriteBatch batchItem = new SpriteBatch();
-        engine.addSystem(new RenderItemSystem(batchItem, camera));
-
+    private void initializeWorld() {
+        world = new World(new Vector2(0, -9.8f), true);
+        debugRenderer = new Box2DDebugRenderer();
+        map = new TmxMapLoader().load("mapa.tmx");
+        mapRenderer = new IsometricTiledMapRenderer(map);
+        this.collisionHandler = new MapCollisionHandler(map, "Collisions", "Jumpable");
+        collisionHandler.createBox2DBodies(world);
+        shapeRenderer = new ShapeRenderer();
     }
 
-    private void createContactListener() {
-        // Cria o MyContactListener e configura o contact listener para o mundo Box2D
-        MyContactListener myContactListener = new MyContactListener(engine, itemCollectionSystem,healthSystem);
-        world.setContactListener(myContactListener);
+    private void initializePlayer() {
+        AnimationComponent tempAnim = new AnimationComponent();
+        tempAnim.init();
+        ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = tempAnim.animations;
+
+        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
+        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
+        int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
+        int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
+
+        float mapPixelWidth = mapWidthInTiles * tilePixelWidth;
+        float mapPixelHeight = mapHeightInTiles * tilePixelHeight;
+        centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
+        centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
+        ObjectMap<String, Sound> sounds = new ObjectMap<>();
+
+        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), anims, sounds, world);
+        player.add(new PositionComponent());
+        player.add(new VelocityComponent());
     }
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    private void initializeSystems() {
+        SpriteBatch batch = new SpriteBatch();
+        engine.addSystem(new CameraSystem(camera, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class),
+            map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class)));
+        engine.addSystem(new RenderSystem(batch, camera));
 
-        world.step(1 / 60f, 6, 2);
+        engine.addSystem(new PlayerInputSystem(world, joystick, bulletSystem, camera, engine));
+        cameraInputSystem = new CameraInputSystem(camera);
+        bulletSystem = new BulletSystem(camera);  // Criação do BulletSystem
+        bulletRenderSystem = new BulletRenderSystem(batch);
+        bulletMovementSystem = new BulletMovementSystem();
+        engine.addSystem(bulletMovementSystem);
 
-        updateUI(delta);
-        // Verifica se jogador morreu após o update dos sistemas
-        HealthComponent health = healthMapper.get(player);
-        triggerGameOver(health);
+        engine.addSystem(bulletSystem); // Adiciona o BulletSystem ao engine
 
-        healthLabel.setText("Health: " + health.currentHealth);
-        itemsLabel.setText("Items: " + itemCollectionSystem.getCollectedCount());
-        attackPowerLabel.setText("Attack: " + attackSystem.getRemainingAttackPower());
-        renderWorld();
-        stage.draw();
 
-    }
+        engine.addSystem(new MovementSystem());
+        engine.addSystem(new AnimationSystem());
+        engine.addSystem(new JumpSystem(world));
+        engine.addSystem(new PhysicsSystem(world));
+        engine.addSystem(cameraInputSystem);
 
-    private void updateCameraPosition() {
-        PositionComponent pos = player.getComponent(PositionComponent.class);
-        if (cameraInputSystem.isFollowingPlayer() && pos != null) {
-            camera.position.set(pos.position.x, pos.position.y, 0);
-        }
-        camera.update();
-    }
+        attackSystem = new AttackSystem();
+        attackSystem.setEngine(engine);
+        healthSystem = new HealthSystem(null, // deathSound
+            null, // hurtSound
+            currentHealth -> healthLabel.setText("Health: " + currentHealth));
+        healthSystem.setEngine(engine);
 
-    private void updateUI(float delta) {
-        stage.act();
-        stage.draw();
-        updateTimer(delta);
-        updateCameraIcon();
-        updateCameraPosition();
-    }
+        engine.addSystem(attackSystem);
+        itemCollectionSystem = new ItemCollectionSystem(playerBounds, itemsLabel, attackSystem, healthSystem);
+        engine.addSystem(itemCollectionSystem);
+        engine.addSystem(new HealthSystem(null, null, currentHealth -> healthLabel.setText("Health: " + currentHealth)));
 
-    private void updateCameraIcon() {
-        // Alterna o ícone da câmera dependendo do estado
-        if (cameraInputSystem.isFollowingPlayer()) {
-            cameraIconImage.setDrawable(new TextureRegionDrawable(cameraOnTexture));
-        } else {
-            cameraIconImage.setDrawable(new TextureRegionDrawable(cameraOffTexture));
-        }
-    }
-
-    private void updateTimer(float delta) {
-        playingTimer.update(delta);
-        float elapsed = playingTimer.getTime();
-        int hours = (int) (elapsed / 3600);
-        int minutes = (int) ((elapsed % 3600) / 60);
-        int seconds = (int) (elapsed % 60);
-        String timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        timerLabel.setText(timeFormatted);
+        engine.addSystem(bulletRenderSystem);
+        engine.addSystem(new CrosshairRenderSystem(batch, camera));
     }
 
     private void renderWorld() {
         mapRenderer.setView(camera);
         mapRenderer.render();
         engine.update(Gdx.graphics.getDeltaTime());
-        //renderCollisionDebug();
+
         debugRenderer.render(world, camera.combined);
     }
 

@@ -1,7 +1,5 @@
-package com.badlogic.UniverseConqueror.Utils;
+package com.badlogic.UniverseConqueror.ContactListener;
 
-import com.badlogic.UniverseConqueror.ECS.components.HealthComponent;
-import com.badlogic.UniverseConqueror.ECS.components.ItemComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PlayerComponent;
 import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
 import com.badlogic.UniverseConqueror.ECS.systems.ItemCollectionSystem;
@@ -9,17 +7,17 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.*;
 
-public class MyContactListener implements ContactListener {
+public class MapContactListener implements ContactListener {
 
     private final Engine engine;
-    private final ItemCollectionSystem itemCollectionSystem; // Item collection system
+    private final ItemCollectionSystem itemCollectionSystem;
     private HealthSystem healthSystem;
 
     // Constructor to receive engine, itemCollectionSystem, and healthSystem
-    public MyContactListener(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem) {
+    public MapContactListener(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem) {
         this.engine = engine;
-        this.itemCollectionSystem = itemCollectionSystem; // Initializes itemCollectionSystem
-        this.healthSystem = healthSystem;  // Initializes healthSystem
+        this.itemCollectionSystem = itemCollectionSystem;
+        this.healthSystem = healthSystem;
     }
 
     @Override
@@ -33,10 +31,8 @@ public class MyContactListener implements ContactListener {
         if (playerEntity != null) {
             // Check if the collision is with an item
             if (isPlayerAndItemCollision(bodyA, bodyB)) {
-                // Collect item and heal the player if it's a healing item
                 collectItem(bodyA, bodyB, playerEntity);
-            } else {
-                // If not an item, apply damage to the player
+            } else if (!isBulletCollision(bodyA, bodyB)) {
                 applyDamageToPlayer(playerEntity, 1);
             }
         }
@@ -61,7 +57,7 @@ public class MyContactListener implements ContactListener {
             }
         }
 
-        return null; // Returns null if no player entity found
+        return null;
     }
 
     // Checks if the collision is between the player and an item
@@ -69,30 +65,39 @@ public class MyContactListener implements ContactListener {
         Fixture playerFixture = bodyA.getFixtureList().get(0);
         Fixture itemFixture = bodyB.getFixtureList().get(0);
 
-        // Item collision is identified by the string "item" in the fixture's userData
-        return ("item".equals(itemFixture.getUserData()));
+        if ("item".equals(itemFixture.getUserData())) {
+            return true;
+        }
+        if ("bullet".equals(itemFixture.getUserData()) || "fireball".equals(itemFixture.getUserData())) {
+            return false;
+        }
+
+        return false;
+    }
+
+    private boolean isBulletCollision(Body bodyA, Body bodyB) {
+        Fixture playerFixture = bodyA.getFixtureList().get(0);
+        Fixture itemFixture = bodyB.getFixtureList().get(0);
+        return "bullet".equals(itemFixture.getUserData()) || "fireball".equals(itemFixture.getUserData());
+    }
+
+    private void disposeBullet(Body bulletBody) {
+        if (bulletBody.getUserData() instanceof Entity) {
+            Entity bulletEntity = (Entity) bulletBody.getUserData();
+            bulletBody.getWorld().destroyBody(bulletBody);
+            engine.removeEntity(bulletEntity);
+        }
     }
 
     // Item collection method, including healing the player if it's a "Vida" item
     private void collectItem(Body bodyA, Body bodyB, Entity playerEntity) {
         Fixture itemFixture = bodyB.getFixtureList().get(0);
 
-        // Check if the userData of the item fixture is "item" and collect
         if ("item".equals(itemFixture.getUserData())) {
             Entity itemEntity = (Entity) itemFixture.getBody().getUserData();
             if (itemEntity != null) {
-                // Call the ItemCollectionSystem method to collect the item
                 itemCollectionSystem.collectItem(itemEntity,playerEntity);
-
-                // Remove the item from ECS
                 engine.removeEntity(itemEntity);
-
-                // If the collected item is "Vida", heal the player
-//                ItemComponent item = itemEntity.getComponent(ItemComponent.class);
-//                if ("Vida".equals(item.name) && playerEntity != null) {
-//                    // Heal the player with a specific amount (example: 20)
-//                    healthSystem.heal(playerEntity, 20);  // Heal the player by 20 health points
-//                }
             }
         }
     }
@@ -101,13 +106,11 @@ public class MyContactListener implements ContactListener {
     private void applyDamageToPlayer(Entity playerEntity, int damageAmount) {
         try {
             if (playerEntity != null) {
-                // Use the HealthSystem to apply damage
-                healthSystem.damage(playerEntity, damageAmount);  // Applies damage to the player
+                healthSystem.damage(playerEntity, damageAmount);
             }
         } catch (Exception e) {
-            // Catch the exception and print the error message
             System.err.println("Error applying damage to the player: " + e.getMessage());
-            e.printStackTrace();  // Optional: Print the stack trace for debugging
+            e.printStackTrace();
         }
     }
 

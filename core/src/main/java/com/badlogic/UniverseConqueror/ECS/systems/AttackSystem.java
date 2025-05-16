@@ -91,7 +91,7 @@ public class AttackSystem extends IteratingSystem {
             if (entities != null && entities.size() > 0) {
                 return entities.get(0);  // Retorna a primeira entidade do jogador
             } else {
-                System.out.println("Nenhuma entidade com PlayerComponent encontrada.");
+                //System.out.println("Nenhuma entidade com PlayerComponent encontrada.");
             }
         } catch (Exception e) {
             // Captura qualquer exceção e imprime no console para debug
