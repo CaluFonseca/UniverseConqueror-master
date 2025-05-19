@@ -1,20 +1,27 @@
 package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
 
 public class BulletFactory {
+    private final AssetManager assetManager;
 
-    private static final Texture bulletTexture = new Texture("bullet.png");
-    private static final Texture fireballTexture = new Texture("fireball.png");
+    public BulletFactory(AssetManager assetManager) {
+        this.assetManager = assetManager;
+    }
 
     public Entity createProjectile(PooledEngine engine, World world, float x, float y, Vector2 target, ProjectileComponent.ProjectileType type) {
         Entity entity = engine.createEntity();
-
+        Texture bulletTexture = assetManager.get(AssetPaths.BULLET_TEXTURE, Texture.class);
+        Texture fireballTexture = assetManager.get(AssetPaths.FIREBALL_TEXTURE, Texture.class);
         // Componente de posição
         PositionComponent position = engine.createComponent(PositionComponent.class);
         position.position.set(x, y);
@@ -49,6 +56,21 @@ public class BulletFactory {
         textureComponent.texture = projectile.texture;
         entity.add(textureComponent);
 
+        if (type == ProjectileComponent.ProjectileType.FIREBALL) {
+            ParticleComponent particle = engine.createComponent(ParticleComponent.class);
+            ParticleEffect effect = assetManager.get(AssetPaths.PARTICLE_EXPLOSION, ParticleEffect.class);
+            particle.effect = new ParticleEffect(effect);
+//            float width = projectile.texture.getWidth();
+//            float height = projectile.texture.getHeight();
+//            particle.effect.setPosition(x + width / 2f, y + height / 2f);
+
+            particle.effect.start();
+            float width = projectile.texture.getWidth();
+            float height = projectile.texture.getHeight();
+            particle.offset.set(width / 2f, height / 2f);
+            entity.add(particle);
+        }
+
         engine.addEntity(entity);
         return entity;
     }
@@ -60,13 +82,19 @@ public class BulletFactory {
 
         Body body = world.createBody(bodyDef);
 
-        PolygonShape shape = new PolygonShape();
-        if (type == ProjectileComponent.ProjectileType.FIREBALL) {
-            shape.setAsBox(60f, 60f);
-        } else {
-            shape.setAsBox(80f, 10f);
-        }
+        Texture texture = type == ProjectileComponent.ProjectileType.FIREBALL ?
+                assetManager.get(AssetPaths.FIREBALL_TEXTURE, Texture.class) :
+                assetManager.get(AssetPaths.BULLET_TEXTURE, Texture.class);
 
+        float width = texture.getWidth();
+        float height = texture.getHeight();
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(
+                width / 2f, height / 2f,
+                new Vector2(width / 2f, height / 2f),
+                0f
+        );
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 0.1f;
@@ -83,7 +111,6 @@ public class BulletFactory {
     }
 
     public static void dispose() {
-        bulletTexture.dispose();
-        fireballTexture.dispose();
+        GameLauncher.assetManager.dispose();
     }
 }

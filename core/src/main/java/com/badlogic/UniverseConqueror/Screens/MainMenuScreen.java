@@ -1,8 +1,10 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -43,19 +45,22 @@ public class MainMenuScreen implements Screen {
     private boolean isAudioOn = true;
     private float currentVolume = 1.0f;
 
-    public MainMenuScreen(Game game) {
+    private final AssetManager assetManager;
+
+    public MainMenuScreen(Game game, AssetManager assetManager) {
         this.game = game;
+        this.assetManager = assetManager;
 
         batch = new SpriteBatch();
         stage = new Stage(new FitViewport(1920, 1080));
 
         // Carregar recursos
         font = new BitmapFont();
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-        background = new Texture(Gdx.files.internal("background.jpg"));
-        music = Gdx.audio.newMusic(Gdx.files.internal("audio/space_intro_sound.mp3"));
-        buttonHoverSound = Gdx.audio.newSound(Gdx.files.internal("audio/alert0.mp3"));
-        buttonClickSound = Gdx.audio.newSound(Gdx.files.internal("audio/keyboardclick.mp3"));
+        skin =assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
+        background = assetManager.get(AssetPaths.BACKGROUND_MAIN, Texture.class);
+        music =assetManager.get(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
+        buttonHoverSound = assetManager.get(AssetPaths.SOUND_HOVER, Sound.class);
+        buttonClickSound = assetManager.get(AssetPaths.SOUND_CLICK, Sound.class);
 
         // Configuração da tabela de UI
         Table table = new Table();
@@ -114,7 +119,7 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 buttonClickSound.play(); // Toca o som de clique
                 stopMusic();
-                game.setScreen(new ControlsScreen(game));
+                game.setScreen(new ControlsScreen(game,assetManager));
             }
         });
 
@@ -124,7 +129,7 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 buttonClickSound.play(); // Toca o som de clique
                 stopMusic();
-                game.setScreen(new CreditsScreen(game)); // Redireciona para a tela de créditos
+                game.setScreen(new CreditsScreen(game,assetManager)); // Redireciona para a tela de créditos
             }
         });
 
@@ -237,11 +242,7 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         batch.dispose();
         font.dispose();
-        skin.dispose();
         stage.dispose();
-        background.dispose();
-        music.dispose();
-        buttonHoverSound.dispose();
-        buttonClickSound.dispose();
+        assetManager.dispose();
     }
 }

@@ -3,6 +3,7 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -27,12 +28,14 @@ public abstract class BaseInfosScreen implements Screen {
     protected Sound buttonSound;
 
     protected String screenText;
+    private final AssetManager assetManager;
 
-    public BaseInfosScreen(Game game, String screenText) {
+    public BaseInfosScreen(Game game, String screenText, AssetManager assetManager) {
         this.game = game;
         this.screenText = screenText;
         initializeResources();
         initializeUI();
+        this.assetManager = assetManager;
     }
 
     private void initializeResources() {
@@ -40,8 +43,8 @@ public abstract class BaseInfosScreen implements Screen {
         batch = new SpriteBatch();
         layout = new GlyphLayout();
         stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-        buttonSound = Gdx.audio.newSound(Gdx.files.internal("audio/keyboardclick.mp3"));
+        skin = assetManager.get("ui/uiskin.json", Skin.class);
+        buttonSound = assetManager.get("audio/keyboardclick.mp3", Sound.class);;
     }
 
     private void initializeUI() {
@@ -51,7 +54,7 @@ public abstract class BaseInfosScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 buttonSound.play();
-                game.setScreen(new MainMenuScreen(game));
+                game.setScreen(new MainMenuScreen(game,assetManager));
             }
         });
         stage.addActor(backButton);
@@ -105,7 +108,6 @@ public abstract class BaseInfosScreen implements Screen {
         font.dispose();
         batch.dispose();
         stage.dispose();
-        skin.dispose();
-        buttonSound.dispose();
+        assetManager.dispose();
     }
 }

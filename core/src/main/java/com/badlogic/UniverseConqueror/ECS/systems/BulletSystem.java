@@ -1,7 +1,9 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.ashley.core.*;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -18,8 +20,8 @@ public class BulletSystem extends EntitySystem {
     private Texture bulletTexture;
     private OrthographicCamera camera;
 
-    public BulletSystem(OrthographicCamera camera) {
-        bulletTexture = new Texture("bullet.png");  // Carrega a textura da bala
+    public BulletSystem(OrthographicCamera camera, AssetManager assetManager) {
+        bulletTexture =assetManager.get(AssetPaths.BULLET_TEXTURE, Texture.class);;  // Carrega a textura da bala
         this.camera = camera;
     }
 

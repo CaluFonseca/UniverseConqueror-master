@@ -8,7 +8,9 @@ import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 public class ItemFactory {
@@ -17,13 +19,15 @@ public class ItemFactory {
     private float x, y;
     private String texturePath;
     private Entity entity;
+    private final AssetManager assetManager;
 
-    public ItemFactory(String name, float x, float y, String texturePath) {
+    public ItemFactory(String name, float x, float y, String texturePath, AssetManager assetManager) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.texturePath = texturePath;
-        itemTexture = new Texture(Gdx.files.internal(texturePath));
+        this.assetManager = assetManager;
+        itemTexture = assetManager.get(texturePath, Texture.class);
     }
 
     public Entity createEntity(PooledEngine engine, World world) {
@@ -63,7 +67,12 @@ public class ItemFactory {
 
         // Cria uma forma retangular
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(itemTexture.getWidth() / 2f, itemTexture.getHeight() / 2f);  // metade do tamanho
+        shape.setAsBox(
+            itemTexture.getWidth() / 2f,
+            itemTexture.getHeight() / 2f,
+            new Vector2(itemTexture.getWidth() / 2f, itemTexture.getHeight() / 2f),
+            0
+        );
 
         // Define o fixture como sensor (detecção sem colisão)
         FixtureDef fixtureDef = new FixtureDef();

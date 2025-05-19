@@ -1,7 +1,9 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,11 +17,13 @@ public class CrosshairRenderSystem extends EntitySystem {
     private final float scale = 0.03f;
     private final float width, height;
     private final Vector2 crosshairPosition = new Vector2();
+    private AssetManager assetManager;
 
-    public CrosshairRenderSystem(SpriteBatch batch, OrthographicCamera camera) {
+    public CrosshairRenderSystem(SpriteBatch batch, OrthographicCamera camera, AssetManager assetManager) {
         this.batch = batch;
         this.camera = camera;
-        this.crosshairTexture = new Texture("crosshair.png");
+        this.assetManager = assetManager;
+        this.crosshairTexture = assetManager.get(AssetPaths.CROSSHAIR_TEXTURE, Texture.class);
         this.width = crosshairTexture.getWidth() * scale;
         this.height = crosshairTexture.getHeight() * scale;
     }

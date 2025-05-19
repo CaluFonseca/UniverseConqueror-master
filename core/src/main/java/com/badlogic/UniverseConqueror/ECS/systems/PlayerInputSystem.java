@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
+import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Utils.Constants;
 import com.badlogic.UniverseConqueror.Utils.Joystick;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -119,7 +120,7 @@ public class PlayerInputSystem extends IteratingSystem {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             // Obtém a posição do clique do mouse (na tela)
             if(StateComponent.State.SUPER_ATTACK == state.get()) {
-            fireBullet(entity,true);
+                fireBullet(entity,true);
             }
             else {
                 fireBullet(entity,false);
@@ -160,14 +161,17 @@ public class PlayerInputSystem extends IteratingSystem {
 
             // Converte o Vector2 para Vector3 (a câmera precisa de um Vector3)
             Vector3 mousePosition3D = new Vector3(mousePosition.x, mousePosition.y, 0);  // Usando Z=0 porque estamos em 2D
-         //   System.out.println("Mouse Position in World antes da onversao: " + mousePosition3D);
+            System.out.println("Mouse Position in World antes da onversao: " + mousePosition3D);
             // Converte a posição da tela para coordenadas do mundo
             mousePosition3D = camera.unproject(mousePosition3D);
 
             // Debug: Verifique se a posição está correta
-          //  System.out.println("Mouse Position in World: " + mousePosition3D);
+            System.out.println("Mouse Position in World: " + mousePosition3D);
 
-
+            // Posição do jogador (no mundo)
+            // Vector2 playerPosition = new Vector2(physics.body.getPosition().x + 10f, physics.body.getPosition().y - 50f);
+// Scale and offset config
+            //float scale = 0.4f;
             TextureRegion currentFrame = animation.currentFrame;
             float frameWidth = currentFrame.getRegionWidth() ;
             float frameHeight = currentFrame.getRegionHeight() ;
@@ -186,10 +190,8 @@ public class PlayerInputSystem extends IteratingSystem {
             // Calcula a direção do clique (posição do mouse - posição do jogador)
             Vector2 direction = new Vector2(mousePosition3D.x, mousePosition3D.y);  // Normaliza a direção para a posição do clique
 
-
-
             // Usa o BulletFactory para criar a bala
-            BulletFactory bulletFactory = new BulletFactory();
+            BulletFactory bulletFactory = new BulletFactory(GameLauncher.assetManager);
             try {
                 if(!fireball) {
                     // Cria a bala, passando a posição do jogador e a direção calculada

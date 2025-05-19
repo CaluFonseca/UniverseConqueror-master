@@ -13,6 +13,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -85,13 +86,14 @@ public class GameScreen implements Screen {
     private Vector2 crosshairPosition;
     private float crosshairScale = 0.03f;
     private float crosshairWidth, crosshairHeight;
-
+    private final AssetManager assetManager;
     // Constructor
-    public GameScreen(GameLauncher game) {
+    public GameScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
         this.playingTimer = new Timer(Float.MAX_VALUE);
         this.shapeRenderer = new ShapeRenderer();
         this.engine = new PooledEngine();
+        this.assetManager = assetManager;
     }
 
     @Override
@@ -113,14 +115,11 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(cameraInputSystem.getInputAdapter());
         Gdx.input.setInputProcessor(multiplexer);
     }
+
     private void createContactListener() {
-        // Cria o MyContactListener e configura o contact listener para o mundo Box2D
-//        MyContactListener myContactListener = new MyContactListener(engine, itemCollectionSystem,healthSystem);
-//        world.setContactListener(myContactListener);
         ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem,world);
         world.setContactListener(contactListenerWrapper);
     }
-
 
     private void updateCameraPosition() {
         PositionComponent pos = player.getComponent(PositionComponent.class);
@@ -187,9 +186,9 @@ public class GameScreen implements Screen {
     private void initializeItems() {
         ArrayList<ItemFactory> items = new ArrayList<>();
 
-        items.add(new ItemFactory("Vida", centerX + 100, centerY, "item.png"));
-        items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, "bullet_item.png"));
-        items.add(new ItemFactory("SuperAtaque", centerX + 250, centerY + 70, "fireball_logo.png"));
+        items.add(new ItemFactory("Vida", centerX + 100, centerY, AssetPaths.ITEM_VIDA,assetManager));
+        items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, AssetPaths.ITEM_ATAQUE,assetManager));
+        items.add(new ItemFactory("SuperAtaque", centerX + 250, centerY + 70, AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
 
         // Adiciona cada item à engine
         for (ItemFactory item : items)  {
@@ -203,7 +202,7 @@ public class GameScreen implements Screen {
 
     private void initializeUI() {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         font = new BitmapFont();
 
         // Footer UI setup
@@ -225,8 +224,9 @@ public class GameScreen implements Screen {
         stage.addActor(timerTable);
 
         // Joystick setup
-        joystick = new Joystick(new Texture("joystick_base.png"), new Texture("joystick_knob.png"), 100f, 100f, 60f);
-        joystick.setPosition(50, 50);
+        Texture base = assetManager.get(AssetPaths.JOYSTICK_BASE, Texture.class);
+        Texture knob = assetManager.get(AssetPaths.JOYSTICK_KNOB, Texture.class);
+        joystick = new Joystick(base,knob, 100f, 100f, 60f);
         stage.addActor(joystick);
 
         // Camera icon setup
@@ -240,10 +240,11 @@ public class GameScreen implements Screen {
         cameraIconImage.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                boolean following = cameraInputSystem.isFollowingPlayer();
-                cameraInputSystem.setCameraFollow(!following);
-                String newIcon = !following ? "camera_on.png" : "camera_off.png";
-                cameraIconImage.setDrawable(new TextureRegionDrawable(new TextureRegion(new Texture(newIcon))));
+                Texture cameraOnTexture = assetManager.get(AssetPaths.CAMERA_ON_ICON, Texture.class);
+                Texture cameraOffTexture = assetManager.get(AssetPaths.CAMERA_OFF_ICON, Texture.class);
+                cameraIconImage.setDrawable(new TextureRegionDrawable(new TextureRegion(
+                    cameraInputSystem.isFollowingPlayer() ? cameraOnTexture : cameraOffTexture
+                )));
             }
         });
         stage.addActor(uiTable);
@@ -290,8 +291,8 @@ public class GameScreen implements Screen {
 
     }
     private void initializeAssets() {
-        cameraOnTexture = new TextureRegion(new Texture("camera_on.png"));
-        cameraOffTexture = new TextureRegion(new Texture("camera_off.png"));
+        cameraOnTexture = new TextureRegion(assetManager.get(AssetPaths.CAMERA_ON_ICON, Texture.class));
+        cameraOffTexture = new TextureRegion(assetManager.get(AssetPaths.CAMERA_OFF_ICON, Texture.class));
     }
 
     private void initializeWorld() {
@@ -305,9 +306,9 @@ public class GameScreen implements Screen {
     }
 
     private void initializePlayer() {
-        AnimationComponent tempAnim = new AnimationComponent();
-        tempAnim.init();
-        ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = tempAnim.animations;
+        AnimationLoader loader = new AnimationLoader(assetManager);
+        ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = loader.loadAnimations();
+       // ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = tempAnim.animations;
 
         int mapWidthInTiles = map.getProperties().get("width", Integer.class);
         int mapHeightInTiles = map.getProperties().get("height", Integer.class);
@@ -320,7 +321,7 @@ public class GameScreen implements Screen {
         centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
         ObjectMap<String, Sound> sounds = new ObjectMap<>();
 
-        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), anims, sounds, world);
+        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), sounds, world, assetManager);
         player.add(new PositionComponent());
         player.add(new VelocityComponent());
     }
@@ -333,7 +334,7 @@ public class GameScreen implements Screen {
 
         engine.addSystem(new PlayerInputSystem(world, joystick, bulletSystem, camera, engine));
         cameraInputSystem = new CameraInputSystem(camera);
-        bulletSystem = new BulletSystem(camera);  // Criação do BulletSystem
+        bulletSystem = new BulletSystem(camera,assetManager);  // Criação do BulletSystem
         bulletRenderSystem = new BulletRenderSystem(batch);
         bulletMovementSystem = new BulletMovementSystem();
         engine.addSystem(bulletMovementSystem);
@@ -360,7 +361,8 @@ public class GameScreen implements Screen {
         engine.addSystem(new HealthSystem(null, null, currentHealth -> healthLabel.setText("Health: " + currentHealth)));
 
         engine.addSystem(bulletRenderSystem);
-        engine.addSystem(new CrosshairRenderSystem(batch, camera));
+        engine.addSystem(new ParticleSystem(batch, camera));
+        engine.addSystem(new CrosshairRenderSystem(batch, camera,assetManager));
     }
 
     private void renderWorld() {
@@ -373,7 +375,7 @@ public class GameScreen implements Screen {
 
     private void triggerGameOver(HealthComponent health) {
         if (health != null && health.isDead()) {
-            game.setScreen(new GameOverScreen(game));
+            game.setScreen(new GameOverScreen(game, assetManager));
         }
     }
 
@@ -397,5 +399,6 @@ public class GameScreen implements Screen {
         mapRenderer.dispose();
         debugRenderer.dispose();
         shapeRenderer.dispose();
+        assetManager.dispose();
     }
 }

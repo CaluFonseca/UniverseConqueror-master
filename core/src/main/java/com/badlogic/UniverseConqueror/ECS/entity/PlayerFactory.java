@@ -1,8 +1,10 @@
 package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.systems.AnimationLoader;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -12,64 +14,67 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 public class PlayerFactory {
 
+    //private final AssetManager assetManager;
 
-    public static Entity  createPlayer(PooledEngine engine,
+
+    public static Entity createPlayer(PooledEngine engine,
                                       Vector2 position,
-                                      ObjectMap<StateComponent.State, Animation<TextureRegion>> animations,
                                       ObjectMap<String, Sound> sounds,
-                                      World world) {
+                                      World world,
+                                      AssetManager assetManager) {
+
         Entity entity = engine.createEntity();
 
-        // Criar e adicionar componentes relacionados à posição e transformações
+        // Transformação e posição
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(position.x, position.y, 0);
+        entity.add(transform);
 
-        // Criar componentes relacionados à física e Box2D
+        PositionComponent positionComponent = engine.createComponent(PositionComponent.class);
+        positionComponent.position.set(position.x, position.y);
+        entity.add(positionComponent);
+
+        // Física
         PhysicsComponent physicsComponent = engine.createComponent(PhysicsComponent.class);
-        BodyComponent bodyComponent = createBody(position, world);  // Cria o corpo físico
-        Body body = bodyComponent.body; // <- agora tens acesso ao body
-        physicsComponent.body = body;
+        BodyComponent bodyComponent = createBody(position, world);
+        physicsComponent.body = bodyComponent.body;
+        entity.add(physicsComponent);
+        entity.add(bodyComponent);
 
-        // Outros componentes do jogador
+        // Velocity e estado
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
         StateComponent state = engine.createComponent(StateComponent.class);
-
-        AnimationComponent anim = engine.createComponent(AnimationComponent.class);
-        anim.animations.putAll(animations);
-
-        SoundComponent sound = engine.createComponent(SoundComponent.class);
-        sound.sounds.putAll(sounds);
-
-        PositionComponent positionComponent = new PositionComponent();
-        positionComponent.position.set(position.x, position.y);
-
-        CameraComponent cameraComponent = new CameraComponent();
-
-        AttackComponent attack = engine.createComponent(AttackComponent.class);
-        JumpComponent jump = engine.createComponent(JumpComponent.class);
-        PlayerComponent player = engine.createComponent(PlayerComponent.class);
-        HealthComponent health = engine.createComponent(HealthComponent.class);
-
-        // Adiciona os componentes à entidade
-        entity.add(transform);
         entity.add(velocity);
         entity.add(state);
-        entity.add(anim);
+
+        // Carrega as animações com o AnimationLoader
+        AnimationLoader animationLoader = new AnimationLoader(assetManager);
+        ObjectMap<StateComponent.State, Animation<TextureRegion>> animations = animationLoader.loadAnimations();
+
+        AnimationComponent animationComponent = engine.createComponent(AnimationComponent.class);
+        animationComponent.setAnimations(animations);
+        entity.add(animationComponent);
+
+        // Sons
+        SoundComponent sound = engine.createComponent(SoundComponent.class);
+        sound.sounds.putAll(sounds);
         entity.add(sound);
-        entity.add(attack);
-        entity.add(jump);
-        entity.add(player);
-        entity.add(physicsComponent);
-        entity.add(positionComponent);
-        entity.add(cameraComponent);
-        entity.add(health);
-        // Adiciona o componente de física que contém o Body do Box2D
-        entity.add(bodyComponent);
-        body.setUserData(entity);
-        // Adiciona a entidade à engine
+
+        // Outros componentes
+        entity.add(engine.createComponent(AttackComponent.class));
+        entity.add(engine.createComponent(JumpComponent.class));
+        entity.add(engine.createComponent(PlayerComponent.class));
+        entity.add(engine.createComponent(CameraComponent.class));
+        entity.add(engine.createComponent(HealthComponent.class));
+
+        // Associa o corpo à entidade
+        bodyComponent.body.setUserData(entity);
+
+        // Adiciona à engine
         engine.addEntity(entity);
         return entity;
     }
+
 
     // Função para criar o corpo físico usando Box2D
     public static BodyComponent createBody(Vector2 position, World world) {

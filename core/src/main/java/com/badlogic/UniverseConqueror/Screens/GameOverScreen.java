@@ -1,8 +1,10 @@
 package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
@@ -29,23 +31,25 @@ public class GameOverScreen implements Screen {
     private Sound clickSound;
     // Adicione esta nova variável
     private Sound gameOverSound;
+    private final AssetManager assetManager;
 
-    public GameOverScreen(GameLauncher game) {
+    public GameOverScreen(GameLauncher game,AssetManager assetManager) {
         this.game = game;
+        this.assetManager = assetManager;
     }
 
     @Override
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
         Gdx.input.setInputProcessor(stage);
-        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("audio/gameOver.mp3"));
+        gameOverSound = assetManager.get(AssetPaths.SOUND_GAME_OVER, Sound.class);
         gameOverSound.play(1.0f);
         batch = new SpriteBatch();
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"), new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas")));
-        background = new Texture(Gdx.files.internal("background_pause.jpg"));
-        music = Gdx.audio.newMusic(Gdx.files.internal("audio/space_intro_sound.mp3"));
-        hoverSound = Gdx.audio.newSound(Gdx.files.internal("audio/alert0.mp3"));
-        clickSound = Gdx.audio.newSound(Gdx.files.internal("audio/keyboardclick.mp3"));
+        skin =assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
+        background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
+        music = assetManager.get(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
+        hoverSound = assetManager.get(AssetPaths.SOUND_HOVER, Sound.class);
+        clickSound =  assetManager.get(AssetPaths.SOUND_CLICK, Sound.class);
 
         music.setLooping(true);
         music.setVolume(0.2f);
@@ -73,7 +77,7 @@ public class GameOverScreen implements Screen {
                 clickSound.play();
                 music.stop();
                 //game.getGameScreen().reset();
-                game.setScreen(new GameScreen(game)); // Agora reinicia o jogo!
+                game.setScreen(new GameScreen(game,assetManager)); // Agora reinicia o jogo!
             }
         });
 
@@ -82,7 +86,7 @@ public class GameOverScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 clickSound.play();
                 music.stop();
-                game.setScreen(new MainMenuScreen(game));
+                game.setScreen(new MainMenuScreen(game,assetManager));
             }
         });
 
@@ -152,10 +156,6 @@ public class GameOverScreen implements Screen {
         stage.dispose();
         skin.dispose();
         batch.dispose();
-        background.dispose();
-        music.dispose();
-        hoverSound.dispose();
-        clickSound.dispose();
-        gameOverSound.dispose();
+        assetManager.dispose();
     }
 }
