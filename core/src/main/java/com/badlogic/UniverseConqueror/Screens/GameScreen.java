@@ -5,11 +5,17 @@ import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.State.GameState;
+import com.badlogic.UniverseConqueror.State.GameStateManager;
+import com.badlogic.UniverseConqueror.State.GameStateService;
+import com.badlogic.UniverseConqueror.State.SavedItemData;
 import com.badlogic.UniverseConqueror.Utils.*;
 import com.badlogic.UniverseConqueror.ECS.entity.PlayerFactory;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
@@ -77,16 +83,15 @@ public class GameScreen implements Screen {
     private HealthSystem healthSystem;
     private BulletSystem bulletSystem; // BulletSystem para renderizar as balas
     private BulletRenderSystem bulletRenderSystem;
-    private Rectangle playerBounds;
     private float centerX, centerY;
     private BulletMovementSystem bulletMovementSystem;
 
-    // Crosshair
-    private Texture crosshairTexture;
-    private Vector2 crosshairPosition;
-    private float crosshairScale = 0.03f;
-    private float crosshairWidth, crosshairHeight;
     private final AssetManager assetManager;
+    private BodyRemovalSystem bodyRemovalSystem;
+    private AnimationSystem animationSystem;
+    private PlayerInputSystem playerInputSystem;
+    private boolean restoredState = false;
+    private GameStateService gameStateService;
     // Constructor
     public GameScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
@@ -98,17 +103,33 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
         initializeAssets();
         initializeWorld();
         initializeCamera();
-        initializePlayer();
+        GameState state = GameStateManager.load();
+        if (state!= null) {
+            restoreState(state);
+            GameStateManager.delete();
+        } else {
+            initializePlayer();
+            initializeItems();
+        }
+
         initializeUI();
         initializeSystems();
-        initializeItems();
         initializeInputProcessor();
         createContactListener();
+
+        if (state != null) {
+            itemCollectionSystem.setCollectedCount(state.collectedItemCount);
+            itemsLabel.setText("Items: " + state.collectedItemCount);
+        }
+        gameStateService = new GameStateService(engine, world, assetManager,
+            bodyRemovalSystem, attackSystem, itemCollectionSystem,
+            playingTimer, camera, playerInputSystem);
+        gameStateService.setPlayer(player);
     }
+
     private void initializeInputProcessor() {
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
@@ -136,6 +157,7 @@ public class GameScreen implements Screen {
         updateCameraIcon();
         updateCameraPosition();
     }
+
     private void updateCameraIcon() {
         // Alterna o ícone da câmera dependendo do estado
         if (cameraInputSystem.isFollowingPlayer()) {
@@ -144,7 +166,6 @@ public class GameScreen implements Screen {
             cameraIconImage.setDrawable(new TextureRegionDrawable(cameraOffTexture));
         }
     }
-
 
     private void updateTimer(float delta) {
         playingTimer.update(delta);
@@ -155,6 +176,7 @@ public class GameScreen implements Screen {
         String timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         timerLabel.setText(timeFormatted);
     }
+
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -166,10 +188,12 @@ public class GameScreen implements Screen {
         // Verifica se jogador morreu após o update dos sistemas
         HealthComponent health = healthMapper.get(player);
         triggerGameOver(health);
+        if (health != null) {
+            healthLabel.setText("Health: " + health.currentHealth);
 
-        healthLabel.setText("Health: " + health.currentHealth);
         itemsLabel.setText("Items: " + itemCollectionSystem.getCollectedCount());
         attackPowerLabel.setText("Attack: " + attackSystem.getRemainingAttackPower());
+        }
         // Inicia o SpriteBatch
         SpriteBatch batch = new SpriteBatch();
         batch.begin();  // Começa a renderização
@@ -183,28 +207,26 @@ public class GameScreen implements Screen {
         stage.draw();
 
     }
+
     private void initializeItems() {
         ArrayList<ItemFactory> items = new ArrayList<>();
-
         items.add(new ItemFactory("Vida", centerX + 100, centerY, AssetPaths.ITEM_VIDA,assetManager));
         items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, AssetPaths.ITEM_ATAQUE,assetManager));
-        items.add(new ItemFactory("SuperAtaque", centerX + 250, centerY + 70, AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
-
-        // Adiciona cada item à engine
+        items.add(new ItemFactory("SuperAtaque", centerX + 450, centerY + 70, AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
+        items.add(new ItemFactory("Vida", centerX -200, centerY-20, AssetPaths.ITEM_VIDA,assetManager));
+        items.add(new ItemFactory("Ataque", centerX  -50, centerY -100, AssetPaths.ITEM_ATAQUE,assetManager));
+        items.add(new ItemFactory("SuperAtaque", centerX - 600, centerY , AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
         for (ItemFactory item : items)  {
             engine.addEntity(item.createEntity(engine, world));
         }
         SpriteBatch batchItem = new SpriteBatch();
         engine.addSystem(new RenderItemSystem(batchItem, camera));
-
     }
-
 
     private void initializeUI() {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         font = new BitmapFont();
-
         // Footer UI setup
         footerTable = new Table();
         footerTable.bottom().right();
@@ -214,13 +236,12 @@ public class GameScreen implements Screen {
         stage.addActor(footerTable);
         initializeLabels();
 
-        // Timer setup
         timerLabel = new Label("00:00:00", skin);
         timerLabel.setFontScale(2f);
         Table timerTable = new Table();
         timerTable.top().setFillParent(true);
         timerTable.add(timerLabel).expandX().center();
-        playingTimer.start();
+        if (!restoredState){ playingTimer.start(); }
         stage.addActor(timerTable);
 
         // Joystick setup
@@ -252,11 +273,7 @@ public class GameScreen implements Screen {
 
     private void initializeLabels() {
         healthMapper = ComponentMapper.getFor(HealthComponent.class);
-
-
         HealthComponent healthComponent = healthMapper.get(player);
-
-
 
         healthLabel = new Label("Health: " + healthComponent.currentHealth, skin);
         attackPowerLabel = new Label("Attack: " , skin);
@@ -267,15 +284,15 @@ public class GameScreen implements Screen {
         attackPowerBackground = new TextureRegionDrawable(new TextureRegion(uiskinTexture, 0, 80, 190, 75));
         itemsBackground = new TextureRegionDrawable(new TextureRegion(uiskinTexture, 0, 80, 190, 75));
         Table healthBox = new Table();
-        healthBox.setBackground(healthBackground); // Set the health background to the label
+        healthBox.setBackground(healthBackground);
         healthBox.add(healthLabel).pad(5);
 
         Table attackBox = new Table();
-        attackBox.setBackground(attackPowerBackground); // Set the attack power background to the label
+        attackBox.setBackground(attackPowerBackground);
         attackBox.add(attackPowerLabel).pad(5);
 
         Table itemsBox = new Table();
-        itemsBox.setBackground(itemsBackground); // Set the items background to the label
+        itemsBox.setBackground(itemsBackground);
         itemsBox.add(itemsLabel).pad(5);
         // Footer setup
         footerTable.center();
@@ -284,12 +301,13 @@ public class GameScreen implements Screen {
         footerTable.add(attackBox).pad(10).left();
         footerTable.add(itemsBox).pad(10).left();
     }
+
     private void initializeCamera() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.zoom = 1.0f;
-
     }
+
     private void initializeAssets() {
         cameraOnTexture = new TextureRegion(assetManager.get(AssetPaths.CAMERA_ON_ICON, Texture.class));
         cameraOffTexture = new TextureRegion(assetManager.get(AssetPaths.CAMERA_OFF_ICON, Texture.class));
@@ -306,24 +324,18 @@ public class GameScreen implements Screen {
     }
 
     private void initializePlayer() {
-        AnimationLoader loader = new AnimationLoader(assetManager);
-        ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = loader.loadAnimations();
-       // ObjectMap<StateComponent.State, Animation<TextureRegion>> anims = tempAnim.animations;
-
         int mapWidthInTiles = map.getProperties().get("width", Integer.class);
         int mapHeightInTiles = map.getProperties().get("height", Integer.class);
         int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
         int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
 
-        float mapPixelWidth = mapWidthInTiles * tilePixelWidth;
-        float mapPixelHeight = mapHeightInTiles * tilePixelHeight;
         centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
         centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
         ObjectMap<String, Sound> sounds = new ObjectMap<>();
 
         player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), sounds, world, assetManager);
-        player.add(new PositionComponent());
-        player.add(new VelocityComponent());
+        engine.addEntity(player);
+
     }
 
     private void initializeSystems() {
@@ -332,42 +344,50 @@ public class GameScreen implements Screen {
             map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class)));
         engine.addSystem(new RenderSystem(batch, camera));
 
-        engine.addSystem(new PlayerInputSystem(world, joystick, bulletSystem, camera, engine));
+        playerInputSystem = new PlayerInputSystem(world, joystick, bulletSystem, camera, engine);
+        engine.addSystem(playerInputSystem);
         cameraInputSystem = new CameraInputSystem(camera);
-        bulletSystem = new BulletSystem(camera,assetManager);  // Criação do BulletSystem
+        bulletSystem = new BulletSystem(camera,assetManager);
         bulletRenderSystem = new BulletRenderSystem(batch);
         bulletMovementSystem = new BulletMovementSystem();
         engine.addSystem(bulletMovementSystem);
-
-        engine.addSystem(bulletSystem); // Adiciona o BulletSystem ao engine
-
-
+        engine.addSystem(bulletSystem);
         engine.addSystem(new MovementSystem());
-        engine.addSystem(new AnimationSystem());
+        engine.addSystem(new StateSystem());
+        AnimationSystem animationSystem = new AnimationSystem();
+        engine.addSystem(animationSystem);
+        this.animationSystem = animationSystem;
         engine.addSystem(new JumpSystem(world));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(cameraInputSystem);
 
         attackSystem = new AttackSystem();
         attackSystem.setEngine(engine);
-        healthSystem = new HealthSystem(null, // deathSound
-            null, // hurtSound
-            currentHealth -> healthLabel.setText("Health: " + currentHealth));
+        healthSystem = new HealthSystem(currentHealth -> healthLabel.setText("Health: " + currentHealth));
         healthSystem.setEngine(engine);
-
+        bodyRemovalSystem = new BodyRemovalSystem(world);
+        engine.addSystem(bodyRemovalSystem);
         engine.addSystem(attackSystem);
-        itemCollectionSystem = new ItemCollectionSystem(playerBounds, itemsLabel, attackSystem, healthSystem);
+        itemCollectionSystem = new ItemCollectionSystem( itemsLabel, attackSystem, healthSystem,bodyRemovalSystem);
         engine.addSystem(itemCollectionSystem);
-        engine.addSystem(new HealthSystem(null, null, currentHealth -> healthLabel.setText("Health: " + currentHealth)));
-
+        engine.addSystem(new HealthSystem( currentHealth -> healthLabel.setText("Health: " + currentHealth)));
         engine.addSystem(bulletRenderSystem);
         engine.addSystem(new ParticleSystem(batch, camera));
         engine.addSystem(new CrosshairRenderSystem(batch, camera,assetManager));
+        engine.addSystem(new SoundSystem());
+        engine.addSystem(new StateSoundSystem());
     }
 
     private void renderWorld() {
         mapRenderer.setView(camera);
         mapRenderer.render();
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+            gameStateService.saveGameState();
+            game.setScreen(new PauseScreen(game, this, assetManager));
+            return;
+        }
+
         engine.update(Gdx.graphics.getDeltaTime());
 
         debugRenderer.render(world, camera.combined);
@@ -375,8 +395,64 @@ public class GameScreen implements Screen {
 
     private void triggerGameOver(HealthComponent health) {
         if (health != null && health.isDead()) {
-            game.setScreen(new GameOverScreen(game, assetManager));
+            if (animationSystem.isDeathAnimationFinished(player)) {
+                game.setScreen(new GameOverScreen(game, assetManager));
+            }
         }
+    }
+
+    public void restoreState(GameState state) {
+        // Remove player atual se existir
+        if (player != null) {
+            engine.removeEntity(player);
+        }
+
+        // Cria novo player
+        ObjectMap<String, Sound> sounds = new ObjectMap<>();
+        player = PlayerFactory.createPlayer(engine, state.playerPosition, sounds, world, assetManager);
+
+        // Aplica estado salvo
+        PositionComponent pos = player.getComponent(PositionComponent.class);
+        if (pos != null) pos.position.set(state.playerPosition);
+
+        BodyComponent body = player.getComponent(BodyComponent.class);
+        if (body != null && body.body != null) {
+            body.body.setTransform(state.playerPosition.x, state.playerPosition.y, 0f);
+            body.body.setLinearVelocity(0, 0);
+            body.body.setAwake(true);
+        }
+
+        HealthComponent health = player.getComponent(HealthComponent.class);
+        if (health != null) health.currentHealth = state.playerHealth;
+
+        if (attackSystem != null) {
+            // attackSystem.setRemainingAttackPower(state.playerAttack);
+        }
+
+        if (!engine.getEntities().contains(player, true)) {
+            engine.addEntity(player);
+        }
+
+        if (playerInputSystem != null) {
+            playerInputSystem.setPlayer(player);
+        }
+
+        // Restaurar itens
+        ImmutableArray<Entity> currentItems = engine.getEntitiesFor(Family.all(ItemComponent.class).get());
+        for (Entity e : currentItems) {
+            engine.removeEntity(e);
+        }
+
+        for (SavedItemData data : state.remainingItems) {
+            Entity restored = data.createEntity(engine, world, assetManager);
+            engine.addEntity(restored);
+        }
+
+        restoredState = true;
+        SpriteBatch batchItem = new SpriteBatch();
+        engine.addSystem(new RenderItemSystem(batchItem, camera));
+        itemCollectionSystem.setCollectedCount(state.collectedItemCount);
+        playingTimer.setTime(state.gameTime);
     }
 
     @Override

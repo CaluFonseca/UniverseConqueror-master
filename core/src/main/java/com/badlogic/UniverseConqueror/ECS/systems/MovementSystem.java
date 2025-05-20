@@ -19,13 +19,13 @@ public class MovementSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        // Obtém os componentes necessários
+
         PhysicsComponent physics = phm.get(entity);
         VelocityComponent velocity = vm.get(entity);
 
         if (physics.body != null && velocity != null) {
             // Aplica a velocidade no corpo de Box2D
-            float deltaX = velocity.velocity.x * deltaTime; // Ajusta com o deltaTime
+            float deltaX = velocity.velocity.x * deltaTime;
             float deltaY = velocity.velocity.y * deltaTime;
             physics.body.setLinearVelocity(deltaX, deltaY);
            // System.out.println("Physics: " + physics.body.getWorldCenter()+"\n velocidade:"+velocity.velocity);

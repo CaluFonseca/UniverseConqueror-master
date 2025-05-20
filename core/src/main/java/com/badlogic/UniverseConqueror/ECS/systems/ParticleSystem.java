@@ -47,7 +47,7 @@ public class ParticleSystem extends EntitySystem {
                 for (var emitter : particle.effect.getEmitters()) {
                     emitter.getAngle().setHigh(angle + 40f);
                     emitter.getAngle().setLow(angle - 40f);
-                    // Removido o flip para evitar artefatos com additive blending
+
                     emitter.getVelocity().setLow(100f);
                     emitter.getVelocity().setHigh(300f);
                 }

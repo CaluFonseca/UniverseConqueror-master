@@ -25,7 +25,7 @@ public class Lwjgl3Launcher {
 
         // Set the desired window size (width, height)
         int windowWidth = 1280;  // Example width
-        int windowHeight = 720;  // Example height
+        int windowHeight = 720;  // Example heightaaaaaaaaa
         configuration.setWindowedMode(windowWidth, windowHeight);
 
         // Set window icon

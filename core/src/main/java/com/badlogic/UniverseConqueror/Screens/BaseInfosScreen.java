@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -25,7 +26,6 @@ public abstract class BaseInfosScreen implements Screen {
     protected Stage stage;
     protected Skin skin;
     protected TextButton backButton;
-    protected Sound buttonSound;
 
     protected String screenText;
     private final AssetManager assetManager;
@@ -44,7 +44,6 @@ public abstract class BaseInfosScreen implements Screen {
         layout = new GlyphLayout();
         stage = new Stage(new ScreenViewport());
         skin = assetManager.get("ui/uiskin.json", Skin.class);
-        buttonSound = assetManager.get("audio/keyboardclick.mp3", Sound.class);;
     }
 
     private void initializeUI() {
@@ -53,7 +52,7 @@ public abstract class BaseInfosScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound.play();
+                SoundManager.getInstance().play("keyboardClick");
                 game.setScreen(new MainMenuScreen(game,assetManager));
             }
         });

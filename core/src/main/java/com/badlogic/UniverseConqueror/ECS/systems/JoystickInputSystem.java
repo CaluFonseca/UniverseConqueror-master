@@ -20,12 +20,6 @@ public class JoystickInputSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-//        VelocityComponent velocity = vm.get(entity);
-//        if (joystick.isMoving()) {
-//            Vector2 dir = joystick.getDirection(); // vetor normalizado
-//            velocity.velocity.set(dir.x * MAX_SPEED, dir.y * MAX_SPEED);
-//        } else {
-//            velocity.velocity.setZero();
-//        }
+
     }
 }

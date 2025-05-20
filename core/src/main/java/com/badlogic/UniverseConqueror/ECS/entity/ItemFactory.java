@@ -65,7 +65,6 @@ public class ItemFactory {
 
         Body body = world.createBody(bodyDef);
 
-        // Cria uma forma retangular
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
             itemTexture.getWidth() / 2f,
@@ -74,16 +73,15 @@ public class ItemFactory {
             0
         );
 
-        // Define o fixture como sensor (detecção sem colisão)
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.isSensor = true;  // ← MUITO IMPORTANTE
+        fixtureDef.isSensor = true;
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setUserData("item");
-        body.setUserData(entity);  // Associa a entidade (ou this) ao corpo
+        body.setUserData(entity);
 
-        shape.dispose();  // Libera recursos da forma
+        shape.dispose();
 
         return body;
     }

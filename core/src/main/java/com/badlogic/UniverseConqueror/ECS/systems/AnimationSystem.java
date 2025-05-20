@@ -22,7 +22,6 @@ public class AnimationSystem extends IteratingSystem {
         StateComponent state = sm.get(entity);
         AnimationComponent anim = am.get(entity);
 
-
         // Atualiza o tempo da animação
         anim.stateTime += deltaTime;
 
@@ -34,5 +33,16 @@ public class AnimationSystem extends IteratingSystem {
         } else {
            // System.out.println("Nenhuma animação encontrada para o estado: " + state.currentState);
         }
+    }
+
+    public boolean isDeathAnimationFinished(Entity entity) {
+        AnimationComponent anim = am.get(entity);
+        StateComponent state = sm.get(entity);
+
+        if (anim == null || state == null) return false;
+        Animation<TextureRegion> deathAnim = anim.animations.get(StateComponent.State.DEATH);
+        return state.currentState == StateComponent.State.DEATH &&
+            deathAnim != null &&
+            state.timeInState >= deathAnim.getAnimationDuration();
     }
 }

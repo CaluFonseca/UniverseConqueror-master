@@ -24,12 +24,11 @@ public class BulletMovementSystem extends IteratingSystem {
         PhysicsComponent physics = phm.get(entity);
 
         // Atualiza a posição da bala com base na física do Box2D
-        position.position.set(physics.body.getPosition());  // Sincroniza a posição com o corpo Box2D
+        position.position.set(physics.body.getPosition());
     }
 
     @Override
     public void update(float deltaTime) {
-       // System.out.println("Updating Bullet Movement...");
         // Atualiza a posição das balas com base na sua velocidade
         for (Entity entity : getEngine().getEntitiesFor(Family.all(PositionComponent.class, VelocityComponent.class, TransformComponent.class).get())) {
             PositionComponent position = pm.get(entity);

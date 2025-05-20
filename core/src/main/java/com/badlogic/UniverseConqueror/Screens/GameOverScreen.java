@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Audio.MusicManager;
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
@@ -7,6 +9,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -26,11 +29,7 @@ public class GameOverScreen implements Screen {
     private Table table;
     private SpriteBatch batch;
     private Texture background;
-    private Music music;
-    private Sound hoverSound;
-    private Sound clickSound;
-    // Adicione esta nova variável
-    private Sound gameOverSound;
+
     private final AssetManager assetManager;
 
     public GameOverScreen(GameLauncher game,AssetManager assetManager) {
@@ -42,18 +41,13 @@ public class GameOverScreen implements Screen {
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
         Gdx.input.setInputProcessor(stage);
-        gameOverSound = assetManager.get(AssetPaths.SOUND_GAME_OVER, Sound.class);
-        gameOverSound.play(1.0f);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        SoundManager.getInstance().play("gameOver");
         batch = new SpriteBatch();
         skin =assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
-        music = assetManager.get(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
-        hoverSound = assetManager.get(AssetPaths.SOUND_HOVER, Sound.class);
-        clickSound =  assetManager.get(AssetPaths.SOUND_CLICK, Sound.class);
-
-        music.setLooping(true);
-        music.setVolume(0.2f);
-        music.play();
+        MusicManager.getInstance().setVolume(0.2f);
+        MusicManager.getInstance().play("menu", true);
 
         table = new Table();
         table.center();
@@ -74,18 +68,18 @@ public class GameOverScreen implements Screen {
         restartButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play();
-                music.stop();
+                SoundManager.getInstance().play("keyboardClick");
+                MusicManager.getInstance().stop();
                 //game.getGameScreen().reset();
-                game.setScreen(new GameScreen(game,assetManager)); // Agora reinicia o jogo!
+                game.setScreen(new GameScreen(game,assetManager));
             }
         });
 
         mainMenuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play();
-                music.stop();
+                SoundManager.getInstance().play("keyboardClick");
+                MusicManager.getInstance().stop();
                 game.setScreen(new MainMenuScreen(game,assetManager));
             }
         });
@@ -93,8 +87,8 @@ public class GameOverScreen implements Screen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play();
-                Gdx.app.exit();
+                SoundManager.getInstance().play("keyboardClick");
+                MusicManager.getInstance().stop();
             }
         });
 
@@ -113,13 +107,9 @@ public class GameOverScreen implements Screen {
         button.addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                hoverSound.play();
+                SoundManager.getInstance().play("hoverButton");
             }
 
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                hoverSound.stop();
-            }
         });
     }
 
@@ -154,8 +144,6 @@ public class GameOverScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        skin.dispose();
         batch.dispose();
-        assetManager.dispose();
     }
 }

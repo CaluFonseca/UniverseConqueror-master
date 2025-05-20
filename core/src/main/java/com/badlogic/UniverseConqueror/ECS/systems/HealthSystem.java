@@ -11,7 +11,6 @@ public class HealthSystem extends EntitySystem {
     private ComponentMapper<HealthComponent> hm = ComponentMapper.getFor(HealthComponent.class);
     private ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
 
-    private Sound deathSound, hurtSound;
     private HealthChangeListener healthChangeListener;
     private Engine engine;
 
@@ -19,9 +18,7 @@ public class HealthSystem extends EntitySystem {
         void onHealthChanged(int currentHealth);
     }
 
-    public HealthSystem(Sound deathSound, Sound hurtSound, HealthChangeListener listener) {
-        this.deathSound = deathSound;
-        this.hurtSound = hurtSound;
+    public HealthSystem( HealthChangeListener listener) {
         this.healthChangeListener = listener;
     }
 
@@ -36,29 +33,24 @@ public class HealthSystem extends EntitySystem {
             HealthComponent health = hm.get(entity);
             StateComponent state = sm.get(entity);
 
-            // Atualiza o cooldown de invulnerabilidade (hurtCooldownTimer)
             if (health.hurtCooldownTimer > 0f) {
-                health.hurtCooldownTimer -= deltaTime;  // Reduz o cooldown
+                health.hurtCooldownTimer -= deltaTime;
             }
 
             // Atualiza a duração da animação de "Hurt"
             if (health.hurtDuration > 0f) {
-                health.hurtDuration -= deltaTime;  // Reduz a duração do efeito visual
+                health.hurtDuration -= deltaTime;
             }
 
             // Se levou dano, muda para HURT
             if (health.wasDamagedThisFrame && !health.isDead() && health.hurtCooldownTimer <= 0f) {
                 state.set(StateComponent.State.HURT);  // Altera o estado para HURT (animação de dor)
-                if (hurtSound != null) {
-                    hurtSound.play();  // Toca o som de dor
-                }
 
                 // Notifica mudança de saúde
                 if (healthChangeListener != null) {
                     healthChangeListener.onHealthChanged(health.currentHealth);  // Notifica a mudança de saúde
                 }
 
-                // Reseta as variáveis de dano
                 health.wasDamagedThisFrame = false;
                 health.hurtCooldownTimer = 0.1f;  // 1 segundo de invulnerabilidade
                 health.hurtDuration = 0.1f;  // Duração da animação de dor
@@ -66,20 +58,14 @@ public class HealthSystem extends EntitySystem {
 
             // Lógica de morte
             if (health.currentHealth <= 0 && state.get() != StateComponent.State.DEATH) {
-                state.set(StateComponent.State.DEATH);  // Muda para o estado de morte
-                if (deathSound != null) {
-                    deathSound.play();  // Toca o som de morte
-                }
+                state.set(StateComponent.State.DEATH);
             }
 
-            // Volta para IDLE quando a duração da animação de "HURT" acabar
             if (state.get() == StateComponent.State.HURT && health.hurtDuration <= 0f && health.hurtCooldownTimer <= 0f && !health.isDead()) {
-                state.set(StateComponent.State.IDLE);  // Retorna ao estado IDLE
+                state.set(StateComponent.State.IDLE);
             }
         }
     }
-
-
 
     // Método para aplicar dano à saúde
     public void damage(Entity entity, int amount) {
@@ -89,7 +75,6 @@ public class HealthSystem extends EntitySystem {
             health.currentHealth = Math.max(0, health.currentHealth - amount);
             health.wasDamagedThisFrame = true;
             state.set(StateComponent.State.HURT);
-
             health.hurtCooldownTimer = 0.1f;  // 1 segundo de invulnerabilidade
             health.hurtDuration = 0.1f;
 

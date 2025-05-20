@@ -28,7 +28,6 @@ public class PhysicsSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        // Atualiza o mundo Box2D -delata
         world.step(1 / 60f, 6, 2);
 
         // Atualiza a posição e velocidade das entidades físicas
@@ -42,19 +41,14 @@ public class PhysicsSystem extends EntitySystem {
 
             Body body = physics.body;
 
-            // Verifica se o corpo é válido
             if (body != null) {
 
-                // Aplica a velocidade física
                 physics.body.setLinearVelocity(velocity.velocity);
 
                 // Sincroniza a posição física com a posição lógica
                 position.position.set(body.getPosition().x, body.getPosition().y);
                 transform.position.set(body.getPosition().x, body.getPosition().y, 0);
 
-                // Debug: Exibe as informações de posição e velocidade
-                //System.out.println("Posição do corpo: " + body.getPosition());
-               // System.out.println("Velocidade aplicada: " + velocity.velocity);
             }
         }
     }
@@ -64,7 +58,6 @@ public class PhysicsSystem extends EntitySystem {
     }
 
     public void render(float deltaTime) {
-        // Se necessário, renderiza a física no modo de depuração
         debugRenderer.render(world, getEngine().getSystem(CameraSystem.class).getCamera().combined);
     }
 }

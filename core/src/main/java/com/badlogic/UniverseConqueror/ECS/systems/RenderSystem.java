@@ -11,12 +11,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class RenderSystem extends IteratingSystem {
     private SpriteBatch batch;
-    private OrthographicCamera camera;  // Adiciona a referência para a câmera
+    private OrthographicCamera camera;
 
     public RenderSystem(SpriteBatch batch, OrthographicCamera camera) {
         super(Family.all(TransformComponent.class, AnimationComponent.class).get());
         this.batch = batch;
-        this.camera = camera;  // Recebe a câmera no construtor
+        this.camera = camera;
     }
 
     @Override
@@ -31,39 +31,21 @@ public class RenderSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         PositionComponent position = entity.getComponent(PositionComponent.class);  // Use PositionComponent
         AnimationComponent animation = entity.getComponent(AnimationComponent.class);
-
         if (animation.currentFrame != null) {
             TextureRegion frame = animation.currentFrame;
-
-            // Debugging the flipping logic
-            // System.out.println("facingRight: " + animation.facingRight);
-
-//            // Apply scaling
-//            float scale = 1f;
-//            float drawWidth = frame.getRegionWidth() * scale;
-//            float drawHeight = frame.getRegionHeight() * scale;
 
             // Flip logic if facing left
             if (frame.isFlipX()) {
                 frame.flip(true, false);  // Undo flip
             }
-
             if (!animation.facingRight) {
                 frame.flip(true, false);  // Flip the sprite horizontally
             }
 
-            // Use PositionComponent for position
-            float x = position.position.x ;  // Center the player horizontally
+            float x = position.position.x ;
             float y = position.position.y;
 
-            // Draw the sprite
-         //   batch.draw(frame, x, y, drawWidth, drawHeight);
           batch.draw(frame,position.position.x - frame.getRegionWidth() / 2,position.position.y - frame.getRegionHeight() / 2);
-//            float offsetX = drawWidth / 2;
-//            float offsetY = drawHeight / 2;
-//
-//// Adjust the position to center the texture
-//            batch.draw(frame, x - offsetX, y - offsetY, drawWidth, drawHeight);
         }
 
     }

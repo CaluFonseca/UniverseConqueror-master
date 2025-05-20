@@ -15,13 +15,13 @@ public class BulletSystem extends EntitySystem {
     private ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
     private ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private ComponentMapper<PhysicsComponent> em = ComponentMapper.getFor(PhysicsComponent.class);
-//    private ComponentMapper<AttackComponent> am = ComponentMapper.getFor(AttackComponent.class);
+
 
     private Texture bulletTexture;
     private OrthographicCamera camera;
 
     public BulletSystem(OrthographicCamera camera, AssetManager assetManager) {
-        bulletTexture =assetManager.get(AssetPaths.BULLET_TEXTURE, Texture.class);;  // Carrega a textura da bala
+        bulletTexture =assetManager.get(AssetPaths.BULLET_TEXTURE, Texture.class);;
         this.camera = camera;
     }
 
@@ -41,15 +41,9 @@ public class BulletSystem extends EntitySystem {
                 getEngine().removeEntity(entity);
            }
             else {
-                // Optionally check for map collision or handle other conditions
-                //checkForCollisionsWithMap(physics.body,physics,entity);
+
            }
         }
-    }
-   private void checkForCollisionsWithMap(Body bulletBody,PhysicsComponent physics,Entity entity) {
-      // Check if bullet's body has collided with any map element (using Box2D collision)
-       physics.body.getWorld().destroyBody(bulletBody);
-      getEngine().removeEntity(entity);
     }
 
     // Method to check if a bullet is out of bounds
@@ -61,21 +55,10 @@ public class BulletSystem extends EntitySystem {
                 position.position.y > camera.position.y + camera.viewportHeight / 2 + margin;
     }
 
-
-    // Método de renderização das balas
-//    public void render(SpriteBatch batch) {
-//               for (Entity entity : getEngine().getEntitiesFor(Family.all(PositionComponent.class).get())) {
-//            PositionComponent position = pm.get(entity);
-//            batch.begin();
-//            batch.draw(bulletTexture, position.position.x, position.position.y);  // Ajuste de escala
-//            batch.end();
-//        }
-//    }
-
     // Método para descarregar recursos
     public void dispose() {
         if (bulletTexture != null) {
-            bulletTexture.dispose();  // Descarte da textura quando não for mais necessária
+            bulletTexture.dispose();
         }
     }
 }

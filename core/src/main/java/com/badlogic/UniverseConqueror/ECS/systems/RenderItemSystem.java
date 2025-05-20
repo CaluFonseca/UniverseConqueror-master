@@ -26,13 +26,8 @@ public class RenderItemSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-
         batch.setProjectionMatrix(camera.combined);
-   //     System.out.println("Iniciando renderização...");
-
-        // Inicia a renderização
         batch.begin();
-
         // Itera sobre as entidades e renderiza as texturas
         int count = 0;
         for (Entity entity : getEngine().getEntitiesFor(Family.all(TextureComponent.class, TransformComponent.class, ItemComponent.class).get())) {

@@ -14,7 +14,6 @@ public class AttackSystem extends IteratingSystem {
 
     private final ComponentMapper<AttackComponent> am = ComponentMapper.getFor(AttackComponent.class);
     private final ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
-    private Engine engine;
 
     public AttackSystem() {
         super(Family.all(AttackComponent.class, StateComponent.class).get());
@@ -43,9 +42,8 @@ public class AttackSystem extends IteratingSystem {
             }
 
         } else {
-            // Se pode atacar e está pronto (lógica de controle pode chamar isso externamente)
             if (attack.canAttack()) {
-                // Exemplo: iniciar ataque manualmente fora do sistema, ou via input
+
             }
         }
     }
@@ -62,44 +60,45 @@ public class AttackSystem extends IteratingSystem {
         }
     }
 
-    // Método para obter o remainingAttackPower do jogador
-    public int getRemainingAttackPower() {
-        // Busca a entidade do jogador
+    public void setRemainingAttackPower(int power) {
         Entity playerEntity = getPlayerEntity();
         AttackComponent attack = playerEntity.getComponent(AttackComponent.class);
 
-        // Se o jogador tiver um AttackComponent, retorna o remainingAttackPower
+        if (attack != null) {
+            attack.remainingAttackPower = power;  // Adiciona ao remainingAttackPower
+       //     System.out.println("Aumentando Remaining Attack Power: " + attack.remainingAttackPower);
+        }
+    }
+    // Método para obter o remainingAttackPower do jogador
+    public int getRemainingAttackPower() {
+
+        Entity playerEntity = getPlayerEntity();
+        AttackComponent attack = playerEntity.getComponent(AttackComponent.class);
+
         if (attack != null) {
             return attack.remainingAttackPower;
         }
 
-        // Retorna 0 caso não encontre o AttackComponent
         return 0;
     }
 
     public void setEngine(Engine engine) {
-        this.engine = engine;
     }
 
     // Método para obter a entidade do jogador
     private Entity getPlayerEntity() {
         try {
-            // Buscando a entidade do jogador através do componente PlayerComponent
             ImmutableArray<Entity> entities = getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get());
-
-            // Se houver entidades com PlayerComponent, retornamos a primeira
             if (entities != null && entities.size() > 0) {
-                return entities.get(0);  // Retorna a primeira entidade do jogador
+                return entities.get(0);
             } else {
                 //System.out.println("Nenhuma entidade com PlayerComponent encontrada.");
             }
         } catch (Exception e) {
-            // Captura qualquer exceção e imprime no console para debug
             System.err.println("Erro ao tentar buscar a entidade do jogador: " + e.getMessage());
             e.printStackTrace();
         }
-
-        return null;  // Retorna null se não encontrar a entidade do jogador ou ocorrer um erro
+        return null;
     }
 }
 

@@ -63,4 +63,8 @@ public class Timer {
     public void setDuration(float duration) {
         this.duration = duration;  // Set a new duration for the timer
     }
+
+    public void setTime(float time) {
+        this.time = time;
+    }
 }

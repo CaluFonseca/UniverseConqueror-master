@@ -40,6 +40,11 @@ public class AssetPaths {
     public static final String SOUND_ITEM_PICKUP = "audio/item_pickup.mp3";
     public static final String SOUND_FLIGHT = "audio/flight.mp3";
     public static final String SOUND_LASER = "audio/laser_shoot.mp3";
+    public static final String SOUND_FIREBALL = "audio/fireball.mp3";
+    public static final String SOUND_JUMP = "audio/jump.mp3";
+    public static final String SOUND_WALK = "audio/walk.mp3";
+    public static final String SOUND_DEATH = "audio/death.mp3";
+    public static final String SOUND_WALK_INJURED = "audio/walk.mp3";
 
     // Music
     public static final String MUSIC_SPACE_INTRO = "audio/space_intro_sound.mp3";

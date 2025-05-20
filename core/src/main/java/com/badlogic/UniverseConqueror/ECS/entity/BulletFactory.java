@@ -60,9 +60,6 @@ public class BulletFactory {
             ParticleComponent particle = engine.createComponent(ParticleComponent.class);
             ParticleEffect effect = assetManager.get(AssetPaths.PARTICLE_EXPLOSION, ParticleEffect.class);
             particle.effect = new ParticleEffect(effect);
-//            float width = projectile.texture.getWidth();
-//            float height = projectile.texture.getHeight();
-//            particle.effect.setPosition(x + width / 2f, y + height / 2f);
 
             particle.effect.start();
             float width = projectile.texture.getWidth();

@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Audio.MusicManager;
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -29,9 +31,6 @@ public class MainMenuScreen implements Screen {
     private Skin skin;
     private BitmapFont font;
     private Texture background;
-    private Music music;
-    private Sound buttonHoverSound;
-    private Sound buttonClickSound;
 
     private TextButton playButton;
     private TextButton audioButton;
@@ -58,9 +57,7 @@ public class MainMenuScreen implements Screen {
         font = new BitmapFont();
         skin =assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         background = assetManager.get(AssetPaths.BACKGROUND_MAIN, Texture.class);
-        music =assetManager.get(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
-        buttonHoverSound = assetManager.get(AssetPaths.SOUND_HOVER, Sound.class);
-        buttonClickSound = assetManager.get(AssetPaths.SOUND_CLICK, Sound.class);
+        MusicManager.getInstance().play("menu", true);
 
         // Configuração da tabela de UI
         Table table = new Table();
@@ -75,7 +72,7 @@ public class MainMenuScreen implements Screen {
         playButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 stopMusic();
                 ((GameLauncher) game).startGame(); // Chama método de GameLauncher
             }
@@ -85,7 +82,7 @@ public class MainMenuScreen implements Screen {
         audioButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 isAudioOn = !isAudioOn;
                 toggleAudio();
             }
@@ -95,7 +92,7 @@ public class MainMenuScreen implements Screen {
         volumeUpButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 currentVolume = Math.min(currentVolume + 0.1f, 1.0f);
                 volumeSlider.setValue(currentVolume);
                 setMusicVolume();
@@ -106,7 +103,7 @@ public class MainMenuScreen implements Screen {
         volumeDownButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 currentVolume = Math.max(currentVolume - 0.1f, 0.0f);
                 volumeSlider.setValue(currentVolume);
                 setMusicVolume();
@@ -117,7 +114,7 @@ public class MainMenuScreen implements Screen {
         controlsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 stopMusic();
                 game.setScreen(new ControlsScreen(game,assetManager));
             }
@@ -127,7 +124,7 @@ public class MainMenuScreen implements Screen {
         creditsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonClickSound.play(); // Toca o som de clique
+                SoundManager.getInstance().play("keyboardClick");
                 stopMusic();
                 game.setScreen(new CreditsScreen(game,assetManager)); // Redireciona para a tela de créditos
             }
@@ -168,43 +165,43 @@ public class MainMenuScreen implements Screen {
         button.addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                buttonHoverSound.play(); // Toca o som de hover
+                SoundManager.getInstance().play("hoverButton");
             }
 
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                buttonHoverSound.stop();
+                SoundManager.getInstance().play("hoverButton");
             }
         });
     }
 
     private void toggleAudio() {
         if (isAudioOn) {
-            music.play();
-            music.setLooping(true);
+            MusicManager.getInstance().unmute();
+            MusicManager.getInstance().play("menu", true);
             audioButton.setText("Som: On");
         } else {
-            music.pause();
+            MusicManager.getInstance().mute();
             audioButton.setText("Som: Off");
         }
     }
 
     private void stopMusic() {
-        music.stop();
+        MusicManager.getInstance().stop();
     }
 
     private void setMusicVolume() {
         if (isAudioOn) {
-            music.setVolume(currentVolume);
+            MusicManager.getInstance().setVolume(currentVolume);
         }
     }
 
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-        if (isAudioOn && !music.isPlaying()) {
-            music.setLooping(true);
-            music.play();
+
+        if (isAudioOn && !MusicManager.getInstance().isPlaying("menu")) {
+            MusicManager.getInstance().play("menu", true);
         }
     }
 

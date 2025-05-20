@@ -13,17 +13,16 @@ public class HealthComponent implements Component {
     public boolean isDead() {
         return currentHealth <= 0;
     }
-    // Atualiza o estado do cooldown e da duração do dano
+
     public void update(float deltaTime) {
        if (hurtCooldownTimer > 0f) {
-           hurtCooldownTimer -= deltaTime;  // Diminui o cooldown de invulnerabilidade
+           hurtCooldownTimer -= deltaTime;
        }
 
        if (hurtDuration > 0f) {
-           hurtDuration -= deltaTime;  // Diminui a duração do efeito visual
+           hurtDuration -= deltaTime;
        }
 
-        // Reseta o flag de dano no final do quadro
        wasDamagedThisFrame = false;
   }
 }

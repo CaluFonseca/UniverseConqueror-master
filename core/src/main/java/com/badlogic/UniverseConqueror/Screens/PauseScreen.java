@@ -1,11 +1,15 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Audio.MusicManager;
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -29,9 +33,6 @@ public class PauseScreen implements Screen {
     private Table table;
     private SpriteBatch batch;
     private Texture background;
-    private Music music;
-    private Sound hoverSound;
-    private Sound clickSound;
     private boolean isAudioOn = true;
 
     private Timer pauseTimer; // Timer to track how long the game has been paused
@@ -49,17 +50,11 @@ public class PauseScreen implements Screen {
         // Setup the stage and viewport
         stage = new Stage(new FitViewport(1920, 1080));
         Gdx.input.setInputProcessor(stage);
-
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         batch = new SpriteBatch();
         skin =assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         background =   background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
-        music = assetManager.get(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
-        hoverSound = assetManager.get(AssetPaths.SOUND_HOVER, Sound.class);
-        clickSound =  assetManager.get(AssetPaths.SOUND_CLICK, Sound.class);
-
-        // Set music to loop and start playing
-        music.setLooping(true);
-        music.play();
+        MusicManager.getInstance().play("menu", true);
 
         // Timer to track pause duration
         pauseTimer = new Timer(Float.MAX_VALUE); // Infinite timer to just count time
@@ -85,8 +80,7 @@ public class PauseScreen implements Screen {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play(); // Play click sound
-                //   gameScreen.resumeGame(); // Resume the game
+                SoundManager.getInstance().play("keyboardClick");
                 game.setScreen(gameScreen); // Switch back to the game screen
             }
         });
@@ -94,8 +88,8 @@ public class PauseScreen implements Screen {
         mainMenuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play(); // Play click sound
-                music.stop(); // Stop the pause screen music
+                SoundManager.getInstance().play("keyboardClick");
+                MusicManager.getInstance().stop();
                 game.setScreen(new MainMenuScreen(game,assetManager)); // Switch to the main menu screen
             }
         });
@@ -103,7 +97,8 @@ public class PauseScreen implements Screen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play(); // Play click sound
+                SoundManager.getInstance().play("keyboardClick");
+                GameStateManager.delete();
                 Gdx.app.exit(); // Exit the game application
             }
         });
@@ -111,14 +106,14 @@ public class PauseScreen implements Screen {
         audioToggleButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                clickSound.play(); // Play click sound
+                SoundManager.getInstance().play("keyboardClick");
                 isAudioOn = !isAudioOn; // Toggle the audio state
                 if (isAudioOn) {
-                    music.play(); // Resume music
-                    audioToggleButton.setText("Sound: On"); // Update button text
+                    MusicManager.getInstance().unmute();
+                    audioToggleButton.setText("Sound: On");
                 } else {
-                    music.pause(); // Pause music
-                    audioToggleButton.setText("Sound: Off"); // Update button text
+                    MusicManager.getInstance().mute();
+                    audioToggleButton.setText("Sound: Off");
                 }
             }
         });
@@ -153,13 +148,13 @@ public class PauseScreen implements Screen {
         button.addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                hoverSound.play(); // Play hover sound when mouse enters button
+                SoundManager.getInstance().play("hoverButton");
             }
 
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                hoverSound.stop(); // Stop hover sound when mouse exits button
-            }
+//            @Override
+//            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+//                SoundManager.getInstance().stop("hoverButton");
+//            }
         });
     }
 
@@ -212,6 +207,5 @@ public class PauseScreen implements Screen {
     public void dispose() {
         stage.dispose();
         batch.dispose();
-        assetManager.dispose();
     }
 }

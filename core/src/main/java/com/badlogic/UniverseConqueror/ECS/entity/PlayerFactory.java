@@ -14,9 +14,6 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 public class PlayerFactory {
 
-    //private final AssetManager assetManager;
-
-
     public static Entity createPlayer(PooledEngine engine,
                                       Vector2 position,
                                       ObjectMap<String, Sound> sounds,
@@ -57,8 +54,7 @@ public class PlayerFactory {
 
         // Sons
         SoundComponent sound = engine.createComponent(SoundComponent.class);
-        sound.sounds.putAll(sounds);
-        entity.add(sound);
+        entity.add(new SoundComponent());
 
         // Outros componentes
         entity.add(engine.createComponent(AttackComponent.class));
@@ -71,7 +67,7 @@ public class PlayerFactory {
         bodyComponent.body.setUserData(entity);
 
         // Adiciona à engine
-        engine.addEntity(entity);
+       // engine.addEntity(entity);
         return entity;
     }
 

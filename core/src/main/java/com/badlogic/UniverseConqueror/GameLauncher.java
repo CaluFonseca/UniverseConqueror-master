@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror;
 
+import com.badlogic.UniverseConqueror.Audio.MusicManager;
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
@@ -67,6 +69,12 @@ public class GameLauncher extends Game {
 
         // === Animations State ===
         queueAnimationTextures(assetManager);
+
+        // === Sound & Music Manager ===
+        SoundManager.init(assetManager);
+        MusicManager.init(assetManager);
+        SoundManager.getInstance().loadAll();
+        MusicManager.getInstance().loadAll();
 
         assetManager.finishLoading();
         batch = new SpriteBatch();
