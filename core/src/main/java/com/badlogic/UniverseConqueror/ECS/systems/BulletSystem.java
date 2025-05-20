@@ -28,7 +28,10 @@ public class BulletSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         // Atualiza a posição das balas com base na sua velocidade
-        for (Entity entity : getEngine().getEntitiesFor(Family.all(PositionComponent.class, VelocityComponent.class, TransformComponent.class).get())) {
+        for (Entity entity : getEngine().getEntitiesFor(Family
+            .all(PositionComponent.class, VelocityComponent.class, TransformComponent.class)
+            .exclude(PlayerComponent.class)
+            .get())){
             PositionComponent position = pm.get(entity);
             VelocityComponent velocity = vm.get(entity);
             PhysicsComponent physics = em.get(entity);

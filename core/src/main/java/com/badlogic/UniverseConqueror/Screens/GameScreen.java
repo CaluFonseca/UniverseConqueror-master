@@ -195,13 +195,13 @@ public class GameScreen implements Screen {
         attackPowerLabel.setText("Attack: " + attackSystem.getRemainingAttackPower());
         }
         // Inicia o SpriteBatch
-        SpriteBatch batch = new SpriteBatch();
-        batch.begin();  // Começa a renderização
-
-        // Renderiza as balas diretamente aqui
-        bulletRenderSystem.update(delta);
-
-        batch.end();  // Finaliza a renderização
+//        SpriteBatch batch = new SpriteBatch();
+//        batch.begin();  // Começa a renderização
+//
+//        // Renderiza as balas diretamente aqui
+//        bulletRenderSystem.update(delta);
+//
+//        batch.end();  // Finaliza a renderização
 
         renderWorld();
         stage.draw();
