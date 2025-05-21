@@ -26,6 +26,7 @@ public class GameStateService {
     private final Timer playingTimer;
     private final OrthographicCamera camera;
     private final PlayerInputSystem playerInputSystem;
+    public Vector2 spaceshipPosition;
 
     private Entity player;
     private boolean restoredState = false;
@@ -80,7 +81,14 @@ public class GameStateService {
                 state.remainingItems.add(new SavedItemData(ic.name, new Vector2(tc.position.x, tc.position.y)));
             }
         }
-
+// Salva a posição da spaceship, se existir
+        ImmutableArray<Entity> spaceships = engine.getEntitiesFor(Family.all(EndLevelComponent.class, PositionComponent.class).get());
+        if (spaceships.size() > 0) {
+            PositionComponent spPos = spaceships.first().getComponent(PositionComponent.class);
+            if (spPos != null) {
+                state.spaceshipPosition = spPos.position.cpy();
+            }
+        }
         ImmutableArray<Entity> bullets = engine.getEntitiesFor(Family.all(ProjectileComponent.class).get());
         for (Entity bullet : bullets) {
             BodyComponent bodyComponent = bullet.getComponent(BodyComponent.class);

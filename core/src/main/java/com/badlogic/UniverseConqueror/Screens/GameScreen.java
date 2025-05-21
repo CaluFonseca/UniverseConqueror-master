@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.ContactListener.ContactListenerWrapper;
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.entity.SpaceshipFactory;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.GameLauncher;
@@ -121,7 +122,7 @@ public class GameScreen implements Screen {
             initializePlayer();
             initializeItems();
         }
-
+        engine.addSystem(new RenderSpaceshipSystem(game.batch, camera));
         initializeUI();
         initializeSystems();
         initializeInputProcessor();
@@ -152,6 +153,13 @@ public class GameScreen implements Screen {
 
     private void createContactListener() {
         ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem,world);
+        contactListenerWrapper.mapContactListener.setOnEndLevel(() -> {
+            float totalTime = playingTimer.getTime();
+            int items = itemCollectionSystem.getCollectedCount();
+            int health = player.getComponent(HealthComponent.class).currentHealth;
+
+            game.setScreen(new EndScreen(game,assetManager, items, health, totalTime));
+        });
         world.setContactListener(contactListenerWrapper);
     }
 
@@ -254,6 +262,7 @@ public class GameScreen implements Screen {
 
         SpriteBatch batchItem = new SpriteBatch();
         engine.addSystem(new RenderItemSystem(batchItem, camera));
+        initializeSpaceship();
     }
 
 
@@ -358,27 +367,11 @@ public class GameScreen implements Screen {
     }
 
     private void initializePlayer() {
-//        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
-//        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
-//        int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
-//        int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
-//
-//        centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
-//        centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
-//        ObjectMap<String, Sound> sounds = new ObjectMap<>();
-//
-//        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), sounds, world, assetManager);
-//        engine.addEntity(player);
-//        ObjectMap<String, Sound> sounds = new ObjectMap<>();
-
-        // Obtém o tamanho do mapa
         int mapWidth = mapGraphBuilder.getWidth();
         int mapHeight = mapGraphBuilder.getHeight();
 
-        // Tenta pegar o tile walkable no centro
         Node spawnNode = mapGraphBuilder.nodes[mapWidth / 2][mapHeight / 2];
         if (!spawnNode.walkable) {
-            // Procura ao redor do centro
             outer:
             for (int x = mapWidth / 2 - 2; x <= mapWidth / 2 + 2; x++) {
                 for (int y = mapHeight / 2 - 2; y <= mapHeight / 2 + 2; y++) {
@@ -392,16 +385,19 @@ public class GameScreen implements Screen {
                 }
             }
         }
-
-        // Converte para posição do mundo
         Vector2 spawnPosition = mapGraphBuilder.toWorldPosition(spawnNode);
-        this.centerX = spawnPosition.x;
-        this.centerY = spawnPosition.y;
-
-        // Cria o jogador nessa posição
+        this.centerX = spawnPosition.x+5;
+        this.centerY = spawnPosition.y+5;
         player = PlayerFactory.createPlayer(engine, spawnPosition, world, assetManager);
         engine.addEntity(player);
+    }
 
+    private void initializeSpaceship() {
+        Node node = getRandomWalkableNode();
+        Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);
+
+        SpaceshipFactory spaceshipFactory = new SpaceshipFactory(assetManager);
+        spaceshipFactory.createSpaceship(worldPos, engine, world);
     }
 
     private void initializeSystems() {
@@ -466,17 +462,30 @@ public class GameScreen implements Screen {
             }
         }
     }
-
+    private void clearWorldAndEngine() {
+        engine.removeAllEntities();
+        engine = new PooledEngine(); // opcionalmente reseta engine inteira
+        world.dispose();
+        world = new World(new Vector2(0, -9.8f), true);
+    }
     public void restoreState(GameState state) {
         // Remove player atual se existir
+      //  clearWorldAndEngine();
         if (player != null) {
             engine.removeEntity(player);
         }
+        ImmutableArray<Entity> existingSpaceships = engine.getEntitiesFor(Family.all(EndLevelComponent.class).get());
+        for (Entity spaceship : existingSpaceships) {
+            engine.removeEntity(spaceship);
+        }
 
-        // Cria novo player
+        if (state.spaceshipPosition != null) {
+            SpaceshipFactory factory = new SpaceshipFactory(assetManager);
+            factory.createSpaceship(state.spaceshipPosition, engine, world); // já adiciona
+        }
+
         player = PlayerFactory.createPlayer(engine, state.playerPosition, world, assetManager);
 
-        // Aplica estado salvo
         PositionComponent pos = player.getComponent(PositionComponent.class);
         if (pos != null) pos.position.set(state.playerPosition);
 
@@ -512,7 +521,6 @@ public class GameScreen implements Screen {
             Entity restored = data.createEntity(engine, world, assetManager);
             engine.addEntity(restored);
         }
-
         restoredState = true;
         SpriteBatch batchItem = new SpriteBatch();
         engine.addSystem(new RenderItemSystem(batchItem, camera));

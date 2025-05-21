@@ -8,4 +8,5 @@ public class Constants {
     public static final float JUMP_FORCE = 500f;
 
     public static final String SAVE_PATH = "savegame.json";
+    public static final float SPEED_FAST = 10000f;
 }

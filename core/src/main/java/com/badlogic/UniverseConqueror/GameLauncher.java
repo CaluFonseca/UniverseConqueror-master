@@ -2,11 +2,14 @@ package com.badlogic.UniverseConqueror;
 
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -24,6 +27,10 @@ public class GameLauncher extends Game {
 
     @Override
     public void create() {
+        FileHandle dir = Gdx.files.internal(".");
+        for (FileHandle file : dir.list()) {
+            System.out.println("Asset: " + file.name());
+        }
         assetManager = new AssetManager();
         // === UI ===
         assetManager.load(AssetPaths.UI_SKIN_JSON, Skin.class);
@@ -46,7 +53,7 @@ public class GameLauncher extends Game {
         assetManager.load(AssetPaths.ITEM_VIDA, Texture.class);
         assetManager.load(AssetPaths.ITEM_ATAQUE, Texture.class);
         assetManager.load(AssetPaths.ITEM_SUPER_ATAQUE, Texture.class);
-      //  assetManager.load(AssetPaths.ITEM_SPACESHIP, Texture.class);
+        assetManager.load(AssetPaths.ITEM_SPACESHIP, Texture.class);
 
         // === Backgrounds ===
         assetManager.load(AssetPaths.BACKGROUND_PAUSE, Texture.class);
@@ -60,6 +67,9 @@ public class GameLauncher extends Game {
         assetManager.load(AssetPaths.SOUND_ITEM_PICKUP, Sound.class);
         assetManager.load(AssetPaths.SOUND_FLIGHT, Sound.class);
         assetManager.load(AssetPaths.SOUND_LASER, Sound.class);
+        assetManager.load(AssetPaths.SOUND_EMPTY_GUN, Sound.class);
+        assetManager.load(AssetPaths.SOUND_NEXT_LEVEL, Sound.class);
+        assetManager.load(AssetPaths.SOUND_WAYPOINT, Sound.class);
 
         // === Music ===
         assetManager.load(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
@@ -105,6 +115,7 @@ public class GameLauncher extends Game {
         }
     }
     public void startGame() {
+        GameStateManager.delete();
         setScreen(new GameScreen(this,assetManager));
     }
     public GameScreen getGameScreen() {

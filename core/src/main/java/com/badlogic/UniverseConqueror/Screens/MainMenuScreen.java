@@ -73,7 +73,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 SoundManager.getInstance().play("keyboardClick");
-                stopMusic();
+                MusicManager.getInstance().stop();;
                 ((GameLauncher) game).startGame(); // Chama método de GameLauncher
             }
         });

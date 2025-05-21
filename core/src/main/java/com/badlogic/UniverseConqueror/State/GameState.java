@@ -11,6 +11,6 @@ public class GameState {
     public float gameTime;
     public int collectedItemCount = 0;
     public ArrayList<SavedItemData> remainingItems = new ArrayList<>();
-
+    public Vector2 spaceshipPosition;
 
 }

@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.*;
 
 public class ContactListenerWrapper implements ContactListener {
 
-    private final MapContactListener mapContactListener;
+    public final MapContactListener mapContactListener;
     private final BulletContactListener bulletContactListener;
     private final World world;
     public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem,World world) {

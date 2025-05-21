@@ -25,10 +25,12 @@ public class SoundManager {
         soundPaths.put("walk", AssetPaths.SOUND_WALK);
         soundPaths.put("walk_injured", AssetPaths.SOUND_WALK);
         soundPaths.put("death", AssetPaths.SOUND_DEATH);
-
+        soundPaths.put("empty_gun", AssetPaths.SOUND_EMPTY_GUN);
         soundPaths.put("keyboardClick", AssetPaths.SOUND_CLICK);
         soundPaths.put("hoverButton", AssetPaths.SOUND_HOVER);
         soundPaths.put("gameOver", AssetPaths.SOUND_GAME_OVER);
+        soundPaths.put("nextLevel", AssetPaths.SOUND_NEXT_LEVEL);
+        soundPaths.put("wayPoint", AssetPaths.SOUND_WAYPOINT);
     }
 
     public static void init(AssetManager assetManager) {

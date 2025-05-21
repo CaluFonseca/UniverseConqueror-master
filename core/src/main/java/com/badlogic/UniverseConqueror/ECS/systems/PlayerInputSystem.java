@@ -1,8 +1,10 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.UniverseConqueror.Utils.Constants;
 import com.badlogic.UniverseConqueror.Utils.Joystick;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -63,24 +65,27 @@ public class PlayerInputSystem extends IteratingSystem {
 
         // Verifica se o Shift está pressionado
         boolean isShiftPressed = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+      //  float currentSpeed = Constants.SPEED;
         float currentSpeed = Constants.SPEED;
-
+        if (isShiftPressed) {
+            currentSpeed = Constants.SPEED_FAST; // velocidade aumentada
+        }
         // Verifica se há input de teclado
         boolean keyPressed = false;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-            dx -= currentSpeed;
+            dx -= currentSpeed * deltaTime;
             keyPressed = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-            dx += currentSpeed;
+            dx += currentSpeed* deltaTime;
             keyPressed = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
-            dy += currentSpeed;
+            dy += currentSpeed* deltaTime;
             keyPressed = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
-            dy -= currentSpeed;
+            dy -= currentSpeed* deltaTime;
             keyPressed = true;
         }
 
@@ -127,7 +132,7 @@ public class PlayerInputSystem extends IteratingSystem {
             state.set(StateComponent.State.FAST_MOVE);
         } else if (isMoving) {
             state.set(StateComponent.State.WALK);
-            if (state != null && sound != null && state.currentState == StateComponent.State.WALK) {
+            if (sound != null && state.currentState == StateComponent.State.WALK) {
                 if (!sound.play) {
                     sound.soundKey = "walk";
                     sound.play = true;
@@ -208,6 +213,13 @@ public class PlayerInputSystem extends IteratingSystem {
             } else {
                 animation.facingRight = false;
             }
+        }
+        else {
+            if (sound != null && !sound.play) {
+                sound.soundKey = "empty_gun"; // chave lógica usada no SoundSystem
+                sound.play = true;
+            }
+            System.out.println("Fim do nothingbalas");
         }
     }
 }

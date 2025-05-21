@@ -1,30 +1,75 @@
 package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-
-
+import com.badlogic.gdx.physics.box2d.*;
 
 public class SpaceshipFactory {
+    private final AssetManager assetManager;
 
-    public static Entity createSpaceship(Vector2 position, Engine engine) {
+    public SpaceshipFactory(AssetManager assetManager) {
+        this.assetManager = assetManager;
+    }
+
+    public Entity createSpaceship(Vector2 position, Engine engine, World world) {
         Entity spaceship = new Entity();
 
-        spaceship.add(new PositionComponent(position));
-        spaceship.add(new BoundsComponent(64, 64)); // ajusta se tua sprite for diferente
+        // Carrega a textura
+        Texture texture = assetManager.get(AssetPaths.ITEM_SPACESHIP, Texture.class);
+       // Texture texture = new Texture(assetManager.getAssetFileName(AssetPaths.ITEM_SPACESHIP));
+        // COMPONENTES
+        PositionComponent positionComponent = new PositionComponent(position);
+        spaceship.add(positionComponent);
+
+        TransformComponent transformComponent = new TransformComponent();
+        transformComponent.position.set(position.x, position.y, 0);
+        spaceship.add(transformComponent);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.texture = texture;
+        spaceship.add(textureComponent);
+
+        spaceship.add(new BoundsComponent(texture.getWidth(), texture.getHeight()));
         spaceship.add(new TargetComponent());
         spaceship.add(new EndLevelComponent());
 
-        // Se quiser adicionar uma textura futuramente:
-        TextureComponent tc = new TextureComponent();
-       // tc.region = new TextureRegion(assetManager.get(ITEM_SPACESHIP, Texture.class));
-        spaceship.add(tc);
+        // BODY COMPONENTE (Box2D)
+        BodyComponent bodyComponent = new BodyComponent();
+        bodyComponent.body = createBody(world, position, texture, spaceship);
+        spaceship.add(bodyComponent);
 
+        // Adiciona entidade ao engine
         engine.addEntity(spaceship);
+        System.out.println("Created spaceship at: x=" + position.x + ", y=" + position.y);
         return spaceship;
+    }
+
+    private Body createBody(World world, Vector2 position, Texture texture, Entity entity) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set(position.x, position.y);
+
+        Body body = world.createBody(bodyDef);
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(20f, 20f);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.isSensor = true;
+
+        Fixture fixture = body.createFixture(fixtureDef);
+        fixture.setUserData("spaceship");
+        body.setUserData(entity);
+
+        shape.dispose();
+
+        return body;
     }
 }

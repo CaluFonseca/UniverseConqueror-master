@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.PlayerComponent;
 import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
 import com.badlogic.UniverseConqueror.ECS.systems.ItemCollectionSystem;
@@ -12,14 +13,16 @@ public class MapContactListener implements ContactListener {
     private final Engine engine;
     private final ItemCollectionSystem itemCollectionSystem;
     private HealthSystem healthSystem;
-
+    private Runnable onEndLevelCallback;
     // Constructor to receive engine, itemCollectionSystem, and healthSystem
     public MapContactListener(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem) {
         this.engine = engine;
         this.itemCollectionSystem = itemCollectionSystem;
         this.healthSystem = healthSystem;
     }
-
+    public void setOnEndLevel(Runnable callback) {
+        this.onEndLevelCallback = callback;
+    }
     @Override
     public void beginContact(Contact contact) {
         Body bodyA = contact.getFixtureA().getBody();
@@ -29,6 +32,14 @@ public class MapContactListener implements ContactListener {
         Entity playerEntity = getPlayerEntity(bodyA, bodyB);
 
         if (playerEntity != null) {
+            // Verifica se colidiu com spaceship (tem EndLevelComponent)
+            if (isPlayerAndSpaceshipCollision(bodyA, bodyB)) {
+                SoundManager.getInstance().play("item");
+                if (onEndLevelCallback != null) {
+                    onEndLevelCallback.run();
+                }
+                return; // Evita aplicar dano desnecessário
+            }
             // Check if the collision is with an item
             if (isPlayerAndItemCollision(bodyA, bodyB)) {
                 collectItem(bodyA, bodyB, playerEntity);
@@ -59,6 +70,26 @@ public class MapContactListener implements ContactListener {
 
         return null;
     }
+    private boolean isPlayerAndSpaceshipCollision(Body bodyA, Body bodyB) {
+        Object dataA = bodyA.getUserData();
+        Object dataB = bodyB.getUserData();
+
+        if (!(dataA instanceof Entity) || !(dataB instanceof Entity)) {
+            return false;
+        }
+
+        Entity entityA = (Entity) dataA;
+        Entity entityB = (Entity) dataB;
+
+        boolean isPlayerA = entityA.getComponent(PlayerComponent.class) != null;
+        boolean isPlayerB = entityB.getComponent(PlayerComponent.class) != null;
+
+        boolean isSpaceshipA = entityA.getComponent(com.badlogic.UniverseConqueror.ECS.components.EndLevelComponent.class) != null;
+        boolean isSpaceshipB = entityB.getComponent(com.badlogic.UniverseConqueror.ECS.components.EndLevelComponent.class) != null;
+
+        return (isPlayerA && isSpaceshipB) || (isPlayerB && isSpaceshipA);
+    }
+
 
     // Checks if the collision is between the player and an item
     private boolean isPlayerAndItemCollision(Body bodyA, Body bodyB) {

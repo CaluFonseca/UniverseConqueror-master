@@ -27,7 +27,7 @@ public class AssetPaths {
     public static final String ITEM_VIDA = "item.png";
     public static final String ITEM_ATAQUE = "bullet_item.png";
     public static final String ITEM_SUPER_ATAQUE = "fireball_logo.png";
-    //public static final String ITEM_SPACESHIP = "spaceship.png";
+    public static final String ITEM_SPACESHIP = "finalSpaceship.png";
     // Particle Effects
     public static final String PARTICLE_EXPLOSION = "effects/fire_trail.p";
     public static final String FIREBALL_PARTICLE_IMAGE = "effects/fire_particle.png";
@@ -45,7 +45,9 @@ public class AssetPaths {
     public static final String SOUND_WALK = "audio/walk.mp3";
     public static final String SOUND_DEATH = "audio/death.mp3";
     public static final String SOUND_WALK_INJURED = "audio/walk.mp3";
-
+    public static final String SOUND_EMPTY_GUN = "audio/empty_gun.mp3";
+    public static final String SOUND_NEXT_LEVEL = "audio/nextLevel.mp3";
+    public static final String SOUND_WAYPOINT = "audio/waypoint.mp3";
     // Music
     public static final String MUSIC_SPACE_INTRO = "audio/space_intro_sound.mp3";
 

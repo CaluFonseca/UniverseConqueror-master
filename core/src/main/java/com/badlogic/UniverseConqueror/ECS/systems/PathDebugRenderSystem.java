@@ -55,7 +55,13 @@ public class PathDebugRenderSystem extends EntitySystem {
                 Vector2 waypoint = waypoints.get(i);
 
                 float alpha = 1f - ((float) i / total);
-                shapeRenderer.setColor(new Color(1, 0, 0, alpha));
+                Color color;
+                if (path.type == PathComponent.PathType.SPACESHIP) {
+                    color = new Color(1f, 1f, 0f, alpha); // Amarelo
+                } else {
+                    color = new Color(1f, 0f, 0f, alpha); // Vermelho
+                }
+                shapeRenderer.setColor(color);
                 shapeRenderer.circle(waypoint.x, waypoint.y, 10f);
             }
         }

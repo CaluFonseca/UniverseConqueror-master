@@ -13,6 +13,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.UniverseConqueror.ECS.components.EndLevelComponent;
 
 public class ItemCollectionSystem extends IteratingSystem {
    // private final Rectangle playerBounds;

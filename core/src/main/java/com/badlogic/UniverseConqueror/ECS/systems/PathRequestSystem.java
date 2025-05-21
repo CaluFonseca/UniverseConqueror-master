@@ -17,6 +17,7 @@ public class PathRequestSystem extends EntitySystem {
     private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
     private final Family playerFamily = Family.all(PlayerComponent.class, PositionComponent.class).get();
     private final Family itemFamily = Family.all(ItemComponent.class, PositionComponent.class).get();
+    private final Family spaceshipFamily = Family.all(TargetComponent.class, PositionComponent.class).get();
 
     private Engine engine;
 
@@ -32,7 +33,45 @@ public class PathRequestSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        PathComponent pathComponent = new PathComponent();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+
+            pathComponent.type = PathComponent.PathType.SPACESHIP;
+            ImmutableArray<Entity> players = engine.getEntitiesFor(playerFamily);
+            ImmutableArray<Entity> spaceships = engine.getEntitiesFor(spaceshipFamily);
+
+            if (players.size() == 0 || spaceships.size() == 0) return;
+
+            Entity player = players.first();
+            Entity spaceship = spaceships.first(); // Assumimos só uma spaceship
+
+            Vector2 playerPos = pm.get(player).position;
+            Vector2 spaceshipPos = pm.get(spaceship).position;
+
+            Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
+            Node endNode = mapGraphBuilder.getNodeAtWorldPosition(spaceshipPos.x, spaceshipPos.y);
+
+            if (startNode == null || endNode == null) return;
+
+            List<Node> path = pathfinder.findPath(startNode, endNode);
+
+            if (!path.isEmpty()) {
+               // PathComponent pathComponent = new PathComponent();
+                for (Node node : path) {
+                    pathComponent.waypoints.add(mapGraphBuilder.toWorldPosition(node));
+                }
+
+                player.remove(PathComponent.class);
+                player.add(pathComponent);
+
+                // Optional: log
+                System.out.println("Path to spaceship created with " + path.size() + " steps.");
+            }
+        }
+
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            pathComponent.type = PathComponent.PathType.ITEM;
             ImmutableArray<Entity> players = engine.getEntitiesFor(playerFamily);
             ImmutableArray<Entity> items = engine.getEntitiesFor(itemFamily);
 
@@ -63,7 +102,7 @@ public class PathRequestSystem extends EntitySystem {
             List<Node> path = pathfinder.findPath(startNode, endNode);
 
             if (!path.isEmpty()) {
-                PathComponent pathComponent = new PathComponent();
+               // PathComponent pathComponent = new PathComponent();
 
                 for (Node node : path) {
                     pathComponent.waypoints.add(mapGraphBuilder.toWorldPosition(node));

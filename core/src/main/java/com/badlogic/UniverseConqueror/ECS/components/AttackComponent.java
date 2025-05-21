@@ -10,7 +10,7 @@ public class AttackComponent implements Component {
     public float timeSinceLastAttack = 0f;
 
     public int maxAttackPower = 100;          // Valor total máximo
-    public int remainingAttackPower = 100;    // Quanto ainda pode atacar
+    public int remainingAttackPower = 10;    // Quanto ainda pode atacar
     public int attackCost = 10;               // Quanto consome por ataque
 
 

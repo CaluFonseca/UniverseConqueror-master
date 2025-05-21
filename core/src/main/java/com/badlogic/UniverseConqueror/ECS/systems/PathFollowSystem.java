@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.PathComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PhysicsComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
@@ -56,10 +57,10 @@ protected void processEntity(Entity entity, float deltaTime) {
     Vector2 direction = new Vector2(target).sub(currentPos);
     float distance = direction.len();
 
-  //  System.out.println("🎯 Target: " + target + " | Pos: " + currentPos + " | Distance: " + distance);
+  //  System.out.println(" Target: " + target + " | Pos: " + currentPos + " | Distance: " + distance);
 
-    if (distance < 20f) {
-        System.out.println("✅ Chegou ao waypoint, removendo...");
+    if (distance < 50f) {
+        SoundManager.getInstance().play("wayPoint");
         path.waypoints.poll();
         velocity.velocity.setZero();
     } else {

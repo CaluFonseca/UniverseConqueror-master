@@ -81,6 +81,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 SoundManager.getInstance().play("keyboardClick");
+
                 game.setScreen(gameScreen); // Switch back to the game screen
             }
         });

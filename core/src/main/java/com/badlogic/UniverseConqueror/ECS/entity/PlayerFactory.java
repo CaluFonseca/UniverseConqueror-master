@@ -101,7 +101,7 @@ public class PlayerFactory {
 //        massData.I = 0.1f;          // Definindo a inércia (resistência à rotação)
 //        body.setMassData(massData); // Aplicando os dados de massa ao corpo
 
-
+        System.out.println("Created Player at: x=" + position.x + ", y=" + position.y);
         // Descartar o shape após o uso para liberar memória
         shape.dispose();
 
@@ -109,6 +109,7 @@ public class PlayerFactory {
         BodyComponent bodyComponent = new BodyComponent();
         bodyComponent.body = body;
         return bodyComponent;
+
     }
 
 
