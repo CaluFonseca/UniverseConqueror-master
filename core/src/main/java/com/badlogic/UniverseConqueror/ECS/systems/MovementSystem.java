@@ -27,7 +27,8 @@ public class MovementSystem extends IteratingSystem {
             // Aplica a velocidade no corpo de Box2D
             float deltaX = velocity.velocity.x * deltaTime;
             float deltaY = velocity.velocity.y * deltaTime;
-            physics.body.setLinearVelocity(deltaX, deltaY);
+      //      physics.body.setLinearVelocity(deltaX, deltaY);
+            physics.body.setLinearVelocity(velocity.velocity);
            // System.out.println("Physics: " + physics.body.getWorldCenter()+"\n velocidade:"+velocity.velocity);
             // Atualiza a posição do TransformComponent
             TransformComponent transform = tm.get(entity);

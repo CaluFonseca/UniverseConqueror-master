@@ -46,6 +46,7 @@ public class GameLauncher extends Game {
         assetManager.load(AssetPaths.ITEM_VIDA, Texture.class);
         assetManager.load(AssetPaths.ITEM_ATAQUE, Texture.class);
         assetManager.load(AssetPaths.ITEM_SUPER_ATAQUE, Texture.class);
+      //  assetManager.load(AssetPaths.ITEM_SPACESHIP, Texture.class);
 
         // === Backgrounds ===
         assetManager.load(AssetPaths.BACKGROUND_PAUSE, Texture.class);

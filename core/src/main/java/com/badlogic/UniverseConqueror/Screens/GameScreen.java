@@ -5,6 +5,9 @@ import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Pathfinding.AStarPathfinder;
+import com.badlogic.UniverseConqueror.Pathfinding.MapGraphBuilder;
+import com.badlogic.UniverseConqueror.Pathfinding.Node;
 import com.badlogic.UniverseConqueror.State.GameState;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.State.GameStateService;
@@ -92,6 +95,7 @@ public class GameScreen implements Screen {
     private PlayerInputSystem playerInputSystem;
     private boolean restoredState = false;
     private GameStateService gameStateService;
+    private MapGraphBuilder mapGraphBuilder;
     // Constructor
     public GameScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
@@ -106,6 +110,9 @@ public class GameScreen implements Screen {
         initializeAssets();
         initializeWorld();
         initializeCamera();
+      //  MapGraphBuilder mapGraphBuilder =
+        this.mapGraphBuilder =new MapGraphBuilder(map);
+        engine.addSystem(new PathFollowSystem());
         GameState state = GameStateManager.load();
         if (state!= null) {
             restoreState(state);
@@ -124,6 +131,12 @@ public class GameScreen implements Screen {
             itemCollectionSystem.setCollectedCount(state.collectedItemCount);
             itemsLabel.setText("Items: " + state.collectedItemCount);
         }
+
+        MapGraphBuilder mapGraphBuilder = new MapGraphBuilder(map);
+        AStarPathfinder pathfinder = new AStarPathfinder(mapGraphBuilder.nodes);
+
+        engine.addSystem(new PathRequestSystem(mapGraphBuilder, pathfinder));
+        engine.addSystem(new PathDebugRenderSystem(camera));
         gameStateService = new GameStateService(engine, world, assetManager,
             bodyRemovalSystem, attackSystem, itemCollectionSystem,
             playingTimer, camera, playerInputSystem);
@@ -207,21 +220,42 @@ public class GameScreen implements Screen {
         stage.draw();
 
     }
+    private Node getRandomWalkableNode() {
+        int width = mapGraphBuilder.getWidth();
+        int height = mapGraphBuilder.getHeight();
 
+        for (int attempts = 0; attempts < 100; attempts++) {
+            int x = (int)(Math.random() * width);
+            int y = (int)(Math.random() * height);
+            Node node = mapGraphBuilder.nodes[x][y];
+            if (node.walkable) return node;
+        }
+        return null; // fallback se não encontrar (raro)
+    }
+
+    private ItemFactory createItem(String tipo, String assetPath) {
+        Node node = getRandomWalkableNode();
+        Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);
+        return new ItemFactory(tipo, worldPos.x, worldPos.y, assetPath, assetManager);
+    }
     private void initializeItems() {
         ArrayList<ItemFactory> items = new ArrayList<>();
-        items.add(new ItemFactory("Vida", centerX + 100, centerY, AssetPaths.ITEM_VIDA,assetManager));
-        items.add(new ItemFactory("Ataque", centerX + 150, centerY + 50, AssetPaths.ITEM_ATAQUE,assetManager));
-        items.add(new ItemFactory("SuperAtaque", centerX + 450, centerY + 70, AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
-        items.add(new ItemFactory("Vida", centerX -200, centerY-20, AssetPaths.ITEM_VIDA,assetManager));
-        items.add(new ItemFactory("Ataque", centerX  -50, centerY -100, AssetPaths.ITEM_ATAQUE,assetManager));
-        items.add(new ItemFactory("SuperAtaque", centerX - 600, centerY , AssetPaths.ITEM_SUPER_ATAQUE,assetManager));
-        for (ItemFactory item : items)  {
+
+        items.add(createItem("Vida", AssetPaths.ITEM_VIDA));
+        items.add(createItem("Ataque", AssetPaths.ITEM_ATAQUE));
+        items.add(createItem("SuperAtaque", AssetPaths.ITEM_SUPER_ATAQUE));
+        items.add(createItem("Vida", AssetPaths.ITEM_VIDA));
+        items.add(createItem("Ataque", AssetPaths.ITEM_ATAQUE));
+        items.add(createItem("SuperAtaque", AssetPaths.ITEM_SUPER_ATAQUE));
+
+        for (ItemFactory item : items) {
             engine.addEntity(item.createEntity(engine, world));
         }
+
         SpriteBatch batchItem = new SpriteBatch();
         engine.addSystem(new RenderItemSystem(batchItem, camera));
     }
+
 
     private void initializeUI() {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
@@ -324,16 +358,48 @@ public class GameScreen implements Screen {
     }
 
     private void initializePlayer() {
-        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
-        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
-        int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
-        int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
+//        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
+//        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
+//        int tilePixelWidth = map.getProperties().get("tilewidth", Integer.class);
+//        int tilePixelHeight = map.getProperties().get("tileheight", Integer.class);
+//
+//        centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
+//        centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
+//        ObjectMap<String, Sound> sounds = new ObjectMap<>();
+//
+//        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), sounds, world, assetManager);
+//        engine.addEntity(player);
+//        ObjectMap<String, Sound> sounds = new ObjectMap<>();
 
-        centerX = (mapWidthInTiles + mapHeightInTiles) * tilePixelWidth / 4f;
-        centerY = (mapHeightInTiles - mapWidthInTiles) * tilePixelHeight / 4f;
-        ObjectMap<String, Sound> sounds = new ObjectMap<>();
+        // Obtém o tamanho do mapa
+        int mapWidth = mapGraphBuilder.getWidth();
+        int mapHeight = mapGraphBuilder.getHeight();
 
-        player = PlayerFactory.createPlayer(engine, new Vector2(centerX, centerY), sounds, world, assetManager);
+        // Tenta pegar o tile walkable no centro
+        Node spawnNode = mapGraphBuilder.nodes[mapWidth / 2][mapHeight / 2];
+        if (!spawnNode.walkable) {
+            // Procura ao redor do centro
+            outer:
+            for (int x = mapWidth / 2 - 2; x <= mapWidth / 2 + 2; x++) {
+                for (int y = mapHeight / 2 - 2; y <= mapHeight / 2 + 2; y++) {
+                    if (x >= 0 && y >= 0 && x < mapWidth && y < mapHeight) {
+                        Node node = mapGraphBuilder.nodes[x][y];
+                        if (node.walkable) {
+                            spawnNode = node;
+                            break outer;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Converte para posição do mundo
+        Vector2 spawnPosition = mapGraphBuilder.toWorldPosition(spawnNode);
+        this.centerX = spawnPosition.x;
+        this.centerY = spawnPosition.y;
+
+        // Cria o jogador nessa posição
+        player = PlayerFactory.createPlayer(engine, spawnPosition, world, assetManager);
         engine.addEntity(player);
 
     }
@@ -408,8 +474,7 @@ public class GameScreen implements Screen {
         }
 
         // Cria novo player
-        ObjectMap<String, Sound> sounds = new ObjectMap<>();
-        player = PlayerFactory.createPlayer(engine, state.playerPosition, sounds, world, assetManager);
+        player = PlayerFactory.createPlayer(engine, state.playerPosition, world, assetManager);
 
         // Aplica estado salvo
         PositionComponent pos = player.getComponent(PositionComponent.class);

@@ -16,7 +16,6 @@ public class PlayerFactory {
 
     public static Entity createPlayer(PooledEngine engine,
                                       Vector2 position,
-                                      ObjectMap<String, Sound> sounds,
                                       World world,
                                       AssetManager assetManager) {
 

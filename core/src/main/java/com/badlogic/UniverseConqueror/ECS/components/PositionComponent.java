@@ -13,4 +13,7 @@ public class PositionComponent implements Component {
     public PositionComponent() {
 
     }
+    public PositionComponent(Vector2 position) {
+        this.position.set(position);
+    }
 }

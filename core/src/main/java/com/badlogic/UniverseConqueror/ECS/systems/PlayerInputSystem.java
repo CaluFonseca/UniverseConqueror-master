@@ -153,8 +153,8 @@ public class PlayerInputSystem extends IteratingSystem {
 
         if (  attack.remainingAttackPower>0) {
             Vector2 mousePosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            Vector3 mousePosition3D = new Vector3(mousePosition.x, mousePosition.y, 0);  // Usando Z=0 porque estamos em 2D
-           // System.out.println("Mouse Position in World antes da onversao: " + mousePosition3D);
+            Vector3 mousePosition3D = new Vector3(mousePosition.x, mousePosition.y, 0);
+           //System.out.println("Mouse Position in World antes da onversao: " + mousePosition3D);
             mousePosition3D = camera.unproject(mousePosition3D);
           //  System.out.println("Mouse Position in World: " + mousePosition3D);
             TextureRegion currentFrame = animation.currentFrame;
