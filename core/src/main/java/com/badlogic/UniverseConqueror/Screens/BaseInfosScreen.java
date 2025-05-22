@@ -5,19 +5,20 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public abstract class BaseInfosScreen implements Screen {
+public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, NavigableScreen {
     protected Game game;
     protected BitmapFont font;
     protected SpriteBatch batch;
@@ -28,14 +29,14 @@ public abstract class BaseInfosScreen implements Screen {
     protected TextButton backButton;
 
     protected String screenText;
-    private final AssetManager assetManager;
+    protected final AssetManager assetManager;
 
     public BaseInfosScreen(Game game, String screenText, AssetManager assetManager) {
         this.game = game;
         this.screenText = screenText;
+        this.assetManager = assetManager;
         initializeResources();
         initializeUI();
-        this.assetManager = assetManager;
     }
 
     private void initializeResources() {
@@ -52,8 +53,14 @@ public abstract class BaseInfosScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                SoundManager.getInstance().play("keyboardClick");
-                game.setScreen(new MainMenuScreen(game,assetManager));
+                playClickSound();
+                goToMainMenu();
+            }
+        });
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                playHoverSound();
             }
         });
         stage.addActor(backButton);
@@ -107,6 +114,31 @@ public abstract class BaseInfosScreen implements Screen {
         font.dispose();
         batch.dispose();
         stage.dispose();
-        assetManager.dispose();
+      //  assetManager.dispose();
+    }
+
+    @Override
+    public void playClickSound() {
+        SoundManager.getInstance().play("keyboardClick");
+    }
+
+    @Override
+    public void playHoverSound() {
+        SoundManager.getInstance().play("hoverButton");
+    }
+
+    @Override
+    public void goToMainMenu() {
+        game.setScreen(new MainMenuScreen(game, assetManager));
+    }
+
+    @Override
+    public void exitGame() {
+        Gdx.app.exit();
+    }
+
+    @Override
+    public void restartGame() {
+        // Optional for BaseInfosScreen
     }
 }

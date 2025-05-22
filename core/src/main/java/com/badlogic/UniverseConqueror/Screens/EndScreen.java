@@ -11,12 +11,14 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class EndScreen extends ScreenAdapter {
+public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen {
 
     private final GameLauncher game;
     private final Stage stage;
@@ -26,7 +28,8 @@ public class EndScreen extends ScreenAdapter {
     private final int remainingHealth;
     private final float totalTime;
     private final AssetManager assetManager;
-    public EndScreen(GameLauncher game,AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime) {
+
+    public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime) {
         this.game = game;
         this.assetManager = assetManager;
         this.collectedItems = collectedItems;
@@ -51,33 +54,12 @@ public class EndScreen extends ScreenAdapter {
         Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
         Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
 
-        TextButton retryButton = new TextButton("Voltar a Jogar", skin);
-        TextButton exitButton = new TextButton("Sair", skin);
-
-        retryButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                SoundManager.getInstance().play("keyboardClick");
-                MusicManager.getInstance().stop();;
-                ((GameLauncher) game).startGame(); // Chama método de GameLauncher
-            }
+        TextButton retryButton = createButton("Voltar a Jogar", () -> {
+            MusicManager.getInstance().stop();
+            restartGame();
         });
-//        retryButton.addListener(event -> {
-//            if (retryButton.isPressed()) {
-//                GameStateManager.delete(); // limpa qualquer progresso salvo
-//                game.startGame(); // reinicia o jogo corretamente
-//                return true;
-//            }
-//            return false;
-//        });
 
-        exitButton.addListener(event -> {
-            if (exitButton.isPressed()) {
-                Gdx.app.exit();
-                return true;
-            }
-            return false;
-        });
+        TextButton exitButton = createButton("Sair", this::exitGame);
 
         table.add(titleLabel).padBottom(20f).row();
         table.add(timeLabel).padBottom(10f).row();
@@ -88,6 +70,24 @@ public class EndScreen extends ScreenAdapter {
 
         stage.addActor(table);
         SoundManager.getInstance().play("nextLevel");
+    }
+
+    private TextButton createButton(String text, Runnable action) {
+        TextButton button = new TextButton(text, skin);
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                playClickSound();
+                action.run();
+            }
+        });
+        button.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                playHoverSound();
+            }
+        });
+        return button;
     }
 
     @Override
@@ -103,5 +103,31 @@ public class EndScreen extends ScreenAdapter {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+    }
+
+    @Override
+    public void playClickSound() {
+        SoundManager.getInstance().play("keyboardClick");
+    }
+
+    @Override
+    public void playHoverSound() {
+        SoundManager.getInstance().play("hoverButton");
+    }
+
+    @Override
+    public void goToMainMenu() {
+        game.setScreen(new MainMenuScreen(game, assetManager));
+    }
+
+    @Override
+    public void exitGame() {
+        GameStateManager.delete();
+        Gdx.app.exit();
+    }
+
+    @Override
+    public void restartGame() {
+        game.startGame();
     }
 }
