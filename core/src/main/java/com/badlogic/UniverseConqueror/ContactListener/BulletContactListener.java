@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
+import com.badlogic.UniverseConqueror.ECS.components.PhysicsComponent;
+import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -8,11 +10,12 @@ import com.badlogic.gdx.physics.box2d.*;
 public class BulletContactListener implements ContactListener {
     private final Engine engine;
     private final World world;
+    private final BulletFactory bulletFactory;
 
-    // Constructor to initialize engine
-    public BulletContactListener(Engine engine, World world) {
+    public BulletContactListener(Engine engine, World world, BulletFactory bulletFactory) {
         this.engine = engine;
         this.world = world;
+        this.bulletFactory = bulletFactory;
     }
 
     @Override
@@ -26,13 +29,10 @@ public class BulletContactListener implements ContactListener {
         }
     }
 
-    // Checks if the body is a bullet by checking userData
     private boolean isBulletCollision(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("bullet".equals(fixture.getUserData())) {
-                return true;
-            }
-            if ("fireball".equals(fixture.getUserData())) {
+            Object data = fixture.getUserData();
+            if ("bullet".equals(data) || "fireball".equals(data)) {
                 return true;
             }
         }
@@ -48,22 +48,16 @@ public class BulletContactListener implements ContactListener {
         return false;
     }
 
-    // Dispose the bullet by removing its entity and destroying its body in the Box2D world
     private void disposeBullet(Body bulletBody) {
         if (bulletBody.getUserData() instanceof Entity bulletEntity) {
             Gdx.app.postRunnable(() -> {
-                world.destroyBody(bulletBody);
+                bulletFactory.free(bulletEntity);
                 engine.removeEntity(bulletEntity);
             });
         }
     }
 
-    @Override
-    public void endContact(Contact contact) {}
-
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
-
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
+    @Override public void endContact(Contact contact) {}
+    @Override public void preSolve(Contact contact, Manifold oldManifold) {}
+    @Override public void postSolve(Contact contact, ContactImpulse impulse) {}
 }

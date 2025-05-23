@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.ContactListener.ContactListenerWrapper;
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
 import com.badlogic.UniverseConqueror.ECS.entity.SpaceshipFactory;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
@@ -97,6 +98,7 @@ public class GameScreen implements Screen {
     private boolean restoredState = false;
     private GameStateService gameStateService;
     private MapGraphBuilder mapGraphBuilder;
+    private BulletFactory bulletFactory;
     // Constructor
     public GameScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
@@ -122,6 +124,7 @@ public class GameScreen implements Screen {
             initializePlayer();
             initializeItems();
         }
+         bulletFactory = new BulletFactory(assetManager, engine);
         engine.addSystem(new RenderSpaceshipSystem(game.batch, camera));
         initializeUI();
         initializeSystems();
@@ -152,7 +155,9 @@ public class GameScreen implements Screen {
     }
 
     private void createContactListener() {
-        ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem,world);
+        world.setContactListener(new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem, world, bulletFactory));
+
+        ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(engine, itemCollectionSystem, healthSystem,world,bulletFactory);
         contactListenerWrapper.mapContactListener.setOnEndLevel(() -> {
             float totalTime = playingTimer.getTime();
             int items = itemCollectionSystem.getCollectedCount();
@@ -406,14 +411,17 @@ public class GameScreen implements Screen {
             map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class)));
         engine.addSystem(new RenderSystem(batch, camera));
 
-        playerInputSystem = new PlayerInputSystem(world, joystick, bulletSystem, camera, engine);
-        engine.addSystem(playerInputSystem);
+
+
         cameraInputSystem = new CameraInputSystem(camera);
-        bulletSystem = new BulletSystem(camera,assetManager);
+        bulletSystem = new BulletSystem(camera,assetManager, engine);
         bulletRenderSystem = new BulletRenderSystem(batch);
         bulletMovementSystem = new BulletMovementSystem();
+        playerInputSystem = new PlayerInputSystem(world, joystick, bulletSystem, camera, engine,bulletFactory);
+
         engine.addSystem(bulletMovementSystem);
         engine.addSystem(bulletSystem);
+        engine.addSystem(playerInputSystem);
         engine.addSystem(new MovementSystem());
         engine.addSystem(new StateSystem());
         AnimationSystem animationSystem = new AnimationSystem();
@@ -462,15 +470,9 @@ public class GameScreen implements Screen {
             }
         }
     }
-    private void clearWorldAndEngine() {
-        engine.removeAllEntities();
-        engine = new PooledEngine(); // opcionalmente reseta engine inteira
-        world.dispose();
-        world = new World(new Vector2(0, -9.8f), true);
-    }
+
     public void restoreState(GameState state) {
-        // Remove player atual se existir
-      //  clearWorldAndEngine();
+
         if (player != null) {
             engine.removeEntity(player);
         }

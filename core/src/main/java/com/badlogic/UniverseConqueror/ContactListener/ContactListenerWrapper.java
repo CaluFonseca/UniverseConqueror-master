@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
+import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
 import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
 import com.badlogic.UniverseConqueror.ECS.systems.ItemCollectionSystem;
 import com.badlogic.ashley.core.Engine;
@@ -10,18 +11,17 @@ public class ContactListenerWrapper implements ContactListener {
     public final MapContactListener mapContactListener;
     private final BulletContactListener bulletContactListener;
     private final World world;
-    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem,World world) {
+    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem,World world, BulletFactory bulletFactory) {
         this.world = world;
         this.mapContactListener = new MapContactListener(engine, itemCollectionSystem, healthSystem);
-        this.bulletContactListener = new BulletContactListener(engine,world);
+        this.bulletContactListener = new BulletContactListener(engine,world, bulletFactory);
 
     }
 
     @Override
     public void beginContact(Contact contact) {
-        // Delegate to both listeners
-        bulletContactListener.beginContact(contact); // Handles bullet collisions
-        mapContactListener.beginContact(contact);     // Handles other collisions (player, items, etc.)
+        bulletContactListener.beginContact(contact);
+        mapContactListener.beginContact(contact);
     }
 
     @Override
