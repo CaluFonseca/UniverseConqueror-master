@@ -64,6 +64,51 @@ public Vector2 toWorldPosition(Node node) {
     return new Vector2(worldX + tileWidth / 2f, worldY);
 }
 
+    public Node getNode(int x, int y) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            return nodes[x][y];
+        }
+        return null;
+    }
+
+    public Node findNearestWalkableOffset(Node origin, int dx, int dy) {
+        int tx = origin.x + dx;
+        int ty = origin.y + dy;
+
+        Node target = getNode(tx, ty);
+        if (target != null && target.walkable) {
+            return target;
+        }
+
+        // fallback: procura em volta
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                Node n = getNode(tx + i, ty + j);
+                if (n != null && n.walkable) {
+                    return n;
+                }
+            }
+        }
+        return origin; // fallback total
+    }
+public Node toNode(Vector2 worldPosition) {
+    float halfTileWidth = tileWidth / 2f;
+    float halfTileHeight = tileHeight / 2f;
+
+    float adjustedX = worldPosition.x - originX;
+    float adjustedY = worldPosition.y - originY;
+
+    float rotatedX = (adjustedY / halfTileHeight + adjustedX / halfTileWidth) / 2f;
+    float rotatedY = (adjustedY / halfTileHeight - adjustedX / halfTileWidth) / 2f;
+
+    int y = Math.round(rotatedX);
+    int x = width - 1 - Math.round(rotatedY);
+
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+          return nodes[x][y];
+    }
+        return null;
+}
 
 public Node getNodeAtWorldPosition(float worldX, float worldY) {
      float halfTileWidth = tileWidth / 2f;

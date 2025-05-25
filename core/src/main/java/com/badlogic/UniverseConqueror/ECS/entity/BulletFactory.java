@@ -81,7 +81,9 @@ public class BulletFactory {
                 bullet.add(particle);
             }
         }
-
+        if (!engine.getEntities().contains(bullet, true)) {
+            engine.addEntity(bullet);
+        }
         return bullet;
     }
 

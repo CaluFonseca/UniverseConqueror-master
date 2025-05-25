@@ -24,13 +24,15 @@ public class GameLauncher extends Game {
     public SpriteBatch batch;
     private GameScreen gameScreen;
     public static AssetManager assetManager;
+    public boolean isNewGame = false;
+
 
     @Override
     public void create() {
-        FileHandle dir = Gdx.files.internal(".");
-        for (FileHandle file : dir.list()) {
-            System.out.println("Asset: " + file.name());
-        }
+//        FileHandle dir = Gdx.files.internal(".");
+//        for (FileHandle file : dir.list()) {
+//            System.out.println("Asset: " + file.name());
+//        }
         assetManager = new AssetManager();
         // === UI ===
         assetManager.load(AssetPaths.UI_SKIN_JSON, Skin.class);
@@ -70,6 +72,9 @@ public class GameLauncher extends Game {
         assetManager.load(AssetPaths.SOUND_EMPTY_GUN, Sound.class);
         assetManager.load(AssetPaths.SOUND_NEXT_LEVEL, Sound.class);
         assetManager.load(AssetPaths.SOUND_WAYPOINT, Sound.class);
+        assetManager.load(AssetPaths.SOUND_DEATH_ALIEN, Sound.class);
+        assetManager.load(AssetPaths.SOUND_PATROL_ALIEN, Sound.class);
+        assetManager.load(AssetPaths.SOUND_CHASE_ALIEN, Sound.class);
 
         // === Music ===
         assetManager.load(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
@@ -87,6 +92,14 @@ public class GameLauncher extends Game {
         SoundManager.getInstance().loadAll();
         MusicManager.getInstance().loadAll();
 
+
+        //Enemy
+        // Regista todos os frames no AssetManager
+        for (int i = 1; i <= 17; i++) assetManager.load("enemy/attack/frame-" + String.format("%02d.png", i), Texture.class);
+        for (int i = 1; i <= 9; i++) assetManager.load("enemy/death/frame-" + String.format("%02d.png", i), Texture.class);
+        for (int i = 1; i <= 34; i++) assetManager.load("enemy/walk/frame-" + String.format("%02d.png", i), Texture.class);
+        for (int i = 1; i <= 6; i++) assetManager.load("enemy/idle/frame-" + String.format("%02d.png", i), Texture.class);
+        for (int i = 1; i <= 3; i++) assetManager.load("enemy/hurt/frame-" + String.format("%02d.png", i), Texture.class);
         assetManager.finishLoading();
         batch = new SpriteBatch();
         gameScreen = new GameScreen(this,assetManager);
@@ -122,4 +135,11 @@ public class GameLauncher extends Game {
         return gameScreen;
     }
 
+    public boolean isNewGame() {
+        return isNewGame;
+    }
+
+    public void setNewGame(boolean isNewGame) {
+        this.isNewGame = isNewGame;
+    }
 }

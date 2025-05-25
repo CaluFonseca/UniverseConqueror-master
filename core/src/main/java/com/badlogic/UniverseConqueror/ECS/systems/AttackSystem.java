@@ -56,7 +56,7 @@ public class AttackSystem extends IteratingSystem {
 
         if (attack != null) {
             attack.remainingAttackPower += amount;  // Adiciona ao remainingAttackPower
-            System.out.println("Aumentando Remaining Attack Power: " + attack.remainingAttackPower);
+           // System.out.println("Aumentando Remaining Attack Power: " + attack.remainingAttackPower);
         }
     }
 
@@ -95,7 +95,7 @@ public class AttackSystem extends IteratingSystem {
                 //System.out.println("Nenhuma entidade com PlayerComponent encontrada.");
             }
         } catch (Exception e) {
-            System.err.println("Erro ao tentar buscar a entidade do jogador: " + e.getMessage());
+           // System.err.println("Erro ao tentar buscar a entidade do jogador: " + e.getMessage());
             e.printStackTrace();
         }
         return null;

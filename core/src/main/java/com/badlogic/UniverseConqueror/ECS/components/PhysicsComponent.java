@@ -7,8 +7,12 @@ import com.badlogic.gdx.math.Vector2;
 public class PhysicsComponent implements Component {
     public Body body;  // O corpo do Box2D que controla a física
     public Vector2 velocity = new Vector2();  // Velocidade física
-    public float mass = 1f;  // Massa do corpo (opcional)
+    public float mass = 1f;  // Massa do corpo
 
+    public PhysicsComponent() {
 
-
+    }
+    public PhysicsComponent(Body body) {
+        this.body = body;
+    }
 }

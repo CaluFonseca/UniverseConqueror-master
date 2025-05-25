@@ -1,11 +1,11 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Audio.MusicManager;
+import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ContactListener.ContactListenerWrapper;
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
-import com.badlogic.UniverseConqueror.ECS.entity.SpaceshipFactory;
+import com.badlogic.UniverseConqueror.ECS.entity.*;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
-import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Pathfinding.AStarPathfinder;
 import com.badlogic.UniverseConqueror.Pathfinding.MapGraphBuilder;
@@ -15,7 +15,6 @@ import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.State.GameStateService;
 import com.badlogic.UniverseConqueror.State.SavedItemData;
 import com.badlogic.UniverseConqueror.Utils.*;
-import com.badlogic.UniverseConqueror.ECS.entity.PlayerFactory;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -40,12 +39,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -99,6 +96,9 @@ public class GameScreen implements Screen {
     private GameStateService gameStateService;
     private MapGraphBuilder mapGraphBuilder;
     private BulletFactory bulletFactory;
+
+    private Label enemiesKilledLabel;
+    private int enemiesKilledCount = 0;
     // Constructor
     public GameScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
@@ -117,14 +117,17 @@ public class GameScreen implements Screen {
         this.mapGraphBuilder =new MapGraphBuilder(map);
         engine.addSystem(new PathFollowSystem());
         GameState state = GameStateManager.load();
-        if (state!= null) {
-            restoreState(state);
-            GameStateManager.delete();
-        } else {
+        if (game.isNewGame() || state == null) {
+            game.setNewGame(false);
             initializePlayer();
             initializeItems();
+        } else {
+            restoreState(state);
+            GameStateManager.delete();
         }
-         bulletFactory = new BulletFactory(assetManager, engine);
+
+
+        bulletFactory = new BulletFactory(assetManager, engine);
         engine.addSystem(new RenderSpaceshipSystem(game.batch, camera));
         initializeUI();
         initializeSystems();
@@ -132,7 +135,11 @@ public class GameScreen implements Screen {
         createContactListener();
 
         if (state != null) {
+
             itemCollectionSystem.setCollectedCount(state.collectedItemCount);
+            if (itemCollectionSystem == null) {
+                throw new IllegalStateException("ItemCollectionSystem não foi inicializado ainda!");
+            }
             itemsLabel.setText("Items: " + state.collectedItemCount);
         }
 
@@ -162,8 +169,9 @@ public class GameScreen implements Screen {
             float totalTime = playingTimer.getTime();
             int items = itemCollectionSystem.getCollectedCount();
             int health = player.getComponent(HealthComponent.class).currentHealth;
-
-            game.setScreen(new EndScreen(game,assetManager, items, health, totalTime));
+            SoundManager.getInstance().stop();
+            MusicManager.getInstance().stop();
+            game.setScreen(new EndScreen(game,assetManager, items, health, totalTime, enemiesKilledCount));
         });
         world.setContactListener(contactListenerWrapper);
     }
@@ -220,15 +228,6 @@ public class GameScreen implements Screen {
         itemsLabel.setText("Items: " + itemCollectionSystem.getCollectedCount());
         attackPowerLabel.setText("Attack: " + attackSystem.getRemainingAttackPower());
         }
-        // Inicia o SpriteBatch
-//        SpriteBatch batch = new SpriteBatch();
-//        batch.begin();  // Começa a renderização
-//
-//        // Renderiza as balas diretamente aqui
-//        bulletRenderSystem.update(delta);
-//
-//        batch.end();  // Finaliza a renderização
-
         renderWorld();
         stage.draw();
 
@@ -243,7 +242,7 @@ public class GameScreen implements Screen {
             Node node = mapGraphBuilder.nodes[x][y];
             if (node.walkable) return node;
         }
-        return null; // fallback se não encontrar (raro)
+        return null;
     }
 
     private ItemFactory createItem(String tipo, String assetPath) {
@@ -260,7 +259,12 @@ public class GameScreen implements Screen {
         items.add(createItem("Vida", AssetPaths.ITEM_VIDA));
         items.add(createItem("Ataque", AssetPaths.ITEM_ATAQUE));
         items.add(createItem("SuperAtaque", AssetPaths.ITEM_SUPER_ATAQUE));
-
+        items.add(createItem("Vida", AssetPaths.ITEM_VIDA));
+        items.add(createItem("Ataque", AssetPaths.ITEM_ATAQUE));
+        items.add(createItem("SuperAtaque", AssetPaths.ITEM_SUPER_ATAQUE));
+        items.add(createItem("Vida", AssetPaths.ITEM_VIDA));
+        items.add(createItem("Ataque", AssetPaths.ITEM_ATAQUE));
+        items.add(createItem("SuperAtaque", AssetPaths.ITEM_SUPER_ATAQUE));
         for (ItemFactory item : items) {
             engine.addEntity(item.createEntity(engine, world));
         }
@@ -317,8 +321,30 @@ public class GameScreen implements Screen {
             }
         });
         stage.addActor(uiTable);
-    }
 
+        // Enemies Killed UI
+        Image killedCounterImage = new Image(new Texture("Killed_alien_counter.png"));
+        enemiesKilledLabel = new Label("0", skin);
+        enemiesKilledLabel.setFontScale(0.7f);
+        enemiesKilledLabel.setAlignment(Align.center);
+
+        Stack killsStack = new Stack();
+        killsStack.add(killedCounterImage);
+        killsStack.add(enemiesKilledLabel);
+
+        Table killsTable = new Table();
+        killsTable.top().right();
+        killsTable.setFillParent(true);
+        killsTable.add(killsStack).size(50, 60).pad(10);
+
+        stage.addActor(killsTable);
+    }
+    public void incrementEnemiesKilled() {
+        enemiesKilledCount++;
+        if (enemiesKilledLabel != null) {
+            enemiesKilledLabel.setText(String.valueOf(enemiesKilledCount));
+        }
+    }
     private void initializeLabels() {
         healthMapper = ComponentMapper.getFor(HealthComponent.class);
         HealthComponent healthComponent = healthMapper.get(player);
@@ -403,6 +429,40 @@ public class GameScreen implements Screen {
 
         SpaceshipFactory spaceshipFactory = new SpaceshipFactory(assetManager);
         spaceshipFactory.createSpaceship(worldPos, engine, world);
+
+// Deslocamentos para cobrir 6 lados em torno da spaceship (hexágono aproximado)
+        int[][] offsets = new int[][] {
+            {-1,  1}, // cima-esquerda
+            { 1,  1}, // cima-direita
+            { 2,  0}, // direita
+            { 1, -1}, // baixo-direita
+            {-1, -1}, // baixo-esquerda
+            {-2,  0}  // esquerda
+        };
+
+        for (int[] offset : offsets) {
+            Node patrolStartNode = mapGraphBuilder.findNearestWalkableOffset(node, offset[0], offset[1]);
+            Node patrolEndNode = mapGraphBuilder.findNearestWalkableOffset(node, offset[0] * 2, offset[1] * 2);
+
+            if (patrolStartNode != null && patrolEndNode != null) {
+                Vector2 patrolStartWorld = mapGraphBuilder.toWorldPosition(patrolStartNode);
+                Vector2 patrolEndWorld = mapGraphBuilder.toWorldPosition(patrolEndNode);
+
+                Entity enemy = EnemyFactory.createPatrollingEnemy(
+                    engine,
+                    world,
+                    patrolStartWorld,
+                    assetManager,
+                    player,
+                    camera,
+                    patrolStartWorld,
+                    patrolEndWorld
+                );
+
+                engine.addEntity(enemy);
+            }
+        }
+
     }
 
     private void initializeSystems() {
@@ -445,7 +505,15 @@ public class GameScreen implements Screen {
         engine.addSystem(new ParticleSystem(batch, camera));
         engine.addSystem(new CrosshairRenderSystem(batch, camera,assetManager));
         engine.addSystem(new SoundSystem());
-        engine.addSystem(new StateSoundSystem());
+        engine.addSystem(new StateSoundSystem(camera));
+        engine.addSystem(new AISystem());
+        engine.addSystem(new EnemyHealthBarSystem(camera));
+        engine.addSystem(new EnemyCleanupSystem(
+            engine,
+            bodyRemovalSystem,
+            animationSystem,
+            enemy -> incrementEnemiesKilled()
+        ));
     }
 
     private void renderWorld() {
@@ -454,6 +522,8 @@ public class GameScreen implements Screen {
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
             gameStateService.saveGameState();
+            SoundManager.getInstance().stop();
+            MusicManager.getInstance().stop();
             game.setScreen(new PauseScreen(game, this, assetManager));
             return;
         }
@@ -466,13 +536,16 @@ public class GameScreen implements Screen {
     private void triggerGameOver(HealthComponent health) {
         if (health != null && health.isDead()) {
             if (animationSystem.isDeathAnimationFinished(player)) {
+                SoundManager.getInstance().stop();
+                MusicManager.getInstance().stop();
                 game.setScreen(new GameOverScreen(game, assetManager));
             }
         }
     }
 
     public void restoreState(GameState state) {
-
+        SoundManager.getInstance().stop();
+        MusicManager.getInstance().stop();
         if (player != null) {
             engine.removeEntity(player);
         }
@@ -550,6 +623,8 @@ public class GameScreen implements Screen {
         mapRenderer.dispose();
         debugRenderer.dispose();
         shapeRenderer.dispose();
+
         assetManager.dispose();
+
     }
 }

@@ -10,8 +10,11 @@ import com.badlogic.UniverseConqueror.ECS.components.TransformComponent;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class RenderSystem extends IteratingSystem {
-    private SpriteBatch batch;
-    private OrthographicCamera camera;
+    private final SpriteBatch batch;
+    private final OrthographicCamera camera;
+
+    private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
+    private final ComponentMapper<AnimationComponent> am = ComponentMapper.getFor(AnimationComponent.class);
 
     public RenderSystem(SpriteBatch batch, OrthographicCamera camera) {
         super(Family.all(TransformComponent.class, AnimationComponent.class).get());
@@ -21,7 +24,7 @@ public class RenderSystem extends IteratingSystem {
 
     @Override
     public void update(float deltaTime) {
-        batch.setProjectionMatrix(camera.combined);  // Configura a projeção da câmera
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
         super.update(deltaTime);
         batch.end();
@@ -29,27 +32,22 @@ public class RenderSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        PositionComponent position = entity.getComponent(PositionComponent.class);  // Use PositionComponent
-        AnimationComponent animation = entity.getComponent(AnimationComponent.class);
+        TransformComponent transform = tm.get(entity);
+        AnimationComponent animation = am.get(entity);
+
         if (animation.currentFrame != null) {
             TextureRegion frame = animation.currentFrame;
 
-            // Flip logic if facing left
-            if (frame.isFlipX()) {
-                frame.flip(true, false);  // Undo flip
-            }
-            if (!animation.facingRight) {
-                frame.flip(true, false);  // Flip the sprite horizontally
-            }
+            // Flip logic
+            if (frame.isFlipX()) frame.flip(true, false);
+            if (!animation.facingRight) frame.flip(true, false);
 
-            float x = position.position.x ;
-            float y = position.position.y;
+            float x = transform.position.x;
+            float y = transform.position.y;
 
-          batch.draw(frame,position.position.x - frame.getRegionWidth() / 2,position.position.y - frame.getRegionHeight() / 2);
+            batch.draw(frame, x - frame.getRegionWidth() / 2f, y - frame.getRegionHeight() / 2f);
         }
-
     }
-
 }
 
 

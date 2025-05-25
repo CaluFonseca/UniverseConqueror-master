@@ -143,6 +143,9 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
 
     @Override
     public void restartGame() {
+
+        SoundManager.getInstance().stop();
+        MusicManager.getInstance().stop();
         game.setScreen(new GameScreen(game, assetManager));
     }
 }

@@ -29,12 +29,15 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
     private final float totalTime;
     private final AssetManager assetManager;
 
-    public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime) {
+    private final int enemiesKilled;
+
+    public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime, int enemiesKilled) {
         this.game = game;
         this.assetManager = assetManager;
         this.collectedItems = collectedItems;
         this.remainingHealth = remainingHealth;
         this.totalTime = totalTime;
+        this.enemiesKilled = enemiesKilled;
 
         this.stage = new Stage(new ScreenViewport());
         this.skin = new Skin(Gdx.files.internal(AssetPaths.UI_SKIN_JSON));
@@ -53,6 +56,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         Label timeLabel = new Label("Tempo de jogo: " + String.format("%.2f", totalTime) + "s", skin);
         Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
         Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
+        Label enemyLabel = new Label("Inimigos derrotados: " + enemiesKilled, skin);
 
         TextButton retryButton = createButton("Voltar a Jogar", () -> {
             MusicManager.getInstance().stop();
@@ -64,7 +68,8 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         table.add(titleLabel).padBottom(20f).row();
         table.add(timeLabel).padBottom(10f).row();
         table.add(itemLabel).padBottom(10f).row();
-        table.add(healthLabel).padBottom(20f).row();
+        table.add(healthLabel).padBottom(10f).row();
+        table.add(enemyLabel).padBottom(20f).row();
         table.add(retryButton).width(400).pad(10).row();
         table.add(exitButton).width(400).pad(10).row();
 
@@ -117,6 +122,8 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
 
     @Override
     public void goToMainMenu() {
+        SoundManager.getInstance().stop();
+
         game.setScreen(new MainMenuScreen(game, assetManager));
     }
 
@@ -128,6 +135,8 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
 
     @Override
     public void restartGame() {
+        SoundManager.getInstance().stop();
+        MusicManager.getInstance().stop();
         game.startGame();
     }
 }

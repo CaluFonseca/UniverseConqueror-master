@@ -18,7 +18,9 @@ public class StateComponent implements Component {
         DEFENSE,
         WALK_INJURED,
         IDLE_INJURED,
-        DEFENSE_INJURED
+        DEFENSE_INJURED,
+        PATROL,
+        CHASE
     }
 
     public State currentState = State.IDLE;
@@ -31,6 +33,8 @@ public class StateComponent implements Component {
     }
 
     public void set(State newState) {
+        if (currentState == State.DEATH) return;
+
         if (newState != currentState) {
             previousState = currentState;
             currentState = newState;

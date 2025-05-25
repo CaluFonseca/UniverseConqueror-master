@@ -118,6 +118,7 @@ public class PlayerInputSystem extends IteratingSystem {
             state.set(StateComponent.State.FAST_MOVE);
         } else if (isMoving) {
             state.set(StateComponent.State.WALK);
+
             if (sound != null && state.currentState == StateComponent.State.WALK && !sound.play) {
                 sound.soundKey = "walk";
                 sound.play = true;
@@ -156,28 +157,49 @@ public class PlayerInputSystem extends IteratingSystem {
                 ? ProjectileComponent.ProjectileType.FIREBALL
                 : ProjectileComponent.ProjectileType.BULLET;
 
-            Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, type);
-            engine.addEntity(bullet);
-            bulletSystem.spawnedFromFactory(bullet);
+           // Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, type);
+           // engine.addEntity(bullet);
 
-            if (!fireball) {
-                state.set(StateComponent.State.ATTACK);
-                attack.remainingAttackPower -= 1;
-                if (!sound.play) {
-                    sound.soundKey = "attack";
-                    sound.play = true;
-                }
-            } else {
-                if(attack.remainingAttackPower>=5) {
+
+            if (fireball) {
+                // FIREBALL LOGIC
+                if (attack.remainingAttackPower >= 5) {
                     attack.remainingAttackPower -= 5;
-                    if (!sound.play) {
+                    state.set(StateComponent.State.SUPER_ATTACK);
+
+                    Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, ProjectileComponent.ProjectileType.FIREBALL);
+                   // engine.addEntity(bullet);
+                    bulletSystem.spawnedFromFactory(bullet);
+
+                    if (sound != null && !sound.play) {
                         sound.soundKey = "superattack";
                         sound.play = true;
                     }
+                } else {
+                    if (sound != null && !sound.play) {
+                        sound.soundKey = "empty_gun";
+                        sound.play = true;
+                    }
                 }
-                if (sound != null && !sound.play) {
-                    sound.soundKey = "empty_gun";
-                    sound.play = true;
+            } else {
+                // BULLET LOGIC
+                if (attack.remainingAttackPower >= 1) {
+                    attack.remainingAttackPower -= 1;
+                    state.set(StateComponent.State.ATTACK);
+
+                    Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, ProjectileComponent.ProjectileType.BULLET);
+                    //engine.addEntity(bullet);
+                    bulletSystem.spawnedFromFactory(bullet);
+
+                    if (sound != null && !sound.play) {
+                        sound.soundKey = "attack";
+                        sound.play = true;
+                    }
+                } else {
+                    if (sound != null && !sound.play) {
+                        sound.soundKey = "empty_gun";
+                        sound.play = true;
+                    }
                 }
             }
 

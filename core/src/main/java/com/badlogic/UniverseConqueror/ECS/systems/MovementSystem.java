@@ -19,21 +19,32 @@ public class MovementSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-
         PhysicsComponent physics = phm.get(entity);
         VelocityComponent velocity = vm.get(entity);
+        TransformComponent transform = tm.get(entity);
 
         if (physics.body != null && velocity != null) {
             // Aplica a velocidade no corpo de Box2D
-            float deltaX = velocity.velocity.x * deltaTime;
-            float deltaY = velocity.velocity.y * deltaTime;
-      //      physics.body.setLinearVelocity(deltaX, deltaY);
             physics.body.setLinearVelocity(velocity.velocity);
-           // System.out.println("Physics: " + physics.body.getWorldCenter()+"\n velocidade:"+velocity.velocity);
-            // Atualiza a posição do TransformComponent
-            TransformComponent transform = tm.get(entity);
-            transform.position.set(physics.body.getPosition().x, physics.body.getPosition().y, transform.position.z);
+//            System.out.println("Processing entity: " + entity);
+//            // DEBUG: informações antes e depois
+//            System.out.println("[MovementSystem] ---");
+//            System.out.println("Entity ID: " + entity.hashCode());
+//            System.out.println("Velocity: " + velocity.velocity);
+//            System.out.println("Body position (before): " + physics.body.getPosition());
+//            System.out.println("Transform position (before): " + transform.position);
 
+            // Atualiza o TransformComponent
+            transform.position.set(
+                physics.body.getPosition().x,
+                physics.body.getPosition().y,
+                transform.position.z
+            );
+
+           // System.out.println("Transform position (after): " + transform.position);
+        } else {
+            System.out.println("[MovementSystem] Missing components for entity: " + entity.hashCode());
         }
     }
+
 }

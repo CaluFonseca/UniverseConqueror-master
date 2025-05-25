@@ -328,7 +328,7 @@ public class Character {
             if (facingRight) velocity.x = baseSpeed * 0.6f;
             else velocity.x = -baseSpeed * 0.6f;
 
-            System.out.println("Saltou. Movimento desbloqueado.");
+          //  System.out.println("Saltou. Movimento desbloqueado.");
             setState(State.JUMP);
             jumpSound.play();
 

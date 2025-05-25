@@ -68,6 +68,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         table.add(pauseLabel).padBottom(50).row();
 
         TextButton resumeButton = createButton("Resume", () -> game.setScreen(gameScreen));
+        TextButton restartButton = createButton("Restart", this::restartGame);
         TextButton mainMenuButton = createButton("Main Menu", this::goToMainMenu);
         TextButton exitButton = createButton("Exit", this::exitGame);
 
@@ -96,6 +97,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         float buttonHeight = 80f;
 
         table.add(resumeButton).size(buttonWidth, buttonHeight).pad(10).row();
+        table.add(restartButton).size(buttonWidth, buttonHeight).pad(10).row();
         table.add(mainMenuButton).size(buttonWidth, buttonHeight).pad(10).row();
         table.add(exitButton).size(buttonWidth, buttonHeight).pad(10).row();
         table.add(audioToggleButton).size(buttonWidth, buttonHeight).pad(10).row();
@@ -149,7 +151,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
     @Override public void hide() { dispose(); }
     @Override public void pause() {}
-    @Override public void resume() {}
+    @Override public void resume() { }
 
     @Override
     public void dispose() {
@@ -161,5 +163,12 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     @Override public void playHoverSound() { SoundManager.getInstance().play("hoverButton"); }
     @Override public void goToMainMenu() { game.setScreen(new MainMenuScreen(game, assetManager)); }
     @Override public void exitGame() { GameStateManager.delete(); Gdx.app.exit(); }
-    @Override public void restartGame() { game.setScreen(new GameScreen(game, assetManager)); }
+    @Override
+    public void restartGame() {
+        SoundManager.getInstance().stop();
+        MusicManager.getInstance().stop();
+        game.setNewGame(true);
+        game.setScreen(new GameScreen(game, assetManager));
+
+    }
 }

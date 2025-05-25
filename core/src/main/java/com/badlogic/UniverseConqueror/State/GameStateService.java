@@ -97,6 +97,20 @@ public class GameStateService {
             }
             engine.removeEntity(bullet);
         }
+
+        ImmutableArray<Entity> enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, PositionComponent.class).get());
+        for (Entity e : enemies) {
+            PositionComponent posEnemy = e.getComponent(PositionComponent.class);
+            EnemyComponent enemy = e.getComponent(EnemyComponent.class);
+
+            String type = enemy.type != null ? enemy.type.name().toLowerCase() : "chase";
+            Vector2 patrolStart = enemy.patrolStart != null ? enemy.patrolStart.cpy() : null;
+            Vector2 patrolEnd = enemy.patrolEnd != null ? enemy.patrolEnd.cpy() : null;
+
+            state.enemies.add(new SavedEnemyData(posEnemy.position.cpy(), patrolStart, patrolEnd, type));
+        }
+
+
         bodyRemovalSystem.update(0f);
         engine.update(0f);
 

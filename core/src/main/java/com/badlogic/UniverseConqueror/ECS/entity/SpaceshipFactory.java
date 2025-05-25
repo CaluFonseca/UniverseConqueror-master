@@ -22,7 +22,7 @@ public class SpaceshipFactory {
 
         // Carrega a textura
         Texture texture = assetManager.get(AssetPaths.ITEM_SPACESHIP, Texture.class);
-       // Texture texture = new Texture(assetManager.getAssetFileName(AssetPaths.ITEM_SPACESHIP));
+
         // COMPONENTES
         PositionComponent positionComponent = new PositionComponent(position);
         spaceship.add(positionComponent);
@@ -46,7 +46,7 @@ public class SpaceshipFactory {
 
         // Adiciona entidade ao engine
         engine.addEntity(spaceship);
-        System.out.println("Created spaceship at: x=" + position.x + ", y=" + position.y);
+       // System.out.println("Created spaceship at: x=" + position.x + ", y=" + position.y);
         return spaceship;
     }
 

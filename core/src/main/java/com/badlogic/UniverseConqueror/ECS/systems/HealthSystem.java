@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.HealthComponent;
 import com.badlogic.UniverseConqueror.ECS.components.StateComponent;
+import com.badlogic.UniverseConqueror.ECS.entity.EnemyFactory;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.audio.Sound;
@@ -59,10 +60,13 @@ public class HealthSystem extends EntitySystem {
             // Lógica de morte
             if (health.currentHealth <= 0 && state.get() != StateComponent.State.DEATH) {
                 state.set(StateComponent.State.DEATH);
+                EnemyFactory.changeState(entity, StateComponent.State.DEATH);
+
             }
 
             if (state.get() == StateComponent.State.HURT && health.hurtDuration <= 0f && health.hurtCooldownTimer <= 0f && !health.isDead()) {
                 state.set(StateComponent.State.IDLE);
+                EnemyFactory.changeState(entity, StateComponent.State.IDLE);
             }
         }
     }
@@ -71,13 +75,15 @@ public class HealthSystem extends EntitySystem {
     public void damage(Entity entity, int amount) {
         HealthComponent health = hm.get(entity);
         StateComponent state = sm.get(entity);
-        if (health != null && health.hurtCooldownTimer <= 0f) {
+        if (health != null && health.hurtCooldownTimer <= 0f &&
+            (StateComponent.State.DEFENSE != state.get() && StateComponent.State.DEFENSE_INJURED != state.get())) {
             health.currentHealth = Math.max(0, health.currentHealth - amount);
             health.wasDamagedThisFrame = true;
             state.set(StateComponent.State.HURT);
+
             health.hurtCooldownTimer = 0.1f;  // 1 segundo de invulnerabilidade
             health.hurtDuration = 0.1f;
-
+            //System.out.println("[HealthSystem] State changed to: " + state.get());
         }
     }
 

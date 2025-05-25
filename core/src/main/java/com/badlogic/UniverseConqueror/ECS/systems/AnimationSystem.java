@@ -17,23 +17,37 @@ public class AnimationSystem extends IteratingSystem {
         super(Family.all(AnimationComponent.class, StateComponent.class).get());
     }
 
+
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         StateComponent state = sm.get(entity);
         AnimationComponent anim = am.get(entity);
 
-        // Atualiza o tempo da animação
+        // Atualiza o tempo de estado e animação
+        state.timeInState += deltaTime;
         anim.stateTime += deltaTime;
 
-        //System.out.println("Estado atual: " + state.currentState);
         Animation<TextureRegion> animation = anim.animations.get(state.currentState);
+
         if (animation != null) {
-            anim.currentFrame = animation.getKeyFrame(anim.stateTime, false);
-           // System.out.println("Quadro atual da animação: " + anim.currentFrame);
-        } else {
-           // System.out.println("Nenhuma animação encontrada para o estado: " + state.currentState);
+            // Define looping apenas para estados contínuos
+            boolean looping = (state.currentState == StateComponent.State.IDLE
+                || state.currentState == StateComponent.State.PATROL);
+
+            anim.currentFrame = animation.getKeyFrame(anim.stateTime, looping);
+
+            // DEBUG opcional
+            System.out.println("[AnimationSystem] Entity: " + entity.hashCode());
+            System.out.println(" - State: " + state.currentState);
+            System.out.println(" - TimeInState: " + state.timeInState);
+            System.out.println(" - FrameIndex: " + animation.getKeyFrameIndex(anim.stateTime));
         }
+
+
+
+
     }
+
 
     public boolean isDeathAnimationFinished(Entity entity) {
         AnimationComponent anim = am.get(entity);

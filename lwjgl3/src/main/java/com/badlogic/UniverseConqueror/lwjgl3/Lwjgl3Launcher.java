@@ -18,14 +18,13 @@ public class Lwjgl3Launcher {
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("UniverseConquer");
-
         // Vsync limits the frames per second to what your hardware can display, and helps eliminate
-        // screen tearing.
+        // ssssssssscreen tearing.
         configuration.useVsync(true);
 
         // Set the desired window size (width, height)
         int windowWidth = 1280;  // Example width
-        int windowHeight = 720;  // Example heightaaaaaaaaa
+        int windowHeight = 720;  // Example height
         configuration.setWindowedMode(windowWidth, windowHeight);
 
         // Set window icon

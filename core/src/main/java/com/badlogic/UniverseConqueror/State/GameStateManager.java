@@ -13,7 +13,7 @@ public class GameStateManager {
         Json json = new Json();
         FileHandle file = Gdx.files.local(SAVE_PATH);
         file.writeString(json.prettyPrint(state), false);
-        System.out.println("Jogo salvo em: " + file.file().getAbsolutePath());
+      //  System.out.println("Jogo salvo em: " + file.file().getAbsolutePath());
     }
 
     public static GameState load() {

@@ -10,35 +10,42 @@ public class ContactListenerWrapper implements ContactListener {
 
     public final MapContactListener mapContactListener;
     private final BulletContactListener bulletContactListener;
+    private final EnemyContactListener enemyListener;
+
     private final World world;
-    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem,World world, BulletFactory bulletFactory) {
+    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem, World world, BulletFactory bulletFactory) {
         this.world = world;
         this.mapContactListener = new MapContactListener(engine, itemCollectionSystem, healthSystem);
-        this.bulletContactListener = new BulletContactListener(engine,world, bulletFactory);
-
+        this.bulletContactListener = new BulletContactListener(engine, world, bulletFactory, healthSystem);
+        this.enemyListener = new EnemyContactListener(engine, healthSystem); // 👈 novo
     }
+
 
     @Override
     public void beginContact(Contact contact) {
         bulletContactListener.beginContact(contact);
         mapContactListener.beginContact(contact);
+        enemyListener.beginContact(contact);
     }
 
     @Override
     public void endContact(Contact contact) {
         mapContactListener.endContact(contact);
         bulletContactListener.endContact(contact);
+        enemyListener.beginContact(contact);
     }
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
         mapContactListener.preSolve(contact, oldManifold);
         bulletContactListener.preSolve(contact, oldManifold);
+        enemyListener.preSolve(contact, oldManifold);
     }
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
         mapContactListener.postSolve(contact, impulse);
         bulletContactListener.postSolve(contact, impulse);
+        enemyListener.postSolve(contact, impulse);
     }
 }

@@ -43,11 +43,24 @@ public class MapContactListener implements ContactListener {
             // Check if the collision is with an item
             if (isPlayerAndItemCollision(bodyA, bodyB)) {
                 collectItem(bodyA, bodyB, playerEntity);
-            } else if (!isBulletCollision(bodyA, bodyB)) {
+            } else if (!isBulletCollision(bodyA, bodyB) && !isEnemyCollision(bodyA, bodyB)) {
                 applyDamageToPlayer(playerEntity, 1);
             }
         }
     }
+    private boolean isEnemyCollision(Body bodyA, Body bodyB) {
+        Object dataA = bodyA.getUserData();
+        Object dataB = bodyB.getUserData();
+
+        if (dataA instanceof Entity && ((Entity) dataA).getComponent(com.badlogic.UniverseConqueror.ECS.components.EnemyComponent.class) != null) {
+            return true;
+        }
+        if (dataB instanceof Entity && ((Entity) dataB).getComponent(com.badlogic.UniverseConqueror.ECS.components.EnemyComponent.class) != null) {
+            return true;
+        }
+        return false;
+    }
+
 
     // Retrieves the player entity from the collision
     private Entity getPlayerEntity(Body bodyA, Body bodyB) {
