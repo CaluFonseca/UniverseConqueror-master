@@ -26,15 +26,17 @@ public class StateSoundSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         StateComponent state = sm.get(entity);
         boolean isEnemy = em.has(entity);
+        EnemyComponent enemyComponent = em.get(entity);
+        boolean isUfo = isEnemy && enemyComponent.type == EnemyComponent.BehaviorType.UFO;
 
         state.timeInState += deltaTime;
 
-        if (state.currentState != StateComponent.State.FAST_MOVE && !isEnemy) {
+        if (state.currentState != StateComponent.State.FAST_MOVE && !isEnemy && !isUfo) {
             SoundManager.getInstance().stop("fastmove");
         }
 
         if (state.currentState != state.previousState) {
-            handleStateChange(entity, state, isEnemy);
+            handleStateChange(entity, state, isEnemy, isUfo);
             state.previousState = state.currentState;
             state.timeInState = 0f;
         }
@@ -43,20 +45,24 @@ public class StateSoundSystem extends IteratingSystem {
             handlePlayerLoopedSounds(state);
         }  else {
         if (isInCameraView(entity)) {
-            handleEnemyAmbientSound(entity, state);
+            handleEnemyAmbientSound(entity, state, isUfo);
         } else {
             SoundManager.getInstance().stopLoopForEntity(entity);
         }
     }
     }
 
-    private void handleStateChange(Entity entity, StateComponent state, boolean isEnemy) {
+    private void handleStateChange(Entity entity, StateComponent state, boolean isEnemy, boolean isUfo) {
         switch (state.currentState) {
             case JUMP -> SoundManager.getInstance().play("jump");
             case ATTACK -> SoundManager.getInstance().play("attack");
             case FAST_MOVE -> SoundManager.getInstance().loop("fastmove");
-            case HURT -> SoundManager.getInstance().play(isEnemy ? "hurtAlien" : "hurt");
-            case DEATH -> SoundManager.getInstance().play(isEnemy ? "deathAlien" : "death");
+            case HURT -> SoundManager.getInstance().play(
+                isUfo ? "hurtUfo" : (isEnemy ? "hurtAlien" : "hurt")
+            );
+            case DEATH -> SoundManager.getInstance().play(
+                isUfo ? "deathUfo" : (isEnemy ? "deathAlien" : "death")
+            );
         }
     }
 
@@ -77,11 +83,12 @@ public class StateSoundSystem extends IteratingSystem {
         }
     }
 
-    private void handleEnemyAmbientSound(Entity entity, StateComponent state) {
+    private void handleEnemyAmbientSound(Entity entity, StateComponent state, boolean isUfo) {
         String ambientKey = switch (state.currentState) {
-            case CHASE -> "chaseAlien";
-            case PATROL -> "patrolAlien";
+            case CHASE -> isUfo ? "chaseUfo" : "chaseAlien";
+            case PATROL -> "patrolAlien"; // UFOs não patrulham
             default -> null;
+
         };
 
         SoundManager soundManager = SoundManager.getInstance();

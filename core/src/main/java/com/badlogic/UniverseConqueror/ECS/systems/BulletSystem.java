@@ -52,6 +52,11 @@ public class BulletSystem extends EntitySystem {
                 bulletFactory.free(bullet); // devolve à pool
             }
         }
+        for (Entity bullet : activeBullets) {
+            if (bullet.getComponent(EnemyComponent.class) != null) {
+                System.err.println("[ERRO FATAL] Bullet ainda tem EnemyComponent! ID: " + bullet.hashCode());
+            }
+        }
     }
 
     private boolean isOutOfBounds(PositionComponent position) {
@@ -64,15 +69,22 @@ public class BulletSystem extends EntitySystem {
 
     public void spawnProjectile(float x, float y, Vector2 target, Body body, ProjectileComponent.ProjectileType type) {
         Entity bullet = bulletFactory.obtainProjectile(body.getWorld(), x, y, target, type);
-        engine.addEntity(bullet);
-        activeBullets.add(bullet);
+        if (bullet.getComponent(ProjectileComponent.class) != null) {
+            activeBullets.add(bullet);
+        } else {
+            System.err.println("[BulletSystem] ERRO: entidade retornada pelo BulletFactory não tem ProjectileComponent! ID: " + bullet.hashCode());
+        }
     }
 
     public void dispose() {
 
     }
     public void spawnedFromFactory(Entity bullet) {
-        activeBullets.add(bullet);
+        if (bullet.getComponent(ProjectileComponent.class) != null) {
+            activeBullets.add(bullet);
+        } else {
+            System.err.println("[BulletSystem] Tentativa de adicionar entidade sem ProjectileComponent à lista de projéteis: " + bullet.hashCode());
+        }
     }
 
 }

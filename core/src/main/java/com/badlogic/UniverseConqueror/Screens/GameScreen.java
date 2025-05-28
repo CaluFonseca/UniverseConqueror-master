@@ -147,11 +147,23 @@ public class GameScreen implements Screen {
         AStarPathfinder pathfinder = new AStarPathfinder(mapGraphBuilder.nodes);
 
         engine.addSystem(new PathRequestSystem(mapGraphBuilder, pathfinder));
+
+        engine.addSystem(new EnemyCleanupSystem(
+            engine,
+            bodyRemovalSystem,
+            animationSystem,
+            enemy -> incrementEnemiesKilled()
+        ));
         engine.addSystem(new PathDebugRenderSystem(camera));
+
+        engine.addSystem(new UfoSpawnerSystem(engine, world, assetManager, mapGraphBuilder, player, camera));
+
+
         gameStateService = new GameStateService(engine, world, assetManager,
             bodyRemovalSystem, attackSystem, itemCollectionSystem,
             playingTimer, camera, playerInputSystem);
         gameStateService.setPlayer(player);
+
     }
 
     private void initializeInputProcessor() {
@@ -232,21 +244,10 @@ public class GameScreen implements Screen {
         stage.draw();
 
     }
-    private Node getRandomWalkableNode() {
-        int width = mapGraphBuilder.getWidth();
-        int height = mapGraphBuilder.getHeight();
 
-        for (int attempts = 0; attempts < 100; attempts++) {
-            int x = (int)(Math.random() * width);
-            int y = (int)(Math.random() * height);
-            Node node = mapGraphBuilder.nodes[x][y];
-            if (node.walkable) return node;
-        }
-        return null;
-    }
 
     private ItemFactory createItem(String tipo, String assetPath) {
-        Node node = getRandomWalkableNode();
+        Node node =  mapGraphBuilder.getRandomWalkableNode();
         Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);
         return new ItemFactory(tipo, worldPos.x, worldPos.y, assetPath, assetManager);
     }
@@ -424,7 +425,7 @@ public class GameScreen implements Screen {
     }
 
     private void initializeSpaceship() {
-        Node node = getRandomWalkableNode();
+        Node node = mapGraphBuilder.getRandomWalkableNode();
         Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);
 
         SpaceshipFactory spaceshipFactory = new SpaceshipFactory(assetManager);
@@ -444,9 +445,13 @@ public class GameScreen implements Screen {
             Node patrolStartNode = mapGraphBuilder.findNearestWalkableOffset(node, offset[0], offset[1]);
             Node patrolEndNode = mapGraphBuilder.findNearestWalkableOffset(node, offset[0] * 2, offset[1] * 2);
 
+
+
             if (patrolStartNode != null && patrolEndNode != null) {
                 Vector2 patrolStartWorld = mapGraphBuilder.toWorldPosition(patrolStartNode);
                 Vector2 patrolEndWorld = mapGraphBuilder.toWorldPosition(patrolEndNode);
+
+
 
                 Entity enemy = EnemyFactory.createPatrollingEnemy(
                     engine,
@@ -459,7 +464,7 @@ public class GameScreen implements Screen {
                     patrolEndWorld
                 );
 
-                engine.addEntity(enemy);
+                    engine.addEntity(enemy);
             }
         }
 
@@ -508,12 +513,7 @@ public class GameScreen implements Screen {
         engine.addSystem(new StateSoundSystem(camera));
         engine.addSystem(new AISystem());
         engine.addSystem(new EnemyHealthBarSystem(camera));
-        engine.addSystem(new EnemyCleanupSystem(
-            engine,
-            bodyRemovalSystem,
-            animationSystem,
-            enemy -> incrementEnemiesKilled()
-        ));
+
     }
 
     private void renderWorld() {

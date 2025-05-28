@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.UniverseConqueror.ECS.components.StateComponent;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -32,6 +33,11 @@ public class RenderSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        StateComponent state = entity.getComponent(StateComponent.class);
+        AnimationComponent anim = entity.getComponent(AnimationComponent.class);
+      //  if (state != null && state.get() == StateComponent.State.DEATH)return;
+//        if (anim == null || anim.currentFrame == null) return;
+
         TransformComponent transform = tm.get(entity);
         AnimationComponent animation = am.get(entity);
 

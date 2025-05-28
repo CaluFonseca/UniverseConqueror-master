@@ -20,7 +20,8 @@ public class StateComponent implements Component {
         IDLE_INJURED,
         DEFENSE_INJURED,
         PATROL,
-        CHASE
+        CHASE,
+        FLY
     }
 
     public State currentState = State.IDLE;

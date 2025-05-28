@@ -44,7 +44,18 @@ public class MapGraphBuilder {
             }
         }
     }
+    public Node getRandomWalkableNode() {
+        int width = getWidth();
+        int height = getHeight();
 
+        for (int attempts = 0; attempts < 100; attempts++) {
+            int x = (int)(Math.random() * width);
+            int y = (int)(Math.random() * height);
+            Node node =nodes[x][y];
+            if (node.walkable) return node;
+        }
+        return null;
+    }
 //    public Vector2 toWorldPosition(Node node) {
 //        int rotatedX = node.y;
 //        int rotatedY = width - 1 - node.x;

@@ -15,16 +15,31 @@ public class EnemyAnimationLoader {
         this.assetManager = assetManager;
     }
 
-    public ObjectMap<StateComponent.State, Animation<TextureRegion>> loadAnimations() {
+    public ObjectMap<StateComponent.State, Animation<TextureRegion>> loadAnimations(String enemyType) {
+
         ObjectMap<StateComponent.State, Animation<TextureRegion>> animations = new ObjectMap<>();
 
-        load(animations, StateComponent.State.IDLE, "enemy/idle/frame-", 6, 0.2f, true);
-        load(animations, StateComponent.State.PATROL, "enemy/walk/frame-", 6, 0.1f, true);
-        load(animations, StateComponent.State.CHASE, "enemy/attack/frame-", 17, 0.1f, true);
-        load(animations, StateComponent.State.DEATH, "enemy/death/frame-", 9, 0.1f, false);
-        load(animations, StateComponent.State.HURT, "enemy/hurt/frame-", 3, 0.1f, false);
+        switch (enemyType.toLowerCase()) {
+            case "ufo":
+                load(animations, StateComponent.State.CHASE, "ufo/fly/frame-", 4, 0.1f, true);
+                load(animations, StateComponent.State.DEATH, "ufo/death/frame-", 4, 0.15f, false);
+                load(animations, StateComponent.State.HURT, "ufo/hurt/frame-", 2, 0.1f, false);
+                break;
+
+            case "default": // seu inimigo genérico
+            default:
+                load(animations, StateComponent.State.IDLE, "enemy/idle/frame-", 6, 0.2f, true);
+                load(animations, StateComponent.State.PATROL, "enemy/walk/frame-", 6, 0.1f, true);
+                load(animations, StateComponent.State.CHASE, "enemy/attack/frame-", 17, 0.1f, true);
+                load(animations, StateComponent.State.DEATH, "enemy/death/frame-", 9, 0.1f, false);
+                load(animations, StateComponent.State.HURT, "enemy/hurt/frame-", 3, 0.1f, false);
+                break;
+        }
+
         return animations;
     }
+
+
 
     private void load(ObjectMap<StateComponent.State, Animation<TextureRegion>> map,
                       StateComponent.State state, String basePath,
@@ -32,7 +47,7 @@ public class EnemyAnimationLoader {
         Array<TextureRegion> frames = new Array<>();
         for (int i = 1; i <= frameCount; i++) {
             String filePath = basePath + String.format("%02d.png", i);
-            System.out.println("Loading enemy animation: " + filePath);
+            //System.out.println("Loading enemy animation: " + filePath);
             Texture texture = assetManager.get(filePath, Texture.class);
             TextureRegion region = new TextureRegion(texture);
             frames.add(new TextureRegion(region)); // clone para evitar side-effects

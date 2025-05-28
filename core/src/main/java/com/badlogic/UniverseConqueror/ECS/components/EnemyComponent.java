@@ -7,7 +7,7 @@ public class EnemyComponent implements Component {
     public enum BehaviorType {
         CHASE,
         PATROL,
-        IDLE
+        UFO
     }
     public Vector2 patrolStart = null;
     public Vector2 patrolEnd = null;

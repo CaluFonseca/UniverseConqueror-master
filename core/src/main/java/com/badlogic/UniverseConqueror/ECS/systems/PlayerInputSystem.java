@@ -157,8 +157,8 @@ public class PlayerInputSystem extends IteratingSystem {
                 ? ProjectileComponent.ProjectileType.FIREBALL
                 : ProjectileComponent.ProjectileType.BULLET;
 
-           // Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, type);
-           // engine.addEntity(bullet);
+            //Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, type);
+         //   engine.addEntity(bullet);
 
 
             if (fireball) {
@@ -168,7 +168,7 @@ public class PlayerInputSystem extends IteratingSystem {
                     state.set(StateComponent.State.SUPER_ATTACK);
 
                     Entity bullet = bulletFactory.obtainProjectile(world, bulletStartPosition.x, bulletStartPosition.y, target, ProjectileComponent.ProjectileType.FIREBALL);
-                   // engine.addEntity(bullet);
+                   //  engine.addEntity(bullet);
                     bulletSystem.spawnedFromFactory(bullet);
 
                     if (sound != null && !sound.play) {

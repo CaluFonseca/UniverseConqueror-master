@@ -1,14 +1,12 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
-import com.badlogic.UniverseConqueror.ECS.components.TextureComponent;
-import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.UniverseConqueror.ECS.components.VelocityComponent;
 
 public class BulletRenderSystem extends IteratingSystem {
     private SpriteBatch batch;
@@ -18,7 +16,9 @@ public class BulletRenderSystem extends IteratingSystem {
     private ComponentMapper<VelocityComponent> velocityMapper;
 
     public BulletRenderSystem(SpriteBatch batch) {
-        super(Family.all(PositionComponent.class, TextureComponent.class, VelocityComponent.class).get());
+        super(Family.all(PositionComponent.class, TextureComponent.class, VelocityComponent.class, ProjectileComponent.class)
+            .exclude(EnemyComponent.class)
+            .get());
         this.batch = batch;
         positionMapper = ComponentMapper.getFor(PositionComponent.class);
         textureMapper = ComponentMapper.getFor(TextureComponent.class);
@@ -37,7 +37,7 @@ public class BulletRenderSystem extends IteratingSystem {
         PositionComponent position = positionMapper.get(entity);
         TextureComponent textureComponent = textureMapper.get(entity);
         VelocityComponent velocity = velocityMapper.get(entity);
-
+        //System.out.println("[BulletRender] Entidade: " + entity.hashCode() + ", Texture: " + textureComponent.texture);
         // Calcula o ângulo de rotação com base na direção do movimento
         float angle = velocity.velocity.angleDeg();
         boolean facingRight = false;

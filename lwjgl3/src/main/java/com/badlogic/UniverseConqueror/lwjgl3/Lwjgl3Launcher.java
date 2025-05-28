@@ -23,7 +23,7 @@ public class Lwjgl3Launcher {
         configuration.useVsync(true);
 
         // Set the desired window size (width, height)
-        int windowWidth = 1280;  // Example width
+        int windowWidth = 1280;  // Example widthwd
         int windowHeight = 720;  // Example height
         configuration.setWindowedMode(windowWidth, windowHeight);
 

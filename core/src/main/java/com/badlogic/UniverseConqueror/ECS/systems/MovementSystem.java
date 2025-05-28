@@ -43,7 +43,7 @@ public class MovementSystem extends IteratingSystem {
 
            // System.out.println("Transform position (after): " + transform.position);
         } else {
-            System.out.println("[MovementSystem] Missing components for entity: " + entity.hashCode());
+            //System.out.println("[MovementSystem] Missing components for entity: " + entity.hashCode());
         }
     }
 

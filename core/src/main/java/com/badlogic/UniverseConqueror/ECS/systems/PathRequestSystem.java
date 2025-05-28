@@ -65,7 +65,7 @@ public class PathRequestSystem extends EntitySystem {
                 player.add(pathComponent);
 
                 // Optional: log
-                System.out.println("Path to spaceship created with " + path.size() + " steps.");
+                ///System.out.println("Path to spaceship created with " + path.size() + " steps.");
             }
         }
 

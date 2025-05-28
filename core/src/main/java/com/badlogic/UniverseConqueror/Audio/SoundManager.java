@@ -40,6 +40,10 @@ public class SoundManager {
         soundPaths.put("deathAlien", AssetPaths.SOUND_DEATH_ALIEN);
         soundPaths.put("patrolAlien", AssetPaths.SOUND_PATROL_ALIEN);
         soundPaths.put("chaseAlien", AssetPaths.SOUND_CHASE_ALIEN);
+
+        soundPaths.put("deathUfo", AssetPaths.SOUND_DEATH_UFO);
+        soundPaths.put("hurtUfo", AssetPaths.SOUND_HURT_UFO);
+        soundPaths.put("chaseUfo", AssetPaths.SOUND_CHASE_UFO);
     }
 
     public static void init(AssetManager assetManager) {

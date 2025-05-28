@@ -8,7 +8,7 @@ public class HealthComponent implements Component {
     public boolean wasDamagedThisFrame = false;
     public float hurtCooldownTimer = 0f;
     public float hurtDuration = 0f;
-
+    public boolean scheduledForRemoval = false;
     // Verifica se a entidade está morta
     public boolean isDead() {
         return currentHealth <= 0;

@@ -28,20 +28,22 @@ public class AnimationSystem extends IteratingSystem {
         anim.stateTime += deltaTime;
 
         Animation<TextureRegion> animation = anim.animations.get(state.currentState);
-
         if (animation != null) {
-            // Define looping apenas para estados contínuos
-            boolean looping = (state.currentState == StateComponent.State.IDLE
-                || state.currentState == StateComponent.State.PATROL);
-
-            anim.currentFrame = animation.getKeyFrame(anim.stateTime, looping);
-
-            // DEBUG opcional
-            System.out.println("[AnimationSystem] Entity: " + entity.hashCode());
-            System.out.println(" - State: " + state.currentState);
-            System.out.println(" - TimeInState: " + state.timeInState);
-            System.out.println(" - FrameIndex: " + animation.getKeyFrameIndex(anim.stateTime));
+            anim.currentFrame = animation.getKeyFrame(anim.stateTime); // usa o modo configurado
         }
+//        if (animation != null) {
+//            // Define looping apenas para estados contínuos
+//            boolean looping = (state.currentState == StateComponent.State.IDLE
+//                || state.currentState == StateComponent.State.PATROL);
+//
+//            anim.currentFrame = animation.getKeyFrame(anim.stateTime, looping);
+//
+//            // DEBUG opcional
+////            System.out.println("[AnimationSystem] Entity: " + entity.hashCode());
+////            System.out.println(" - State: " + state.currentState);
+////            System.out.println(" - TimeInState: " + state.timeInState);
+////            System.out.println(" - FrameIndex: " + animation.getKeyFrameIndex(anim.stateTime));
+
 
 
 

@@ -48,9 +48,15 @@ public class AssetPaths {
     public static final String SOUND_EMPTY_GUN = "audio/empty_gun.mp3";
     public static final String SOUND_NEXT_LEVEL = "audio/nextLevel.mp3";
     public static final String SOUND_WAYPOINT = "audio/waypoint.mp3";
+
+    //EnemySound
     public static final String SOUND_DEATH_ALIEN = "audio/deathAlien.mp3";
     public static final String SOUND_CHASE_ALIEN = "audio/chaseAlien.mp3";
     public static final String SOUND_PATROL_ALIEN = "audio/patrolAlien.mp3";
+    //UfoSound
+    public static final String SOUND_DEATH_UFO = "audio/deathUfo.mp3";
+    public static final String SOUND_CHASE_UFO = "audio/chaseUfo.mp3";
+    public static final String SOUND_HURT_UFO = "audio/hurtUfo.mp3";
 
     // Music
     public static final String MUSIC_SPACE_INTRO = "audio/space_intro_sound.mp3";
