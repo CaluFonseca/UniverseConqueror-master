@@ -1,25 +1,29 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
 import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
-import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
 import com.badlogic.UniverseConqueror.ECS.systems.ItemCollectionSystem;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.physics.box2d.*;
 
 public class ContactListenerWrapper implements ContactListener {
 
+    /// Listener responsável por colisões com o mapa (jogador, itens, inimigos)
     public final MapContactListener mapContactListener;
+
+    /// Listener para colisões de projéteis (balas, fireballs)
     private final BulletContactListener bulletContactListener;
+
+    /// Listener para colisões entre inimigos e outros corpos
     private final EnemyContactListener enemyListener;
 
-    private final World world;
-    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem, World world, BulletFactory bulletFactory) {
-        this.world = world;
-        this.mapContactListener = new MapContactListener(engine, itemCollectionSystem, healthSystem);
-        this.bulletContactListener = new BulletContactListener(engine, world, bulletFactory, healthSystem);
-        this.enemyListener = new EnemyContactListener(engine, healthSystem); // 👈 novo
-    }
+    /// Contador de inimigos mortos, passado para MapContactListener via lambda
+    private int enemiesKilledCount;
 
+    public ContactListenerWrapper(Engine engine, ItemCollectionSystem itemCollectionSystem, BulletFactory bulletFactory) {
+        this.mapContactListener = new MapContactListener(engine, itemCollectionSystem, () -> this.enemiesKilledCount);
+        this.bulletContactListener = new BulletContactListener(bulletFactory);
+        this.enemyListener = new EnemyContactListener();
+    }
 
     @Override
     public void beginContact(Contact contact) {
@@ -32,7 +36,7 @@ public class ContactListenerWrapper implements ContactListener {
     public void endContact(Contact contact) {
         mapContactListener.endContact(contact);
         bulletContactListener.endContact(contact);
-        enemyListener.beginContact(contact);
+        enemyListener.endContact(contact);
     }
 
     @Override

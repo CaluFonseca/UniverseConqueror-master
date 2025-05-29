@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.UniverseConqueror.characters.Character;
+//import com.badlogic.UniverseConqueror.characters.Character;
 
 public class Minimap extends Actor {
     private Texture minimapTexture; // Texture for the minimap background
@@ -58,7 +58,8 @@ public class Minimap extends Actor {
 
     // Get the current position of the player on the minimap
     private Vector2 getCharacterPosition() {
-        return player.getPosition(); // Return the player's position
+     //   return player.getPosition(); // Return the player's position
+    return null;
     }
 
     // Dispose of the textures used by the minimap to free resources

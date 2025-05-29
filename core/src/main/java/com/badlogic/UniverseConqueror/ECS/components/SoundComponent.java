@@ -3,11 +3,12 @@ package com.badlogic.UniverseConqueror.ECS.components;
 import com.badlogic.ashley.core.Component;
 
 public class SoundComponent implements Component {
-    public String soundKey = null;  // Chave lógica (ex: "jump", "hurt")
+
+    /// Chave do som a ser reproduzido (ex: "jump", "hurt", "attack")
+    public String soundKey = null;
+
+    /// Indica se o som deve ser reproduzido neste frame
     public boolean play = false;
 
-    public SoundComponent() {
-    }
-
-
+    public SoundComponent() {}
 }

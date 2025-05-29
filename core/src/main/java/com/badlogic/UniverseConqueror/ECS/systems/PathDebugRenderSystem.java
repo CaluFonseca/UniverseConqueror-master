@@ -14,21 +14,28 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class PathDebugRenderSystem extends EntitySystem {
+
+    /// Renderizador para desenhar os caminhos
     private final ShapeRenderer shapeRenderer;
+
+    /// Câmera usada para projetar as posições no mundo
     private final OrthographicCamera camera;
 
+    /// Mapeadores de componentes
     private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
     private final ComponentMapper<PathComponent> pathMapper = ComponentMapper.getFor(PathComponent.class);
 
+    /// Família de entidades que têm caminho e posição
     private final Family pathFamily = Family.all(PathComponent.class, PositionComponent.class).get();
 
+    /// Referência à engine
     private Engine engine;
 
+    /// Construtor que recebe a câmera
     public PathDebugRenderSystem(OrthographicCamera camera) {
-        super(-1000);
+        super(-1000); // Prioridade baixa (desenha após outros sistemas)
         this.shapeRenderer = new ShapeRenderer();
         this.camera = camera;
-
     }
 
     @Override
@@ -38,8 +45,10 @@ public class PathDebugRenderSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        /// Obtém todas as entidades com caminho
         ImmutableArray<Entity> entities = engine.getEntitiesFor(pathFamily);
 
+        /// Define a projeção da câmera e inicia o desenho
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -47,22 +56,26 @@ public class PathDebugRenderSystem extends EntitySystem {
             PathComponent path = pathMapper.get(entity);
             Queue<Vector2> waypointsQueue = path.waypoints;
 
-            // Converter para lista para usar índice
+            /// Converte a fila de pontos para lista (para usar índices)
             List<Vector2> waypoints = new ArrayList<>(waypointsQueue);
             int total = waypoints.size();
 
             for (int i = 0; i < total; i++) {
                 Vector2 waypoint = waypoints.get(i);
 
+                /// Define a transparência com base na ordem dos pontos
                 float alpha = 1f - ((float) i / total);
+
+                /// Define a cor com base no tipo de caminho
                 Color color;
                 if (path.type == PathComponent.PathType.SPACESHIP) {
                     color = new Color(1f, 1f, 0f, alpha); // Amarelo
                 } else {
                     color = new Color(1f, 0f, 0f, alpha); // Vermelho
                 }
+
                 shapeRenderer.setColor(color);
-                shapeRenderer.circle(waypoint.x, waypoint.y, 10f);
+                shapeRenderer.circle(waypoint.x, waypoint.y, 10f); // Desenha o ponto
             }
         }
 
@@ -71,6 +84,7 @@ public class PathDebugRenderSystem extends EntitySystem {
 
     @Override
     public void removedFromEngine(Engine engine) {
+        /// Libera o recurso gráfico ao remover da engine
         shapeRenderer.dispose();
     }
 }

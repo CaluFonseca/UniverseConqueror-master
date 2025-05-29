@@ -11,16 +11,22 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.List;
 
 public class PathRequestSystem extends EntitySystem {
+    /// Referência ao construtor do grafo do mapa (para obter nodes)
     private final MapGraphBuilder mapGraphBuilder;
+    /// Referência ao algoritmo A* para encontrar caminhos
     private final AStarPathfinder pathfinder;
 
+    /// Mapeador para PositionComponent (posição das entidades)
     private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
+
+    /// Famílias para filtrar entidades específicas
     private final Family playerFamily = Family.all(PlayerComponent.class, PositionComponent.class).get();
     private final Family itemFamily = Family.all(ItemComponent.class, PositionComponent.class).get();
     private final Family spaceshipFamily = Family.all(TargetComponent.class, PositionComponent.class).get();
 
     private Engine engine;
 
+    /// Construtor recebe as referências do construtor do grafo e do pathfinder
     public PathRequestSystem(MapGraphBuilder mapGraphBuilder, AStarPathfinder pathfinder) {
         this.mapGraphBuilder = mapGraphBuilder;
         this.pathfinder = pathfinder;
@@ -33,45 +39,51 @@ public class PathRequestSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        /// Cria novo PathComponent para armazenar o caminho calculado
         PathComponent pathComponent = new PathComponent();
+
+        /// Se tecla F foi pressionada, busca caminho até a spaceship
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
 
             pathComponent.type = PathComponent.PathType.SPACESHIP;
+
+            /// Obtém o player e a spaceship
             ImmutableArray<Entity> players = engine.getEntitiesFor(playerFamily);
             ImmutableArray<Entity> spaceships = engine.getEntitiesFor(spaceshipFamily);
 
             if (players.size() == 0 || spaceships.size() == 0) return;
 
             Entity player = players.first();
-            Entity spaceship = spaceships.first(); // Assumimos só uma spaceship
+            Entity spaceship = spaceships.first(); // Assume 1 spaceship
 
             Vector2 playerPos = pm.get(player).position;
             Vector2 spaceshipPos = pm.get(spaceship).position;
 
+            /// Obtém os nodes do grafo para as posições do player e da spaceship
             Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
             Node endNode = mapGraphBuilder.getNodeAtWorldPosition(spaceshipPos.x, spaceshipPos.y);
 
             if (startNode == null || endNode == null) return;
 
+            /// Executa A* para encontrar o caminho
             List<Node> path = pathfinder.findPath(startNode, endNode);
 
             if (!path.isEmpty()) {
-               // PathComponent pathComponent = new PathComponent();
+                /// Converte nodes para posições do mundo e adiciona à fila do caminho
                 for (Node node : path) {
                     pathComponent.waypoints.add(mapGraphBuilder.toWorldPosition(node));
                 }
 
-                player.remove(PathComponent.class);
-                player.add(pathComponent);
+                player.remove(PathComponent.class); /// Remove caminho antigo se houver
+                player.add(pathComponent); /// Adiciona novo caminho ao player
 
-                // Optional: log
-                ///System.out.println("Path to spaceship created with " + path.size() + " steps.");
             }
         }
 
-
+        /// Se tecla H foi pressionada, busca caminho até o item mais próximo
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             pathComponent.type = PathComponent.PathType.ITEM;
+
             ImmutableArray<Entity> players = engine.getEntitiesFor(playerFamily);
             ImmutableArray<Entity> items = engine.getEntitiesFor(itemFamily);
 
@@ -85,25 +97,15 @@ public class PathRequestSystem extends EntitySystem {
             Vector2 targetPos = pm.get(targetItem).position;
 
             Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
-              Node endNode = mapGraphBuilder.getNodeAtWorldPosition(targetPos.x, targetPos.y);
-
-
-//            if (startNode == null || endNode == null) {
-//                System.out.println("[PathRequestSystem] startNode ou endNode é null.");
-//                System.out.println("↪️ Posição do jogador: " + playerPos);
-//                System.out.println("↪️ Posição do alvo: " + targetPos);
-//                return;
-//            }
+            Node endNode = mapGraphBuilder.getNodeAtWorldPosition(targetPos.x, targetPos.y);
 
             if (startNode == null || endNode == null) {
-                //System.out.println("[PathRequestSystem] startNode ou endNode é null. Pos player: " + playerPos + ", alvo: " + targetPos);
                 return;
             }
+
             List<Node> path = pathfinder.findPath(startNode, endNode);
 
             if (!path.isEmpty()) {
-               // PathComponent pathComponent = new PathComponent();
-
                 for (Node node : path) {
                     pathComponent.waypoints.add(mapGraphBuilder.toWorldPosition(node));
                 }
@@ -112,11 +114,12 @@ public class PathRequestSystem extends EntitySystem {
                     player.remove(PathComponent.class);
                 }
                 player.add(pathComponent);
-              //  System.out.println("Caminho gerado com " + path.size() + " passos.");
+
             }
         }
     }
 
+    /// Método para encontrar o item mais próximo do jogador
     private Entity findClosestItem(Entity player, ImmutableArray<Entity> items) {
         Vector2 playerPos = pm.get(player).position;
         Entity closest = null;
@@ -124,7 +127,7 @@ public class PathRequestSystem extends EntitySystem {
 
         for (Entity item : items) {
             Vector2 itemPos = pm.get(item).position;
-            float dist = playerPos.dst2(itemPos); // Evita sqrt
+            float dist = playerPos.dst2(itemPos);
 
             if (dist < minDistance) {
                 minDistance = dist;

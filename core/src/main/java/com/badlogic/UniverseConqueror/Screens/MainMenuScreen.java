@@ -22,26 +22,38 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class MainMenuScreen implements Screen, SoundEnabledScreen {
+    /// SpriteBatch para desenhar texturas e elementos gráficos
     private SpriteBatch batch;
+    /// Palco para gerenciar a UI
     private Stage stage;
+    /// Skin que contém estilos para UI
     private Skin skin;
+    /// Fonte para texto
     private BitmapFont font;
+    /// Textura de fundo do menu
     private Texture background;
 
+    /// Botões da UI
     private TextButton playButton;
     private TextButton audioButton;
     private TextButton volumeUpButton;
     private TextButton volumeDownButton;
     private TextButton controlsButton;
     private TextButton creditsButton;
+    /// Slider para controle de volume
     private Slider volumeSlider;
+    /// Referência ao jogo para trocar telas
     private Game game;
 
+    /// Controle de som ligado/desligado
     private boolean isAudioOn = true;
+    /// Volume atual da música
     private float currentVolume = 1.0f;
 
+    /// Gerenciador de assets
     private final AssetManager assetManager;
 
+    /// Construtor inicializa os componentes essenciais do menu principal
     public MainMenuScreen(Game game, AssetManager assetManager) {
         this.game = game;
         this.assetManager = assetManager;
@@ -61,35 +73,42 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         float buttonWidth = 400f;
         float buttonHeight = 80f;
 
+        /// Botão Play que inicia o jogo e para a música do menu
         playButton = createButton("Play", () -> {
             MusicManager.getInstance().stop();
             ((GameLauncher) game).startGame();
         });
 
+        /// Botão para alternar o som ligado/desligado
         audioButton = createButton("Som: On", this::toggleAudio);
 
+        /// Botão para aumentar o volume
         volumeUpButton = createButton("Volume +", () -> {
             currentVolume = Math.min(currentVolume + 0.1f, 1.0f);
             volumeSlider.setValue(currentVolume);
             setMusicVolume();
         });
 
+        /// Botão para diminuir o volume
         volumeDownButton = createButton("Volume -", () -> {
             currentVolume = Math.max(currentVolume - 0.1f, 0.0f);
             volumeSlider.setValue(currentVolume);
             setMusicVolume();
         });
 
+        /// Botão para abrir tela de controles, parando a música
         controlsButton = createButton("Controlos", () -> {
             stopMusic();
             game.setScreen(new ControlsScreen(game, assetManager));
         });
 
+        /// Botão para abrir tela de créditos, parando a música
         creditsButton = createButton("Creditos", () -> {
             stopMusic();
             game.setScreen(new CreditsScreen(game, assetManager));
         });
 
+        /// Slider de volume que atualiza volume da música
         volumeSlider = new Slider(0.0f, 1.0f, 0.01f, false, skin);
         volumeSlider.setValue(currentVolume);
         volumeSlider.addListener(new ChangeListener() {
@@ -100,6 +119,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
             }
         });
 
+        /// Adiciona botões na tabela com espaçamento
         table.add(playButton).size(buttonWidth, buttonHeight).padBottom(20).row();
         table.add(audioButton).size(buttonWidth, buttonHeight).padBottom(20).row();
         table.add(volumeUpButton).size(buttonWidth, buttonHeight).padBottom(20).row();
@@ -110,6 +130,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         stage.addActor(table);
     }
 
+    /// Cria botão com texto e ação executada ao clicar
     private TextButton createButton(String text, Runnable action) {
         TextButton button = new TextButton(text, skin);
         button.addListener(new ChangeListener() {
@@ -128,6 +149,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         return button;
     }
 
+    /// Alterna o som entre ligado e desligado
     private void toggleAudio() {
         if (isAudioOn) {
             MusicManager.getInstance().unmute();
@@ -140,16 +162,19 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         isAudioOn = !isAudioOn;
     }
 
+    /// Para a música atual
     private void stopMusic() {
         MusicManager.getInstance().stop();
     }
 
+    /// Ajusta o volume da música se o som estiver ligado
     private void setMusicVolume() {
         if (isAudioOn) {
             MusicManager.getInstance().setVolume(currentVolume);
         }
     }
 
+    /// Chamado ao mostrar a tela, configura input e inicia música se necessário
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
@@ -158,6 +183,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         }
     }
 
+    /// Renderiza a tela, desenhando background e UI
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -172,11 +198,13 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         stage.draw();
     }
 
+    /// Atualiza o viewport do palco ao redimensionar a janela
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /// Oculta a tela e libera recursos do palco
     @Override
     public void hide() {
         stage.dispose();
@@ -188,6 +216,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     @Override
     public void resume() {}
 
+    /// Libera os recursos gráficos usados pelo menu
     @Override
     public void dispose() {
         batch.dispose();
@@ -196,11 +225,13 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         assetManager.dispose();
     }
 
+    /// Toca som de clique em botão
     @Override
     public void playClickSound() {
         SoundManager.getInstance().play("keyboardClick");
     }
 
+    /// Toca som de hover ao passar mouse no botão
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");

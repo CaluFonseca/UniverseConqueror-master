@@ -1,69 +1,85 @@
+/// Classe utilitária de temporizador (Timer) para controlar eventos no tempo.
+/// Pode ser usada para cooldowns, contadores regressivos ou temporizações gerais.
+
 package com.badlogic.UniverseConqueror.Utils;
 
 public class Timer {
 
-    private float time;       // Current time of the timer
-    private float duration;   // Duration we want to count down
-    private boolean running;  // Is the timer running or stopped
+    /// Tempo atual acumulado.
+    private float time;
 
-    // Constructor to initialize the timer with a specific duration
+    /// Duração alvo do temporizador.
+    private float duration;
+
+    /// Indica se o temporizador está em execução.
+    private boolean running;
+
+    /// Construtor que define a duração inicial do temporizador.
+    /// @param duration tempo alvo (em segundos)
     public Timer(float duration) {
-        this.duration = duration;  // Set the desired duration
-        this.time = 0;             // Initialize the current time to zero
-        this.running = false;      // Timer is initially stopped
+        this.duration = duration;
+        this.time = 0;
+        this.running = false;
     }
 
-    // Start the timer, resetting the time to 0
+    /// Inicia o temporizador, reiniciando o tempo acumulado.
     public void start() {
-        running = true;  // Set the timer as running
-        time = 0;        // Reset the time to 0
+        running = true;
+        time = 0;
     }
 
-    // Stop the timer
+    /// Para o temporizador, mantendo o tempo acumulado.
     public void stop() {
-        running = false; // Set the timer as stopped
+        running = false;
     }
 
-    // Reset the timer time to 0 without affecting the duration
+    /// Reinicia o tempo acumulado, mas não inicia nem para o temporizador.
     public void reset() {
-        time = 0;  // Reset the current time to zero
+        time = 0;
     }
 
-    // Update the timer based on the delta time (time passed in each frame)
+    /// Atualiza o temporizador com base no deltaTime.
+    /// @param delta tempo decorrido desde o último frame
     public void update(float delta) {
-        if (!running) return;  // If the timer is not running, do nothing
+        if (!running) return;
 
-        time += delta;  // Increment the time by the delta (time passed)
+        time += delta;
         if (time >= duration) {
-            running = false; // Stop the timer once the duration is reached
+            running = false;
         }
     }
 
-    // Check if the timer has finished (duration is reached or exceeded)
+    /// Verifica se o tempo final foi alcançado.
+    /// @return true se o temporizador terminou
     public boolean isFinished() {
-        return !running && time >= duration;  // Returns true if the timer is not running and the time has exceeded or reached the duration
+        return !running && time >= duration;
     }
 
-    // Check if the timer is still running
+    /// Verifica se o temporizador está em execução.
+    /// @return true se está rodando
     public boolean isRunning() {
-        return running;  // Returns true if the timer is running
+        return running;
     }
 
-    // Get the current time of the timer
+    /// Retorna o tempo acumulado atual.
     public float getTime() {
-        return time;  // Return the current time
+        return time;
     }
 
-    // Get the duration of the timer
+    /// Retorna a duração alvo definida.
     public float getDuration() {
-        return duration;  // Return the duration of the timer
+        return duration;
     }
 
-    // Set a new duration for the timer
+    /// Define uma nova duração.
+    /// @param duration nova duração (em segundos)
     public void setDuration(float duration) {
-        this.duration = duration;  // Set a new duration for the timer
+        this.duration = duration;
     }
 
+    /// Define manualmente o tempo acumulado.
+    /// Útil para restaurar estados salvos.
+    /// @param time novo valor de tempo
     public void setTime(float time) {
         this.time = time;
     }

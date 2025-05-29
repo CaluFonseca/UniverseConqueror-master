@@ -18,19 +18,21 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+/// Classe abstrata base para telas de informação, com UI e sons padrões
 public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, NavigableScreen {
-    protected Game game;
-    protected BitmapFont font;
-    protected SpriteBatch batch;
-    protected GlyphLayout layout;
+    protected Game game;               /// Instância do jogo para controle de telas
+    protected BitmapFont font;         /// Fonte para desenhar texto
+    protected SpriteBatch batch;       /// Batch para renderizar texto e gráficos
+    protected GlyphLayout layout;      /// Para medir e posicionar o texto
 
-    protected Stage stage;
-    protected Skin skin;
-    protected TextButton backButton;
+    protected Stage stage;             /// Cena para controle dos atores (botões, etc)
+    protected Skin skin;               /// Skin para estilo visual dos widgets
+    protected TextButton backButton;  /// Botão "Back" para voltar ao menu principal
 
-    protected String screenText;
-    protected final AssetManager assetManager;
+    protected String screenText;       /// Texto exibido na tela
+    protected final AssetManager assetManager;  /// Gerenciador de assets (skins, sons, etc)
 
+    /// Construtor que inicializa recursos e UI, recebendo texto e assetManager
     public BaseInfosScreen(Game game, String screenText, AssetManager assetManager) {
         this.game = game;
         this.screenText = screenText;
@@ -39,6 +41,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         initializeUI();
     }
 
+    /// Inicializa fontes, batch, stage e skin
     private void initializeResources() {
         font = new BitmapFont();
         batch = new SpriteBatch();
@@ -47,6 +50,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         skin = assetManager.get("ui/uiskin.json", Skin.class);
     }
 
+    /// Inicializa o botão Back com listeners para click e hover, adiciona ao stage
     private void initializeUI() {
         backButton = new TextButton("Back", skin);
         backButton.setPosition(20, 20);
@@ -66,11 +70,13 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.addActor(backButton);
     }
 
+    /// Define o input processor para receber eventos de UI
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
     }
 
+    /// Limpa a tela, desenha texto e desenha a stage com atores
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
@@ -82,6 +88,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.draw();
     }
 
+    /// Desenha o texto centralizado na tela usando GlyphLayout e BitmapFont
     private void drawScreenText() {
         layout.setText(font, screenText);
 
@@ -93,50 +100,60 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         batch.end();
     }
 
+    /// Atualiza a viewport do stage para o novo tamanho da tela
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /// Quando a tela é escondida, descarta recursos
     @Override
     public void hide() {
         dispose();
     }
 
+    /// Pausa da tela, vazio (opcional)
     @Override
     public void pause() {}
 
+    /// Retoma da tela, vazio (opcional)
     @Override
     public void resume() {}
 
+    /// Libera os recursos gráficos da tela
     @Override
     public void dispose() {
         font.dispose();
         batch.dispose();
         stage.dispose();
-      //  assetManager.dispose();
+        // assetManager.dispose(); // cuidado: pode ser compartilhado entre telas
     }
 
+    /// Toca o som de clique de botão
     @Override
     public void playClickSound() {
         SoundManager.getInstance().play("keyboardClick");
     }
 
+    /// Toca o som de hover do mouse em botão
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");
     }
 
+    /// Navega para a tela do menu principal
     @Override
     public void goToMainMenu() {
         game.setScreen(new MainMenuScreen(game, assetManager));
     }
 
+    /// Sai do jogo
     @Override
     public void exitGame() {
         Gdx.app.exit();
     }
 
+    /// Reinício do jogo (vazio - opcional para esta tela)
     @Override
     public void restartGame() {
         // Optional for BaseInfosScreen

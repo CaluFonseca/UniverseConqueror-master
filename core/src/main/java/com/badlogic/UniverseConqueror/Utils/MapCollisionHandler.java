@@ -1,3 +1,6 @@
+/// Classe responsável por processar colisões de um mapa isométrico em um jogo usando TiledMap e Box2D.
+/// Extrai retângulos de colisão e "saltáveis" (jumpable) e os converte em corpos físicos no mundo Box2D.
+
 package com.badlogic.UniverseConqueror.Utils;
 
 import com.badlogic.gdx.Gdx;
@@ -10,23 +13,32 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class MapCollisionHandler {
+
+    /// Retângulos de colisão padrão (ex: paredes, obstáculos).
     private final Array<Rectangle> collisionRects;
-    private final Array<Rectangle> jumpableRects;  // Added for the "jumpable" layer
+
+    /// Retângulos de camadas que podem ser atravessadas pulando.
+    private final Array<Rectangle> jumpableRects;
+
+    /// Dimensões dos tiles do mapa.
     private final float tileWidth;
     private final float tileHeight;
-    private TiledMapTileLayer layer;
-    private TiledMapTileLayer jumpableLayer;  // "jumpable" layer
 
-    // Constructor
+    /// Camadas do TiledMap para colisão e "jumpable".
+    private TiledMapTileLayer layer;
+    private TiledMapTileLayer jumpableLayer;
+
+    /// Construtor que processa o mapa e extrai retângulos das camadas especificadas.
+    /// @param map mapa TiledMap
+    /// @param layerName nome da camada de colisão
+    /// @param jumpableLayerName nome da camada de tiles puláveis
     public MapCollisionHandler(TiledMap map, String layerName, String jumpableLayerName) {
         collisionRects = new Array<>();
         jumpableRects = new Array<>();
 
-        // Getting the tile dimensions
         this.tileWidth = map.getProperties().get("tilewidth", Integer.class);
         this.tileHeight = map.getProperties().get("tileheight", Integer.class);
 
-        // Retrieve the map layers
         MapLayer mapLayer = map.getLayers().get(layerName);
         MapLayer jumpableMapLayer = map.getLayers().get(jumpableLayerName);
 
@@ -46,22 +58,19 @@ public class MapCollisionHandler {
         int width = layer.getWidth();
         int height = layer.getHeight();
 
-        // Offset to help position the tiles correctly in an isometric space
         float tileOffsetX = tileWidth;
         float tileOffsetY = tileHeight;
 
-        // Calculate the origin point based on the map size and tile dimensions
         float originX = (width + height) * tileWidth / 4f + tileWidth / 2f - tileOffsetX;
         float originY = - (tileHeight / 2f) * height + tileOffsetY;
 
-        // Iterating through each tile cell in the main layer
+        // Itera sobre os tiles e gera retângulos para colisão e camada pulável
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(x, y);
                 TiledMapTileLayer.Cell jumpableCell = jumpableLayer.getCell(x, y);
 
                 if (cell != null) {
-                    // Logic for the normal collision layer (not "jumpable")
                     int rotatedX = y;
                     int rotatedY = width - 1 - x;
                     float worldX = (rotatedX - rotatedY) * tileWidth / 2f + originX;
@@ -71,14 +80,12 @@ public class MapCollisionHandler {
                     collisionRects.add(isoRect);
                 }
 
-                // Logic for the "jumpable" layer
                 if (jumpableCell != null) {
                     int rotatedX = y;
                     int rotatedY = width - 1 - x;
                     float worldX = (rotatedX - rotatedY) * tileWidth / 2f + originX;
                     float worldY = (rotatedX + rotatedY) * tileHeight / 2f + originY;
 
-                    // Generating a rectangle for the "jumpable" layer
                     Rectangle isoRect = new Rectangle(worldX, worldY - tileHeight / 2f, tileWidth, tileHeight);
                     jumpableRects.add(isoRect);
                 }
@@ -86,41 +93,42 @@ public class MapCollisionHandler {
         }
     }
 
-    // Method to create Box2D bodies from the rectangles
+    /// Cria corpos estáticos no mundo Box2D a partir dos retângulos coletados.
+    /// Colisores normais são sólidos, enquanto "jumpables" são sensores.
     public void createBox2DBodies(World world) {
-        // Creating Box2D bodies for collision layer
         for (Rectangle rect : collisionRects) {
-          //  createBox2DBody(world, rect, (short)0x0001, false);  // Normal collision body
-            createIsometricDiamond(world, rect, 256f, 128f, (short)0x0001, false, 4f);
+            createIsometricDiamond(world, rect, 256f, 128f, (short) 0x0001, false, 4f);
         }
 
-        // Creating Box2D bodies for jumpable layer
         for (Rectangle rect : jumpableRects) {
-            createBox2DBody(world, rect, (short)0x0001, true);  // Jumpable layer body (as sensor)
+            createBox2DBody(world, rect, (short) 0x0001, true);
         }
     }
 
+    /// Cria um corpo com forma de losango isométrico para simular o tile.
+    /// @param world mundo Box2D
+    /// @param pixelPosition posição do retângulo em pixels
+    /// @param widthPx largura do tile em pixels
+    /// @param heightPx altura do tile em pixels
+    /// @param categoryBits categoria do filtro de colisão
+    /// @param isSensor se o corpo deve ser um sensor
+    /// @param ppm fator de conversão pixel-to-meter
     public Body createIsometricDiamond(World world, Rectangle pixelPosition, float widthPx, float heightPx, short categoryBits, boolean isSensor, float ppm) {
-        // Conversion to meters
         Vector2 position = new Vector2(pixelPosition.x, pixelPosition.y);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(position.x+128, position.y+64);
+        bodyDef.position.set(position.x + 128, position.y + 64);
 
         Body body = world.createBody(bodyDef);
-
-        float width = widthPx;
-        float height = heightPx;
 
         PolygonShape shape = new PolygonShape();
         Vector2[] vertices = new Vector2[4];
 
-        // Create the diamond (clockwise)
-        vertices[0] = new Vector2(0, height / 2f);        // top
-        vertices[1] = new Vector2(width / 2f, 0);         // right
-        vertices[2] = new Vector2(0, -height / 2f);       // bottom
-        vertices[3] = new Vector2(-width / 2f, 0);        // left
+        vertices[0] = new Vector2(0, heightPx / 2f);
+        vertices[1] = new Vector2(widthPx / 2f, 0);
+        vertices[2] = new Vector2(0, -heightPx / 2f);
+        vertices[3] = new Vector2(-widthPx / 2f, 0);
 
         shape.set(vertices);
 
@@ -133,7 +141,6 @@ public class MapCollisionHandler {
 
         Fixture fixture = body.createFixture(fixtureDef);
 
-        // Adjustment for rendering/debug purposes
         body.setUserData(new Rectangle(
             pixelPosition.x - widthPx / 2f,
             pixelPosition.y - heightPx / 2f,
@@ -141,38 +148,39 @@ public class MapCollisionHandler {
             heightPx
         ));
         fixture.setUserData("map");
+
         shape.dispose();
         return body;
     }
 
-
-    // Method to create a Box2D body from a Rectangle (Collision or Jumpable)
+    /// Cria um corpo retangular Box2D a partir de um retângulo.
     private void createBox2DBody(World world, Rectangle rect, short categoryBits, boolean isSensor) {
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.StaticBody; // Static body for map objects
+        bodyDef.type = BodyDef.BodyType.StaticBody;
         bodyDef.position.set(rect.x + rect.width / 2, rect.y + rect.height / 2);
 
         Body body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(rect.width / 2, rect.height / 2); // Create a box shape with half the width/height
+        shape.setAsBox(rect.width / 2, rect.height / 2);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.friction = 0.8f;
-        fixtureDef.isSensor = isSensor;  // If it's jumpable, make it a sensor
+        fixtureDef.isSensor = isSensor;
         fixtureDef.filter.categoryBits = categoryBits;
-        fixtureDef.filter.maskBits = -1;  // Collide with everything
+        fixtureDef.filter.maskBits = -1;
 
         body.createFixture(fixtureDef);
         shape.dispose();
     }
 
-    // Getter methods for collision and jumpable rects
+    /// Retorna a lista de retângulos da camada de colisão.
     public Array<Rectangle> getCollisionRects() {
         return collisionRects;
     }
 
+    /// Retorna a lista de retângulos da camada pulável.
     public Array<Rectangle> getJumpableRects() {
         return jumpableRects;
     }

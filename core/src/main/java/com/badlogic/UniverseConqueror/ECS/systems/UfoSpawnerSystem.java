@@ -15,15 +15,15 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class UfoSpawnerSystem extends EntitySystem {
 
-    private final PooledEngine engine;
-    private final World world;
-    private final AssetManager assetManager;
-    private final MapGraphBuilder mapGraphBuilder;
-    private final Entity player;
-    private final OrthographicCamera camera;
+    private final PooledEngine engine;              // Motor ECS para adicionar/remover entidades
+    private final World world;                      // Mundo Box2D para física
+    private final AssetManager assetManager;        // Gerenciador de assets para carregar texturas e sons
+    private final MapGraphBuilder mapGraphBuilder; // Grafo do mapa para localizar nós válidos para spawn
+    private final Entity player;                     // Referência ao jogador para comportamentos dependentes
+    private final OrthographicCamera camera;        // Câmera para possíveis cálculos visuais
 
-    private float spawnTimer = 0f;
-    private final float spawnInterval = 5f; // segundos entre spawns
+    private float spawnTimer = 0f;                   // Temporizador para controlar intervalo de spawn
+    private final float spawnInterval = 5f;          // Intervalo fixo de 5 segundos entre spawns
 
     public UfoSpawnerSystem(PooledEngine engine, World world, AssetManager assetManager,
                             MapGraphBuilder mapGraphBuilder, Entity player, OrthographicCamera camera) {
@@ -37,31 +37,49 @@ public class UfoSpawnerSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        spawnTimer += deltaTime;
-        if (spawnTimer >= spawnInterval) {
-            spawnTimer = 0f;
+        spawnTimer += deltaTime;                   // Incrementa o temporizador pelo delta do frame
 
-            Node node = getRandomWalkableNode();
+        if (spawnTimer >= spawnInterval) {        // Se passou o intervalo, tenta spawnar um UFO
+            spawnTimer = 0f;                       // Reseta o temporizador
+
+            Node node = getRandomWalkableNode();  // Obtém um nó aleatório válido para spawn no mapa
             if (node != null) {
-                Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);
+                Vector2 worldPos = mapGraphBuilder.toWorldPosition(node); // Converte para coordenadas de mundo
+
                 if (worldPos != null) {
-                    // 🟢 UFO com pooling: entidade pode vir "reciclada" do pool
+                    // Cria o UFO via EnemyFactory. Pode vir reciclado de pool
                     Entity ufoEnemy = EnemyFactory.createUfoEnemy(engine, world, worldPos, assetManager, player, camera);
 
                     AnimationComponent anim = ufoEnemy.getComponent(AnimationComponent.class);
                     StateComponent state = ufoEnemy.getComponent(StateComponent.class);
 
-                    if (ufoEnemy != null){
-                        engine.addEntity(ufoEnemy);
-                    } else {
-                        System.err.println("[ERRO] UFO criado incompleto! Falta Animation ou State!");
+                    if (state != null && anim != null) {
+                        // Se o UFO reciclado estava em DEATH, reseta para CHASE
+                        if (state.get() == StateComponent.State.DEATH) {
+                            // Pode colocar logs para debug aqui se quiser
+                        }
+
+                        state.set(StateComponent.State.CHASE);  // Define estado ativo
+                        anim.stateTime = 0f;                    // Reseta o tempo da animação
+
+                        if (anim.animations.containsKey(StateComponent.State.CHASE)) {
+                            anim.currentFrame = anim.animations.get(StateComponent.State.CHASE).getKeyFrame(0f);
+                        } else {
+                            // Log de erro opcional se faltar animação
+                        }
                     }
 
+                    if (ufoEnemy != null) {
+                        engine.addEntity(ufoEnemy);           // Adiciona UFO ao motor ECS para processamento
+                    } else {
+                        // Log de erro opcional se entidade incompleta
+                    }
                 }
             }
         }
     }
 
+    // Obtém um nó aleatório válido para spawn (chamando o builder do mapa)
     private Node getRandomWalkableNode() {
         return mapGraphBuilder.getRandomWalkableNode();
     }

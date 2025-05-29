@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+/// Tela final do nível que mostra estatísticas e opções para reiniciar ou sair do jogo
 public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen {
 
     private final GameLauncher game;
@@ -31,6 +32,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
 
     private final int enemiesKilled;
 
+    /// Construtor que inicializa a tela com as estatísticas do jogo e configura UI e som
     public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime, int enemiesKilled) {
         this.game = game;
         this.assetManager = assetManager;
@@ -44,9 +46,11 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
 
         Gdx.input.setInputProcessor(stage);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+
         setupUI();
     }
 
+    /// Cria e posiciona os elementos da interface gráfica (labels, botões, etc)
     private void setupUI() {
         Table table = new Table();
         table.setFillParent(true);
@@ -74,9 +78,12 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         table.add(exitButton).width(400).pad(10).row();
 
         stage.addActor(table);
+
+        // Toca som indicando avanço de nível
         SoundManager.getInstance().play("nextLevel");
     }
 
+    /// Cria um botão com texto e ação associada, incluindo sons para clique e hover
     private TextButton createButton(String text, Runnable action) {
         TextButton button = new TextButton(text, skin);
         button.addListener(new ChangeListener() {
@@ -95,6 +102,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         return button;
     }
 
+    /// Renderiza a tela limpando o fundo e desenhando o stage
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -104,22 +112,26 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         stage.draw();
     }
 
+    /// Libera recursos da tela
     @Override
     public void dispose() {
         stage.dispose();
         skin.dispose();
     }
 
+    /// Toca som ao clicar
     @Override
     public void playClickSound() {
         SoundManager.getInstance().play("keyboardClick");
     }
 
+    /// Toca som ao passar o mouse sobre botões
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");
     }
 
+    /// Navega para o menu principal do jogo
     @Override
     public void goToMainMenu() {
         SoundManager.getInstance().stop();
@@ -127,12 +139,14 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         game.setScreen(new MainMenuScreen(game, assetManager));
     }
 
+    /// Sai do jogo limpando estado salvo
     @Override
     public void exitGame() {
         GameStateManager.delete();
         Gdx.app.exit();
     }
 
+    /// Reinicia o jogo e para sons e músicas em execução
     @Override
     public void restartGame() {
         SoundManager.getInstance().stop();

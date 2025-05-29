@@ -7,7 +7,6 @@ import com.badlogic.UniverseConqueror.ECS.components.BodyComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -21,6 +20,7 @@ public class ItemFactory {
     private Entity entity;
     private final AssetManager assetManager;
 
+    /// Construtor da fábrica de itens.
     public ItemFactory(String name, float x, float y, String texturePath, AssetManager assetManager) {
         this.name = name;
         this.x = x;
@@ -30,26 +30,29 @@ public class ItemFactory {
         itemTexture = assetManager.get(texturePath, Texture.class);
     }
 
+    /// Cria uma entidade de item e adiciona os componentes necessários.
     public Entity createEntity(PooledEngine engine, World world) {
         entity = engine.createEntity();
+
         PositionComponent position = engine.createComponent(PositionComponent.class);
         position.position.set(x, y);
         entity.add(position);
 
         TransformComponent transformComponent = engine.createComponent(TransformComponent.class);
-        transformComponent.position.set(x, y,0);  // Defina a posição para o item
+        transformComponent.position.set(x, y, 0); /// Define a posição tridimensional do item.
         entity.add(transformComponent);
 
-        // Create and add Texture component (for visual representation)
+        /// Cria e adiciona o componente de textura para representação visual.
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
-        textureComponent.texture = itemTexture;  // Atribui a textura do item.
-        entity.add(textureComponent);  // Adiciona o componente Texture à entidade
+        textureComponent.texture = itemTexture;
+        entity.add(textureComponent);
 
-        // Create and add a collision component (Box2D)
+        /// Cria e adiciona o componente de corpo para colisão (Box2D).
         BodyComponent bodyComponent = engine.createComponent(BodyComponent.class);
         bodyComponent.body = createBody(world);
         entity.add(bodyComponent);
 
+        /// Adiciona o componente lógico de item com o nome associado.
         ItemComponent itemComponent = engine.createComponent(ItemComponent.class);
         itemComponent.name = name;
         entity.add(itemComponent);
@@ -57,8 +60,8 @@ public class ItemFactory {
         return entity;
     }
 
+    /// Cria o corpo físico (Box2D) para o item.
     private Body createBody(World world) {
-        // Define o corpo Box2D como estático
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
         bodyDef.position.set(x, y);

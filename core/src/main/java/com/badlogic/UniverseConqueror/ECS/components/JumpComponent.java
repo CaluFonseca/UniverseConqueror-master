@@ -3,11 +3,25 @@ package com.badlogic.UniverseConqueror.ECS.components;
 import com.badlogic.ashley.core.Component;
 
 public class JumpComponent implements Component {
-    public boolean isJumping = false;  // Indica se o personagem está no ar
-    public float jumpForce = 500f;     // Força de pulo
-    public boolean canJump = true;     // Controle para impedir múltiplos pulos no ar (ex.: double jump)
+
+    /// Indica se o personagem está no ar
+    public boolean isJumping = false;
+
+    /// Força aplicada no pulo
+    public float jumpForce = 500f;
+
+    /// Indica se o personagem pode pular (ex.: impedir múltiplos pulos no ar)
+    public boolean canJump = true;
+
+    /// Duração total atual do pulo
     public float jumpDuration = 0f;
-    public float currentJumpTime = 0f; // Tempo de duração do pulo
-    public float maxJumpTime = 0.5f;   // Tempo máximo que o pulo pode durar
-    public float groundY = 0f;         // Posição do chão (onde o pulo deve terminar)
+
+    /// Tempo atual desde que o pulo começou
+    public float currentJumpTime = 0f;
+
+    /// Tempo máximo permitido para o pulo durar
+    public float maxJumpTime = 0.5f;
+
+    /// Posição vertical do chão (para controle de término do pulo)
+    public float groundY = 0f;
 }

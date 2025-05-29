@@ -1,118 +1,146 @@
+/// Classe principal que inicia o jogo. Responsável por carregar recursos, configurar gerenciadores,
+/// e definir a tela inicial. Estende `Game` da LibGDX.
+
 package com.badlogic.UniverseConqueror;
 
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
+import com.badlogic.UniverseConqueror.Screens.GameScreen;
+import com.badlogic.UniverseConqueror.Screens.MainMenuScreen;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.UniverseConqueror.Screens.GameScreen;
-import com.badlogic.UniverseConqueror.Screens.MainMenuScreen;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import static com.badlogic.UniverseConqueror.Utils.AssetPaths.*;
 
 public class GameLauncher extends Game {
+
+    /// SpriteBatch compartilhado para renderizar elementos gráficos.
     public SpriteBatch batch;
+
+    /// Referência para a tela principal do jogo.
     private GameScreen gameScreen;
+
+    /// AssetManager estático para acesso global aos recursos.
     public static AssetManager assetManager;
+
+    /// Flag para indicar se o jogo atual é novo (sem carregamento de estado).
     public boolean isNewGame = false;
 
-
+    /// Método principal de criação do jogo. Carrega recursos e define a tela inicial.
     @Override
     public void create() {
-//        FileHandle dir = Gdx.files.internal(".");
-//        for (FileHandle file : dir.list()) {
-//            System.out.println("Asset: " + file.name());
-//        }
         assetManager = new AssetManager();
+
         // === UI ===
-        assetManager.load(AssetPaths.UI_SKIN_JSON, Skin.class);
-        assetManager.load(AssetPaths.UI_SKIN_ATLAS, TextureAtlas.class);
+        assetManager.load(UI_SKIN_JSON, Skin.class);
+        assetManager.load(UI_SKIN_ATLAS, TextureAtlas.class);
 
         // === Textures ===
-        assetManager.load(AssetPaths.BULLET_TEXTURE, Texture.class);
-        assetManager.load(AssetPaths.FIREBALL_TEXTURE, Texture.class);
-        assetManager.load(AssetPaths.CROSSHAIR_TEXTURE, Texture.class);
+        assetManager.load(BULLET_TEXTURE, Texture.class);
+        assetManager.load(FIREBALL_TEXTURE, Texture.class);
+        assetManager.load(CROSSHAIR_TEXTURE, Texture.class);
 
         // === Icons ===
-        assetManager.load(AssetPaths.CAMERA_ON_ICON, Texture.class);
-        assetManager.load(AssetPaths.CAMERA_OFF_ICON, Texture.class);
+        assetManager.load(CAMERA_ON_ICON, Texture.class);
+        assetManager.load(CAMERA_OFF_ICON, Texture.class);
 
         // === Joystick ===
-        assetManager.load(AssetPaths.JOYSTICK_BASE, Texture.class);
-        assetManager.load(AssetPaths.JOYSTICK_KNOB, Texture.class);
+        assetManager.load(JOYSTICK_BASE, Texture.class);
+        assetManager.load(JOYSTICK_KNOB, Texture.class);
 
         // === Items ===
-        assetManager.load(AssetPaths.ITEM_VIDA, Texture.class);
-        assetManager.load(AssetPaths.ITEM_ATAQUE, Texture.class);
-        assetManager.load(AssetPaths.ITEM_SUPER_ATAQUE, Texture.class);
-        assetManager.load(AssetPaths.ITEM_SPACESHIP, Texture.class);
+        assetManager.load(ITEM_VIDA, Texture.class);
+        assetManager.load(ITEM_ATAQUE, Texture.class);
+        assetManager.load(ITEM_SUPER_ATAQUE, Texture.class);
+        assetManager.load(ITEM_SPACESHIP, Texture.class);
 
         // === Backgrounds ===
-        assetManager.load(AssetPaths.BACKGROUND_PAUSE, Texture.class);
-        assetManager.load(AssetPaths.BACKGROUND_MAIN, Texture.class);
+        assetManager.load(BACKGROUND_PAUSE, Texture.class);
+        assetManager.load(BACKGROUND_MAIN, Texture.class);
 
-        // === Sounds ===
-        assetManager.load(AssetPaths.SOUND_GAME_OVER, Sound.class);
-        assetManager.load(AssetPaths.SOUND_HOVER, Sound.class);
-        assetManager.load(AssetPaths.SOUND_CLICK, Sound.class);
-        assetManager.load(AssetPaths.SOUND_HURT, Sound.class);
-        assetManager.load(AssetPaths.SOUND_ITEM_PICKUP, Sound.class);
-        assetManager.load(AssetPaths.SOUND_FLIGHT, Sound.class);
-        assetManager.load(AssetPaths.SOUND_LASER, Sound.class);
-        assetManager.load(AssetPaths.SOUND_EMPTY_GUN, Sound.class);
-        assetManager.load(AssetPaths.SOUND_NEXT_LEVEL, Sound.class);
-        assetManager.load(AssetPaths.SOUND_WAYPOINT, Sound.class);
+        // === Sons gerais ===
+        assetManager.load(SOUND_GAME_OVER, Sound.class);
+        assetManager.load(SOUND_HOVER, Sound.class);
+        assetManager.load(SOUND_CLICK, Sound.class);
+        assetManager.load(SOUND_HURT, Sound.class);
+        assetManager.load(SOUND_ITEM_PICKUP, Sound.class);
+        assetManager.load(SOUND_FLIGHT, Sound.class);
+        assetManager.load(SOUND_LASER, Sound.class);
+        assetManager.load(SOUND_EMPTY_GUN, Sound.class);
+        assetManager.load(SOUND_NEXT_LEVEL, Sound.class);
+        assetManager.load(SOUND_WAYPOINT, Sound.class);
 
-        assetManager.load(AssetPaths.SOUND_DEATH_ALIEN, Sound.class);
-        assetManager.load(AssetPaths.SOUND_PATROL_ALIEN, Sound.class);
-        assetManager.load(AssetPaths.SOUND_CHASE_ALIEN, Sound.class);
-        assetManager.load(AssetPaths.SOUND_DEATH_UFO, Sound.class);
-        assetManager.load(AssetPaths.SOUND_HURT_UFO, Sound.class);
-        assetManager.load(AssetPaths.SOUND_CHASE_UFO, Sound.class);
+        // === Sons de inimigos ===
+        assetManager.load(SOUND_DEATH_ALIEN, Sound.class);
+        assetManager.load(SOUND_PATROL_ALIEN, Sound.class);
+        assetManager.load(SOUND_CHASE_ALIEN, Sound.class);
+        assetManager.load(SOUND_DEATH_UFO, Sound.class);
+        assetManager.load(SOUND_HURT_UFO, Sound.class);
+        assetManager.load(SOUND_CHASE_UFO, Sound.class);
 
-        // === Music ===
-        assetManager.load(AssetPaths.MUSIC_SPACE_INTRO, Music.class);
+        // === Música de fundo ===
+        assetManager.load(MUSIC_SPACE_INTRO, Music.class);
 
-        // === Particles ===
-        assetManager.load(AssetPaths.PARTICLE_EXPLOSION, ParticleEffect.class);
-        assetManager.load(AssetPaths.FIREBALL_PARTICLE_IMAGE, Texture.class);
+        // === Partículas ===
+        assetManager.load(PARTICLE_EXPLOSION, ParticleEffect.class);
+        assetManager.load(FIREBALL_PARTICLE_IMAGE, Texture.class);
 
-        // === Animations State ===
+        // === Animações do jogador ===
         queueAnimationTextures(assetManager);
 
-        // === Sound & Music Manager ===
+        // === Inicialização dos gerenciadores de som ===
         SoundManager.init(assetManager);
         MusicManager.init(assetManager);
         SoundManager.getInstance().loadAll();
         MusicManager.getInstance().loadAll();
 
+        loadEnemyAnimations();
+        loadUfoAnimations();
 
-        //Enemy
-        // Regista todos os frames no AssetManager
-        for (int i = 1; i <= 17; i++) assetManager.load("enemy/attack/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 9; i++) assetManager.load("enemy/death/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 34; i++) assetManager.load("enemy/walk/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 6; i++) assetManager.load("enemy/idle/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 3; i++) assetManager.load("enemy/hurt/frame-" + String.format("%02d.png", i), Texture.class);
-        //ufo
-        for (int i = 1; i <= 4; i++) assetManager.load("ufo/hurt/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 6; i++) assetManager.load("ufo/death/frame-" + String.format("%02d.png", i), Texture.class);
-        for (int i = 1; i <= 4; i++) assetManager.load("ufo/fly/frame-" + String.format("%02d.png", i), Texture.class);
+
+        // Finaliza o carregamento de todos os recursos
         assetManager.finishLoading();
+
+        // Inicializa o SpriteBatch compartilhado
         batch = new SpriteBatch();
-        gameScreen = new GameScreen(this,assetManager);
-        setScreen(new MainMenuScreen(this,assetManager));
+
+        // Instancia a tela do jogo (mas não a ativa ainda)
+        gameScreen = new GameScreen(this, assetManager);
+
+        // Define o menu principal como tela inicial
+        setScreen(new MainMenuScreen(this, assetManager));
     }
+    private void loadEnemyAnimations() {
+        loadFormattedFrames(AssetPaths.ENEMY_ATTACK, 17);
+        loadFormattedFrames(AssetPaths.ENEMY_DEATH, 9);
+        loadFormattedFrames(AssetPaths.ENEMY_WALK, 34);
+        loadFormattedFrames(AssetPaths.ENEMY_IDLE, 6);
+        loadFormattedFrames(AssetPaths.ENEMY_HURT, 3);
+    }
+
+    private void loadUfoAnimations() {
+        loadFormattedFrames(AssetPaths.UFO_HURT, 4);
+        loadFormattedFrames(AssetPaths.UFO_DEATH, 6);
+        loadFormattedFrames(AssetPaths.UFO_FLY, 4);
+    }
+
+    private void loadFormattedFrames(String pattern, int count) {
+        for (int i = 1; i <= count; i++) {
+            assetManager.load(String.format(pattern, i), Texture.class);
+        }
+    }
+
+
+    /// Método auxiliar para carregar sequências de animações.
     public static void queueAnimationTextures(AssetManager assetManager) {
         loadFrames(assetManager, ANIM_IDLE, 2);
         loadFrames(assetManager, ANIM_WALK, 7);
@@ -129,24 +157,31 @@ public class GameLauncher extends Game {
         loadFrames(assetManager, ANIM_DEFENSE_INJURED, 4);
     }
 
+    /// Carrega uma sequência de imagens (frames) numeradas para uma animação.
     private static void loadFrames(AssetManager assetManager, String basePath, int count) {
         for (int i = 0; i < count; i++) {
             String path = basePath + String.format("%04d.png", i);
             assetManager.load(path, Texture.class);
         }
     }
+
+    /// Inicia um novo jogo, apagando o estado anterior e reinicializando a tela.
     public void startGame() {
         GameStateManager.delete();
-        setScreen(new GameScreen(this,assetManager));
+        setScreen(new GameScreen(this, assetManager));
     }
+
+    /// Retorna a instância da GameScreen atual.
     public GameScreen getGameScreen() {
         return gameScreen;
     }
 
+    /// Verifica se o jogo atual é uma nova sessão.
     public boolean isNewGame() {
         return isNewGame;
     }
 
+    /// Define o estado de novo jogo.
     public void setNewGame(boolean isNewGame) {
         this.isNewGame = isNewGame;
     }

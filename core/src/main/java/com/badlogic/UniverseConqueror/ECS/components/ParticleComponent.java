@@ -5,8 +5,13 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 
 public class ParticleComponent implements Component {
-    public ParticleEffect effect;
-    public Vector2 offset = new Vector2();  // deslocamento do centro da entidade
-    public float rotation = 0f;
 
+    /// Efeito de partícula que será renderizado
+    public ParticleEffect effect;
+
+    /// Deslocamento em relação ao centro da entidade para posicionar o efeito
+    public Vector2 offset = new Vector2();
+
+    /// Rotação do efeito (em graus)
+    public float rotation = 0f;
 }

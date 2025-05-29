@@ -1,26 +1,21 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
 import com.badlogic.UniverseConqueror.ECS.components.EnemyComponent;
-import com.badlogic.UniverseConqueror.ECS.components.PhysicsComponent;
 import com.badlogic.UniverseConqueror.ECS.components.ProjectileComponent;
+import com.badlogic.UniverseConqueror.ECS.components.UfoComponent;
 import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.UniverseConqueror.ECS.events.DamageTakenEvent;
+import com.badlogic.UniverseConqueror.ECS.events.EventBus;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
 
 public class BulletContactListener implements ContactListener {
-    private final Engine engine;
-    private final World world;
-    private final BulletFactory bulletFactory;
-    private final HealthSystem healthSystem;
 
-    public BulletContactListener(Engine engine, World world, BulletFactory bulletFactory, HealthSystem healthSystem) {
-        this.engine = engine;
-        this.world = world;
+    private final BulletFactory bulletFactory;
+
+    public BulletContactListener(BulletFactory bulletFactory) {
         this.bulletFactory = bulletFactory;
-        this.healthSystem = healthSystem;
     }
 
     @Override
@@ -28,13 +23,13 @@ public class BulletContactListener implements ContactListener {
         Body bodyA = contact.getFixtureA().getBody();
         Body bodyB = contact.getFixtureB().getBody();
 
-        // Colisão da bala com o mapa (paredes, chão etc)
+        /// Colisão da bala com o mapa
         if ((isBulletCollision(bodyA) && isMapCollision(bodyB)) || (isBulletCollision(bodyB) && isMapCollision(bodyA))) {
             Body bulletBody = isBulletCollision(bodyA) ? bodyA : bodyB;
             disposeBullet(bulletBody);
         }
 
-        // Colisão da bala com inimigo
+        /// Colisão da bala com inimigo
         boolean bulletHitsEnemy = isBulletCollision(bodyA) && isEnemy(bodyB);
         boolean enemyHitsBullet = isBulletCollision(bodyB) && isEnemy(bodyA);
 
@@ -46,62 +41,52 @@ public class BulletContactListener implements ContactListener {
                 enemyBody.getUserData() instanceof Entity enemyEntity) {
 
                 ProjectileComponent proj = bulletEntity.getComponent(ProjectileComponent.class);
-                int damage = (proj != null && proj.type == ProjectileComponent.ProjectileType.FIREBALL) ? 100 : 10;
+                int baseDamage = (proj != null && proj.type == ProjectileComponent.ProjectileType.FIREBALL) ? 100 : 10;
 
-                // Aplica dano ao inimigo
-                healthSystem.damage(enemyEntity, damage);
+                /// Dano adicional para UFO
+                int damage = (enemyEntity.getComponent(UfoComponent.class) != null) ? baseDamage + 20 : baseDamage;
 
-                // Libera a bala corretamente
+                /// Emite evento de dano
+                EventBus.get().notify(new DamageTakenEvent(enemyEntity, bulletEntity, damage));
+
+                /// Libera a bala
                 disposeBullet(bulletBody);
             }
         }
     }
 
-    // Checa se o corpo é um inimigo
+    /// Verifica se o corpo pertence a um inimigo
     private boolean isEnemy(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("enemy".equals(fixture.getUserData())) {
-                return true;
-            }
+            if ("enemy".equals(fixture.getUserData())) return true;
         }
         return false;
     }
 
-    // Checa se o corpo é uma bala (bullet ou fireball)
+    /// Verifica se o corpo pertence a uma bala
     private boolean isBulletCollision(Body body) {
-        // Ignora se o corpo for entidade inimiga
         if (body.getUserData() instanceof Entity entity) {
-            if (entity.getComponent(EnemyComponent.class) != null) {
-                return false;  // É inimigo, não bala
-            }
+            if (entity.getComponent(EnemyComponent.class) != null) return false;
         }
-
         for (Fixture fixture : body.getFixtureList()) {
             Object data = fixture.getUserData();
-            if ("bullet".equals(data) || "fireball".equals(data)) {
-                return true;
-            }
+            if ("bullet".equals(data) || "fireball".equals(data)) return true;
         }
         return false;
     }
 
-    // Checa se o corpo é colisão do mapa
+    /// Verifica se o corpo é parte do mapa
     private boolean isMapCollision(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("map".equals(fixture.getUserData())) {
-                return true;
-            }
+            if ("map".equals(fixture.getUserData())) return true;
         }
         return false;
     }
 
-    // Libera a bala do mundo e do engine, thread-safe via postRunnable
+    /// Libera a bala (devolve ao pool)
     private void disposeBullet(Body bulletBody) {
         if (bulletBody.getUserData() instanceof Entity bulletEntity) {
-            if (bulletEntity.getComponent(EnemyComponent.class) != null) {
-                //System.out.println("[BulletContactListener] Tentativa de liberar UFO/inimigo como bala ignorada: " + bulletEntity.hashCode());
-                return; // NÃO libera inimigos aqui
-            }
+            if (bulletEntity.getComponent(EnemyComponent.class) != null) return;
             Gdx.app.postRunnable(() -> bulletFactory.free(bulletEntity));
         }
     }

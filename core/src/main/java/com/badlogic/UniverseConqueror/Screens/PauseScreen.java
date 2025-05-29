@@ -15,45 +15,47 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.UniverseConqueror.GameLauncher;
 
+/// Tela de pausa que implementa controle de som, navegação e exibição do tempo
 public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen {
 
-    private final GameLauncher game;
-    private final GameScreen gameScreen;
-    private final AssetManager assetManager;
+    private final GameLauncher game;       /// Referência ao launcher para controle de tela
+    private final GameScreen gameScreen;   /// Tela principal para voltar do pause
+    private final AssetManager assetManager; /// AssetManager para carregar recursos
 
-    private Stage stage;
-    private Skin skin;
-    private Table table;
-    private SpriteBatch batch;
-    private Texture background;
+    private Stage stage;                   /// Cena para UI
+    private Skin skin;                     /// Skin para botões e labels
+    private Table table;                   /// Layout principal
+    private SpriteBatch batch;             /// Batch para renderizar background
+    private Texture background;            /// Textura de fundo da tela de pausa
 
-    private boolean isAudioOn = true;
-    private Timer pauseTimer;
-    private Label timerLabel;
+    private boolean isAudioOn = true;      /// Estado do áudio ligado/desligado
+    private Timer pauseTimer;              /// Temporizador para contar tempo de pausa
+    private Label timerLabel;              /// Label para mostrar o tempo de pausa
 
+    /// Construtor, inicializa referências
     public PauseScreen(GameLauncher game, GameScreen gameScreen, AssetManager assetManager) {
         this.game = game;
         this.gameScreen = gameScreen;
         this.assetManager = assetManager;
     }
 
+    /// Configura a cena e a interface ao mostrar a tela
     @Override
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
         Gdx.input.setInputProcessor(stage);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+
         batch = new SpriteBatch();
         skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
+
         MusicManager.getInstance().play("menu", true);
 
         pauseTimer = new Timer(Float.MAX_VALUE);
@@ -105,6 +107,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         stage.addActor(table);
     }
 
+    /// Cria botão com texto e ação associada, adicionando sons
     private TextButton createButton(String text, Runnable action) {
         TextButton button = new TextButton(text, skin);
         button.addListener(new ChangeListener() {
@@ -118,6 +121,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         return button;
     }
 
+    /// Adiciona som de hover ao botão
     private void addHoverSound(TextButton button) {
         button.addListener(new ClickListener() {
             @Override
@@ -127,6 +131,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         });
     }
 
+    /// Atualiza o timer e exibe o tempo formatado
     private void updateTimer() {
         float elapsed = pauseTimer.getTime();
         int hours = (int) (elapsed / 3600);
@@ -135,15 +140,19 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         timerLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
     }
 
+    /// Renderiza a tela de pausa, fundo, UI e atualiza timer
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batch.begin();
         batch.draw(background, 0, 0, stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         batch.end();
+
         pauseTimer.update(delta);
         updateTimer();
+
         stage.act(Math.min(delta, 1 / 30f));
         stage.draw();
     }
@@ -153,22 +162,28 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     @Override public void pause() {}
     @Override public void resume() { }
 
+    /// Libera recursos
     @Override
     public void dispose() {
         stage.dispose();
         batch.dispose();
     }
 
+    /// Toca som de clique
     @Override public void playClickSound() { SoundManager.getInstance().play("keyboardClick"); }
+    /// Toca som de hover
     @Override public void playHoverSound() { SoundManager.getInstance().play("hoverButton"); }
+    /// Vai para o menu principal
     @Override public void goToMainMenu() { game.setScreen(new MainMenuScreen(game, assetManager)); }
+    /// Sai do jogo e apaga estado salvo
     @Override public void exitGame() { GameStateManager.delete(); Gdx.app.exit(); }
+
+    /// Reinicia o jogo, para sons, marca novo jogo e abre tela principal
     @Override
     public void restartGame() {
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
         game.setNewGame(true);
         game.setScreen(new GameScreen(game, assetManager));
-
     }
 }

@@ -1,24 +1,33 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
-import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.ECS.components.BodyComponent;
+import com.badlogic.UniverseConqueror.ECS.components.KnockbackComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PlayerComponent;
-import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
+import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.UniverseConqueror.ECS.events.DamageTakenEvent;
+import com.badlogic.UniverseConqueror.ECS.events.EndGameEvent;
+import com.badlogic.UniverseConqueror.ECS.events.EventBus;
 import com.badlogic.UniverseConqueror.ECS.systems.ItemCollectionSystem;
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 public class MapContactListener implements ContactListener {
+    private final ComponentMapper<KnockbackComponent> knockbackMapper = ComponentMapper.getFor(KnockbackComponent.class);
 
     private final Engine engine;
     private final ItemCollectionSystem itemCollectionSystem;
-    private HealthSystem healthSystem;
+    private final java.util.function.Supplier<Integer> enemiesKilledSupplier;
+    //   private HealthSystem healthSystem;
     private Runnable onEndLevelCallback;
     // Constructor to receive engine, itemCollectionSystem, and healthSystem
-    public MapContactListener(Engine engine, ItemCollectionSystem itemCollectionSystem, HealthSystem healthSystem) {
+    public MapContactListener(Engine engine, ItemCollectionSystem itemCollectionSystem,
+                              java.util.function.Supplier<Integer> enemiesKilledSupplier) {
         this.engine = engine;
         this.itemCollectionSystem = itemCollectionSystem;
-        this.healthSystem = healthSystem;
+        this.enemiesKilledSupplier = enemiesKilledSupplier;
     }
     public void setOnEndLevel(Runnable callback) {
         this.onEndLevelCallback = callback;
@@ -28,26 +37,77 @@ public class MapContactListener implements ContactListener {
         Body bodyA = contact.getFixtureA().getBody();
         Body bodyB = contact.getFixtureB().getBody();
 
-        // Get the player entity from the collision
         Entity playerEntity = getPlayerEntity(bodyA, bodyB);
+        boolean colA = isMapCollision(bodyA);
+        boolean colB = isMapCollision(bodyB);
+        if(colA==true||colB == true)
+        {
+            System.out.println("Collision Detected mapa"+ bodyA +"ou"+bodyB);
+            if(colA==true) {
 
-        if (playerEntity != null) {
-            // Verifica se colidiu com spaceship (tem EndLevelComponent)
-            if (isPlayerAndSpaceshipCollision(bodyA, bodyB)) {
-                SoundManager.getInstance().play("item");
-                if (onEndLevelCallback != null) {
-                    onEndLevelCallback.run();
-                }
-                return; // Evita aplicar dano desnecessário
+                // applyKnockbackIfEntity(bodyB,bodyA);
             }
-            // Check if the collision is with an item
-            if (isPlayerAndItemCollision(bodyA, bodyB)) {
-                collectItem(bodyA, bodyB, playerEntity);
-            } else if (!isBulletCollision(bodyA, bodyB) && !isEnemyCollision(bodyA, bodyB)) {
-                applyDamageToPlayer(playerEntity, 1);
+            else{
+                // applyKnockbackIfEntity(bodyA,bodyB);
             }
         }
+        if (playerEntity == null) return;
+
+        if (isPlayerAndSpaceshipCollision(bodyA, bodyB)) {
+            int enemiesKilled = enemiesKilledSupplier.get();
+
+            EventBus.get().notify(new EndGameEvent(playerEntity, enemiesKilled));
+            return;
+        }
+
+        if (isPlayerAndItemCollision(bodyA, bodyB)) {
+            Entity itemEntity = (Entity) bodyB.getUserData();
+            collectItem(itemEntity, playerEntity);
+            engine.removeEntity(itemEntity);
+            return;
+        }
+
+        if (!isBulletCollision(bodyA, bodyB) && !isEnemyCollision(bodyA, bodyB)) {
+            applyDamageToPlayer(playerEntity, 1);
+        }
     }
+
+    private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
+        Entity entity = getEntity(entityBody);
+        if (entity == null) return;
+
+        if (entity.getComponent(KnockbackComponent.class) != null) return;
+
+        PositionComponent pos = entity.getComponent(PositionComponent.class);
+        BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
+
+        if (pos == null || bodyComp == null) return;
+
+        Vector2 entityPos = pos.position;
+        Vector2 tilePos = mapBody.getPosition();
+
+        Vector2 direction = entityPos.cpy().sub(tilePos).nor();
+
+//        // Empurra levemente o corpo antes de aplicar knockback
+//        Vector2 displacement = direction.cpy().scl(0.5f); // desloca meio metro para fora
+//        bodyComp.body.setTransform(bodyComp.body.getPosition().add(displacement), bodyComp.body.getAngle());
+
+        // Cria componente de knockback
+        KnockbackComponent knockback = new KnockbackComponent();
+        knockback.impulse.set(direction.scl(20f)); // impulso real do knockback
+        knockback.timeRemaining = 0.2f;
+        knockback.duration = 0.2f;
+        knockback.hasBeenApplied = false;
+
+        entity.add(knockback);
+
+        System.out.println("[DEBUG] Knockback aplicado à entidade: " + entity + " com direção: " + knockback.impulse);
+    }
+
+
+
+
+
     private boolean isEnemyCollision(Body bodyA, Body bodyB) {
         Object dataA = bodyA.getUserData();
         Object dataB = bodyB.getUserData();
@@ -61,6 +121,30 @@ public class MapContactListener implements ContactListener {
         return false;
     }
 
+    private boolean isMapCollision(Body body) {
+//        for (Fixture fixture : body.getFixtureList()) {
+//            Object userData = fixture.getUserData();
+//            System.out.println("[DEBUG] Fixture userData: " + userData);
+//            if ("map".equals(userData)) {
+//                System.out.println("[DEBUG] isMapCollision: Fixture com userData 'map' encontrada");
+//                return true;
+//            }
+//        }
+        for (Fixture fixture : body.getFixtureList()) {
+            if ("map".equals(fixture.getUserData())) {
+                System.out.println("[DEBUG] isMapCollision: Fixture com userData 'map' encontrada");
+                return  true;
+                //applyKnockbackFromMap(getEntity(body),body);   return true;
+            }
+        }
+        return false;
+        //    System.out.println("[DEBUG] isMapCollision: Nenhuma fixture com userData 'map' encontrada");
+        // return false;
+    }
+    private Entity getEntity(Body body) {
+        Object userData = body.getUserData();
+        return (userData instanceof Entity) ? (Entity) userData : null;
+    }
 
     // Retrieves the player entity from the collision
     private Entity getPlayerEntity(Body bodyA, Body bodyB) {
@@ -134,23 +218,16 @@ public class MapContactListener implements ContactListener {
     }
 
     // Item collection method, including healing the player if it's a "Vida" item
-    private void collectItem(Body bodyA, Body bodyB, Entity playerEntity) {
-        Fixture itemFixture = bodyB.getFixtureList().get(0);
-
-        if ("item".equals(itemFixture.getUserData())) {
-            Entity itemEntity = (Entity) itemFixture.getBody().getUserData();
-            if (itemEntity != null) {
-                itemCollectionSystem.collectItem(itemEntity,playerEntity);
-                engine.removeEntity(itemEntity);
-            }
-        }
+    public void collectItem(Entity item, Entity player) {
+        if (item == null || player == null) return;
+        itemCollectionSystem.collectItem(item, player);
     }
 
     // Applies damage to the player
     private void applyDamageToPlayer(Entity playerEntity, int damageAmount) {
         try {
             if (playerEntity != null) {
-                healthSystem.damage(playerEntity, damageAmount);
+                EventBus.get().notify(new DamageTakenEvent(playerEntity, null, damageAmount));
             }
         } catch (Exception e) {
             System.err.println("Error applying damage to the player: " + e.getMessage());
@@ -167,3 +244,4 @@ public class MapContactListener implements ContactListener {
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {}
 }
+

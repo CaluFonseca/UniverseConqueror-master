@@ -6,48 +6,52 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 
 public class MusicManager {
+
     private static MusicManager instance;
 
     private final AssetManager assetManager;
     private final ObjectMap<String, String> musicPaths = new ObjectMap<>();
+
     private Music currentMusic;
     private String currentKey;
+
     private float volume = 1.0f;
     private boolean isMuted = false;
 
     private MusicManager(AssetManager assetManager) {
         this.assetManager = assetManager;
-
-
         musicPaths.put("menu", AssetPaths.MUSIC_SPACE_INTRO);
-        //musicPaths.put("gameplay", AssetPaths.MUSIC_GAMEPLAY);
-
     }
 
+    /// Inicializa o MusicManager com o AssetManager.
     public static void init(AssetManager assetManager) {
         if (instance == null) {
             instance = new MusicManager(assetManager);
         }
     }
 
+    /// Obtém a instância singleton do MusicManager.
     public static MusicManager getInstance() {
-        if (instance == null) throw new IllegalStateException("MusicManager not initialized.");
+        if (instance == null)
+            throw new IllegalStateException("MusicManager not initialized.");
         return instance;
     }
 
+    /// Carrega todas as músicas registradas no mapa.
     public void loadAll() {
         for (String path : musicPaths.values()) {
             assetManager.load(path, Music.class);
         }
     }
 
+    /// Reproduz a música correspondente à chave, parando a anterior.
     public void play(String key, boolean looping) {
         if (key == null || !musicPaths.containsKey(key)) return;
 
         String path = musicPaths.get(key);
         if (!assetManager.isLoaded(path)) return;
 
-        stop(); // Para qualquer música anterior
+        stop();
 
         currentMusic = assetManager.get(path, Music.class);
         currentKey = key;
@@ -57,6 +61,7 @@ public class MusicManager {
         currentMusic.play();
     }
 
+    /// Para a música atual e limpa os dados associados.
     public void stop() {
         if (currentMusic != null) {
             currentMusic.stop();
@@ -65,14 +70,17 @@ public class MusicManager {
         }
     }
 
+    /// Pausa a música atual, se houver.
     public void pause() {
         if (currentMusic != null) currentMusic.pause();
     }
 
+    /// Retoma a música atual pausada.
     public void resume() {
         if (currentMusic != null) currentMusic.play();
     }
 
+    /// Define o volume da música, se não estiver em modo mudo.
     public void setVolume(float volume) {
         this.volume = volume;
         if (currentMusic != null && !isMuted) {
@@ -80,21 +88,26 @@ public class MusicManager {
         }
     }
 
+    /// Ativa o modo mudo.
     public void mute() {
         isMuted = true;
         if (currentMusic != null) currentMusic.setVolume(0f);
     }
 
+    /// Desativa o modo mudo e restaura o volume anterior.
     public void unmute() {
         isMuted = false;
         if (currentMusic != null) currentMusic.setVolume(volume);
     }
 
+    /// Retorna true se o modo mudo estiver ativado.
     public boolean isMuted() {
         return isMuted;
     }
 
+    /// Verifica se uma música com a chave especificada está sendo tocada.
     public boolean isPlaying(String key) {
-        return currentMusic != null && currentKey != null && currentKey.equals(key) && currentMusic.isPlaying();
+        return currentMusic != null && currentKey != null &&
+            currentKey.equals(key) && currentMusic.isPlaying();
     }
 }

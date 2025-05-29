@@ -6,18 +6,22 @@ import com.badlogic.UniverseConqueror.ECS.components.VelocityComponent;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class ParticleSystem extends EntitySystem {
 
+    /// Batch usado para desenhar as partículas
     private final SpriteBatch batch;
+
+    /// Câmera do jogo para aplicar projeção correta
     private final OrthographicCamera camera;
 
+    /// Mapeadores de componentes
     private final ComponentMapper<ParticleComponent> pm = ComponentMapper.getFor(ParticleComponent.class);
     private final ComponentMapper<PositionComponent> posm = ComponentMapper.getFor(PositionComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
+
+    /// Lista de entidades com partículas
     private ImmutableArray<Entity> entities;
 
     public ParticleSystem(SpriteBatch batch, OrthographicCamera camera) {
@@ -27,11 +31,13 @@ public class ParticleSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
+        /// Seleciona todas as entidades que têm partículas e posição
         entities = engine.getEntitiesFor(Family.all(ParticleComponent.class, PositionComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
+        /// Configura a projeção do batch para seguir a câmera
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
@@ -40,10 +46,10 @@ public class ParticleSystem extends EntitySystem {
             PositionComponent position = posm.get(entity);
             VelocityComponent velocity = vm.has(entity) ? vm.get(entity) : null;
 
+            /// Altera o ângulo das partículas com base na direção da velocidade (se existir)
             if (velocity != null && particle.effect != null) {
-                float angle = velocity.velocity.angleDeg() + 180f; // direção inversa da bala
+                float angle = velocity.velocity.angleDeg() + 180f; // direção oposta à do movimento
 
-                // Aplica o ângulo a todos os emissores
                 for (var emitter : particle.effect.getEmitters()) {
                     emitter.getAngle().setHigh(angle + 40f);
                     emitter.getAngle().setLow(angle - 40f);
@@ -53,6 +59,7 @@ public class ParticleSystem extends EntitySystem {
                 }
             }
 
+            /// Atualiza a posição da partícula e desenha
             if (particle.effect != null) {
                 float px = position.position.x + particle.offset.x;
                 float py = position.position.y + particle.offset.y;
@@ -63,5 +70,4 @@ public class ParticleSystem extends EntitySystem {
 
         batch.end();
     }
-
 }

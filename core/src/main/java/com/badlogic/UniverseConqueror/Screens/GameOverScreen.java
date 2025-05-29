@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+/// Tela de Game Over, exibe opções para reiniciar, voltar ao menu ou sair do jogo
 public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScreen {
     private final GameLauncher game;
     private Stage stage;
@@ -29,20 +30,27 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
 
     private final AssetManager assetManager;
 
+    /// Construtor recebe referência ao jogo e ao asset manager para carregar recursos
     public GameOverScreen(GameLauncher game, AssetManager assetManager) {
         this.game = game;
         this.assetManager = assetManager;
     }
 
+    /// Inicializa elementos gráficos, sons e layout da tela
     @Override
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
         Gdx.input.setInputProcessor(stage);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+
+        // Toca som de game over
         SoundManager.getInstance().play("gameOver");
+
         batch = new SpriteBatch();
         skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
         background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
+
+        // Ajusta volume e toca música do menu
         MusicManager.getInstance().setVolume(0.2f);
         MusicManager.getInstance().play("menu", true);
 
@@ -50,6 +58,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         table.center();
         table.setFillParent(true);
 
+        // Cria título e botões da tela
         Label gameOverLabel = new Label("GAME OVER", skin, "title");
         gameOverLabel.setFontScale(1.8f);
         table.add(gameOverLabel).padBottom(50).row();
@@ -68,6 +77,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         stage.addActor(table);
     }
 
+    /// Cria botão com texto e ação, com sons para clique e hover
     private TextButton createButton(String text, Runnable action) {
         TextButton button = new TextButton(text, skin);
         button.addListener(new ChangeListener() {
@@ -86,6 +96,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         return button;
     }
 
+    /// Renderiza a tela limpando o fundo e desenhando o stage
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -99,11 +110,13 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         stage.draw();
     }
 
+    /// Ajusta viewport no redimensionamento da janela
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /// Quando a tela é ocultada, libera recursos
     @Override
     public void hide() {
         dispose();
@@ -115,37 +128,43 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
     @Override
     public void resume() {}
 
+    /// Libera recursos utilizados pela tela
     @Override
     public void dispose() {
         stage.dispose();
         batch.dispose();
     }
 
+    /// Toca som de clique em botão
     @Override
     public void playClickSound() {
         SoundManager.getInstance().play("keyboardClick");
     }
 
+    /// Toca som ao passar o mouse sobre botão
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");
     }
 
+    /// Volta para o menu principal
     @Override
     public void goToMainMenu() {
         game.setScreen(new MainMenuScreen(game, assetManager));
     }
 
+    /// Sai do jogo
     @Override
     public void exitGame() {
         Gdx.app.exit();
     }
 
+    /// Reinicia o jogo, para sons e inicia nova partida
     @Override
     public void restartGame() {
-
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
+        game.setNewGame(true);
         game.setScreen(new GameScreen(game, assetManager));
     }
 }
