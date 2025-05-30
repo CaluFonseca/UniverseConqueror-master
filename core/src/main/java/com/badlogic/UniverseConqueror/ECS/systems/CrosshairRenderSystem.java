@@ -12,10 +12,10 @@ import com.badlogic.gdx.math.Vector3;
 
 public class CrosshairRenderSystem extends EntitySystem {
 
-    /// SpriteBatch usado para desenhar a mira na tela
+    /// SpriteBatch usado para desenhar a mira no ecrã
     private final SpriteBatch batch;
 
-    /// Câmera usada para converter coordenadas da tela em coordenadas do mundo
+    /// Câmera usada para converter coordenadas do ecrã em coordenadas do mundo
     private final OrthographicCamera camera;
 
     /// Textura da mira (imagem do retículo)
@@ -49,7 +49,7 @@ public class CrosshairRenderSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        /// Captura a posição atual do mouse na tela
+        /// Captura a posição atual do mouse no ecrã
         crosshairPosition.set(Gdx.input.getX(), Gdx.input.getY());
 
         /// Converte para coordenadas do mundo com base na câmera

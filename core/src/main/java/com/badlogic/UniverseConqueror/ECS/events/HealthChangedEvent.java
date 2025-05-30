@@ -1,5 +1,6 @@
 package com.badlogic.UniverseConqueror.ECS.events;
 
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
 import com.badlogic.ashley.core.Entity;
 
 /// Evento que indica uma mudança nos pontos de vida (HP) de uma entidade

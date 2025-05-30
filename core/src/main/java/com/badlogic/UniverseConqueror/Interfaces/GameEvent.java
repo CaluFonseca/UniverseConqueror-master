@@ -1,6 +1,4 @@
-package com.badlogic.UniverseConqueror.ECS.events;
-
-import com.badlogic.ashley.core.Entity;
+package com.badlogic.UniverseConqueror.Interfaces;
 
 /// Interface base para todos os eventos do sistema de eventos do jogo
 public interface GameEvent {

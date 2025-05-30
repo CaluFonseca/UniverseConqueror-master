@@ -23,4 +23,5 @@ public class AnimationComponent implements Component {
     public void setAnimations(ObjectMap<StateComponent.State, Animation<TextureRegion>> animations) {
         this.animations = animations;
     }
+
 }

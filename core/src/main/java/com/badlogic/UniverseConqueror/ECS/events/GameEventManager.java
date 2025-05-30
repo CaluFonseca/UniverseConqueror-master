@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror.ECS.events;
 
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
 

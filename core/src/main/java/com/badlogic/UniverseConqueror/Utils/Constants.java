@@ -7,8 +7,14 @@ public class Constants {
     /// Pixels por metro - usado para conversão entre unidades visuais e físicas no Box2D.
     public static final float PPM = 128f;
 
-    /// Velocidade padrão de movimento do jogador ou inimigos (em unidades por segundo).
+    /// Velocidade padrão de movimento do jogador
     public static final float SPEED = 100f;
+
+    /// Velocidade padrão de movimento dos UFO em CHASE.
+    public static final float SPEED_UFO_ENEMY = 75f;
+
+    /// Velocidade padrão de movimento dos ENEMY em PATROL.
+    public static final float SPEED_ENEMY = 60f;
 
     /// Velocidade de corrida ou movimento especial (ex: dash, sprint).
     public static final float SPRINT_SPEED = 10000f;

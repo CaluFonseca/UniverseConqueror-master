@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class RenderItemSystem extends EntitySystem {
-    private SpriteBatch batch;  /// Batch para desenhar sprites na tela
+    private SpriteBatch batch;  /// Batch para desenhar sprites no ecrã
     private ComponentMapper<TextureComponent> tm = ComponentMapper.getFor(TextureComponent.class);  /// Mapper para TextureComponent
     private ComponentMapper<TransformComponent> trm = ComponentMapper.getFor(TransformComponent.class); /// Mapper para TransformComponent
     private ComponentMapper<ItemComponent> im = ComponentMapper.getFor(ItemComponent.class); /// Mapper para ItemComponent

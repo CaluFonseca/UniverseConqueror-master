@@ -4,6 +4,8 @@ import com.badlogic.UniverseConqueror.ECS.components.ItemComponent;
 import com.badlogic.UniverseConqueror.ECS.events.*;
 import com.badlogic.UniverseConqueror.ECS.systems.AttackSystem;
 import com.badlogic.UniverseConqueror.ECS.systems.HealthSystem;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.ashley.core.Entity;
 
 /// Observador responsável por reagir à coleta de itens.

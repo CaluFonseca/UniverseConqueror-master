@@ -32,19 +32,6 @@ public class BulletMovementSystem extends IteratingSystem {
         if (physics.body != null && physics.body.isActive()) {
             physics.body.setLinearVelocity(velocity.velocity);       // Aplica a velocidade ao corpo Box2D
             position.position.set(physics.body.getPosition());       // Atualiza a posição lógica da entidade
-            // System.out.println("[DEBUG Bullet] Velocidade aplicada: " + velocity.velocity);
         }
     }
-
-    // Versão alternativa sem física, baseada apenas na multiplicação de vetor:
-    /*
-    @Override
-    public void update(float deltaTime) {
-        for (Entity entity : getEngine().getEntitiesFor(Family.all(PositionComponent.class, VelocityComponent.class, TransformComponent.class).get())) {
-            PositionComponent position = pm.get(entity);
-            VelocityComponent velocity = vm.get(entity);
-            position.position.mulAdd(velocity.velocity, deltaTime);
-        }
-    }
-    */
 }

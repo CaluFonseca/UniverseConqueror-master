@@ -5,6 +5,8 @@ import com.badlogic.UniverseConqueror.ECS.components.HealthComponent;
 import com.badlogic.UniverseConqueror.ECS.components.StateComponent;
 import com.badlogic.UniverseConqueror.ECS.entity.EnemyFactory;
 import com.badlogic.UniverseConqueror.ECS.events.*;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 
@@ -83,8 +85,8 @@ public class HealthSystem extends EntitySystem implements Observer {
 
             // Diminui vida, inicia timers de HURT
             health.currentHealth = Math.max(0, health.currentHealth - amount);
-            health.hurtCooldownTimer = 0.1f;
-            health.hurtDuration = 0.15f;
+            health.hurtCooldownTimer = 0.5f;
+            health.hurtDuration = 0.5f;
 
             state.set(StateComponent.State.HURT); // Atualiza estado
             EventBus.get().notify(new HealthChangedEvent(entity, health.currentHealth)); // Atualiza HUD

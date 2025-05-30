@@ -22,7 +22,7 @@ public class AssetPaths {
     public static final String JOYSTICK_BASE = "joystick_base.png";
     public static final String JOYSTICK_KNOB = "joystick_knob.png";
 
-    /// Fundos para diferentes telas
+    /// Fundos para diferentes ecrãs
     public static final String BACKGROUND_PAUSE = "background_pause.jpg";
     public static final String BACKGROUND_MAIN = "background.jpg";
 

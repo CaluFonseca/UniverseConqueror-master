@@ -1,4 +1,4 @@
-/// Classe que representa um joystick virtual 2D para controle de personagem em telas sensíveis ao toque.
+/// Classe que representa um joystick virtual 2D para controle de personagem em ecrãs sensíveis ao toque.
 /// Renderiza um botão circular que pode ser arrastado dentro de uma base circular.
 /// Usa eventos de toque da Scene2D.
 
@@ -88,7 +88,7 @@ public class Joystick extends Actor {
         return isDragging;
     }
 
-    /// Desenha o joystick na tela.
+    /// Desenha o joystick no ecrã.
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(baseTexture, baseCircle.x - baseCircle.radius, baseCircle.y - baseCircle.radius,

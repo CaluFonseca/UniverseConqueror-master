@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
 import com.badlogic.UniverseConqueror.Strategy.*;
 import com.badlogic.UniverseConqueror.ECS.systems.EnemyAnimationLoader;
 import com.badlogic.ashley.core.*;
@@ -12,7 +13,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectMap;
 
-public class EnemyFactory {
+import static com.badlogic.UniverseConqueror.Utils.Constants.*;
+
+
+public class EnemyFactory  {
 
     /// Cria um inimigo que patrulha entre pontos e persegue o jogador ao detectá-lo
     public static Entity createPatrollingEnemy(PooledEngine engine, World world, Vector2 start,
@@ -28,7 +32,7 @@ public class EnemyFactory {
         enemy.add(new PositionComponent(start));
 
         EnemyStrategy patrol = new PatrolStrategy(patrolPoints);
-        EnemyStrategy chase = new ChasePlayerStrategy(player, camera,60f);
+        EnemyStrategy chase = new ChasePlayerStrategy(player, camera,SPEED_ENEMY);
         EnemyStrategy smartStrategy = new SwitchingStrategy(player, patrol, chase, camera);
         enemy.add(new AIComponent(smartStrategy));
 
@@ -71,11 +75,6 @@ public class EnemyFactory {
         EnemyAnimationLoader loader = new EnemyAnimationLoader(assetManager);
         ObjectMap<StateComponent.State, Animation<TextureRegion>> animations = loader.loadAnimations("ufo");
 
-        if (animations == null || animations.get(StateComponent.State.CHASE) == null) {
-            System.err.println("[ERROR] UFO animation failed to load. Aborting entity creation.");
-            return null;
-        }
-
         AnimationComponent anim = engine.createComponent(AnimationComponent.class);
         anim.setAnimations(animations);
         anim.stateTime = 0f;
@@ -88,7 +87,7 @@ public class EnemyFactory {
         enemy.add(state);
         enemy.add(new UfoComponent());
         enemy.add(new PositionComponent(position));
-        enemy.add(new AIComponent(new ChasePlayerStrategy(player, camera,100f)));
+        enemy.add(new AIComponent(new ChasePlayerStrategy(player, camera,SPEED_UFO_ENEMY)));
         enemy.add(new VelocityComponent());
         enemy.add(new TransformComponent());
 
@@ -103,6 +102,7 @@ public class EnemyFactory {
 
         BodyComponent bodyComponent = createEnemyBody(position, world);
         bodyComponent.body.setUserData(enemy);
+
         enemy.add(bodyComponent);
         enemy.add(new PhysicsComponent(bodyComponent.body));
 
@@ -154,10 +154,10 @@ public class EnemyFactory {
 
         AIComponent ai = enemy.getComponent(AIComponent.class);
         if (ai == null) {
-            ai = new AIComponent(new ChasePlayerStrategy(player, camera,100f));
+            ai = new AIComponent(new ChasePlayerStrategy(player, camera,SPEED_UFO_ENEMY));
             enemy.add(ai);
         } else {
-            ai.strategy = new ChasePlayerStrategy(player, camera,100f);
+            ai.strategy = new ChasePlayerStrategy(player, camera,SPEED_UFO_ENEMY);
         }
 
         if (enemy.getComponent(VelocityComponent.class) == null) {
@@ -179,9 +179,6 @@ public class EnemyFactory {
         }
         enemyComponent.type = EnemyComponent.BehaviorType.UFO;
 
-        if (!anim.animations.containsKey(state.get())) {
-            // System.err.println("[ERRO] UFO resetado com estado inv\u00e1lido: " + state.get());
-        }
     }
 
     /// Adiciona anima\u00e7\u00f5es e estado inicial ao inimigo
@@ -221,6 +218,7 @@ public class EnemyFactory {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
+        body.setLinearDamping(0f);
 
         body.createFixture(fixtureDef).setUserData("enemy");
         shape.dispose();

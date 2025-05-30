@@ -1,7 +1,7 @@
 /// Interface que define a estratégia de comportamento para inimigos.
 /// Implementações concretas usarão esta interface para controlar o movimento e ações dos inimigos.
 
-package com.badlogic.UniverseConqueror.Strategy;
+package com.badlogic.UniverseConqueror.Interfaces;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;

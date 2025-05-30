@@ -3,12 +3,12 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -42,7 +42,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     private TextButton creditsButton;
     /// Slider para controle de volume
     private Slider volumeSlider;
-    /// Referência ao jogo para trocar telas
+    /// Referência ao jogo para trocar ecrãs
     private Game game;
 
     /// Controle de som ligado/desligado
@@ -96,13 +96,13 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
             setMusicVolume();
         });
 
-        /// Botão para abrir tela de controles, parando a música
+        /// Botão para abrir ecrã de controles, parando a música
         controlsButton = createButton("Controlos", () -> {
             stopMusic();
             game.setScreen(new ControlsScreen(game, assetManager));
         });
 
-        /// Botão para abrir tela de créditos, parando a música
+        /// Botão para abrir ecrã de créditos, parando a música
         creditsButton = createButton("Creditos", () -> {
             stopMusic();
             game.setScreen(new CreditsScreen(game, assetManager));
@@ -174,7 +174,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         }
     }
 
-    /// Chamado ao mostrar a tela, configura input e inicia música se necessário
+    /// Chamado ao mostrar o ecrã, configura input e inicia música se necessário
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
@@ -183,7 +183,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         }
     }
 
-    /// Renderiza a tela, desenhando background e UI
+    /// Renderiza o ecrã, desenhando background e UI
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -204,7 +204,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         stage.getViewport().update(width, height, true);
     }
 
-    /// Oculta a tela e libera recursos do palco
+    /// Oculta o ecrã e libera recursos do palco
     @Override
     public void hide() {
         stage.dispose();

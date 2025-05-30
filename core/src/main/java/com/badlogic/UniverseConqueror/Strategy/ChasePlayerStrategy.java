@@ -1,14 +1,10 @@
 package com.badlogic.UniverseConqueror.Strategy;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.UniverseConqueror.Pathfinding.AStarPathfinder;
-import com.badlogic.UniverseConqueror.Pathfinding.MapGraphBuilder;
-import com.badlogic.UniverseConqueror.Pathfinding.Node;
+import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
-
-import java.util.List;
 
 public class ChasePlayerStrategy implements EnemyStrategy {
 
@@ -51,11 +47,16 @@ public class ChasePlayerStrategy implements EnemyStrategy {
 
         // Atualiza animação para virar para esquerda/direita conforme direção
         AnimationComponent animation = enemy.getComponent(AnimationComponent.class);
-        if (animation != null) {
-            animation.facingRight = direction.x <= 0; // se direção x <=0, inimigo está olhando para esquerda
-        }
 
         float distance = direction.len();
+        if (animation != null && distance >= 100f) {
+            float threshold = 0.01f;
+            if (direction.x > threshold) {
+                animation.facingRight = false;
+            } else if (direction.x < -threshold) {
+                animation.facingRight = true;
+            }
+        }
 
         // Se está perto demais, para e muda estado para patrulha ou chase dependendo do tipo
         if (distance < 100f) {
@@ -76,54 +77,6 @@ public class ChasePlayerStrategy implements EnemyStrategy {
             }
         }
     }
-
-    // Método comentado para recálculo do caminho usando A* após colisão (opcional)
-    /*
-    public void recalculatePath(MapGraphBuilder graphBuilder, AStarPathfinder pathfinder, Entity target, Entity enemy) {
-        System.out.println("[DEBUG] Recalculando rota para o inimigo após colisão.");
-
-        Vector2 start = enemy.getComponent(PositionComponent.class).position;
-        Vector2 goal = target.getComponent(PositionComponent.class).position;
-
-        Node startNode = graphBuilder.toNode(start);
-        Node goalNode = graphBuilder.toNode(goal);
-
-        System.out.println("[DEBUG] Posição start: " + start);
-        System.out.println("[DEBUG] Posição goal: " + goal);
-        System.out.println("[DEBUG] StartNode: " + (startNode != null ? startNode.x + "," + startNode.y : "null"));
-        System.out.println("[DEBUG] GoalNode: " + (goalNode != null ? goalNode.x + "," + goalNode.y : "null"));
-
-        if (startNode == null || goalNode == null) {
-            System.out.println("[DEBUG] Falha ao converter posições em nós do grafo.");
-            return;
-        }
-
-        List<Node> path = pathfinder.findPath(startNode, goalNode);
-
-        if (path != null && path.size() > 1) {
-            System.out.println("[DEBUG] Caminho encontrado com " + path.size() + " nós:");
-            for (int i = 0; i < path.size(); i++) {
-                Node n = path.get(i);
-                System.out.println("  -> Nó " + i + ": (" + n.x + ", " + n.y + ")");
-            }
-
-            Node nextNode = path.get(1); // Pula o nó atual
-            Vector2 nextWorld = graphBuilder.toWorldPosition(nextNode);
-            Vector2 direction = new Vector2(nextWorld).sub(start).nor().scl(speed);
-
-            VelocityComponent velocity = enemy.getComponent(VelocityComponent.class);
-            if (velocity != null) {
-                velocity.velocity.set(direction);
-                System.out.println("[DEBUG] Direção aplicada ao inimigo: " + direction);
-            } else {
-                System.out.println("[ERRO] VelocityComponent não encontrado no inimigo.");
-            }
-
-        } else {
-            System.out.println("[DEBUG] Caminho vazio ou nulo.");
-        }
-    }
-    */
 
     @Override
     public Vector2 getDirection() {

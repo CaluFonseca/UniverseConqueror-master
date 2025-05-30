@@ -1,4 +1,4 @@
-package com.badlogic.UniverseConqueror.ECS.events;
+package com.badlogic.UniverseConqueror.Interfaces;
 
 /// Interface para qualquer classe que deseje ser notificada de eventos do jogo
 public interface Observer {

@@ -33,16 +33,17 @@ public class MovementSystem extends IteratingSystem {
             /// Aplica a velocidade ao corpo físico (Box2D)
             physics.body.setLinearVelocity(velocity.velocity);
 
-            /// Atualiza a orientação do personagem com base na direção da velocidade
-            if (velocity != null && animation != null) {
-                float vx = velocity.velocity.x;
-
-                if (vx > 0) {
-                    animation.facingRight = true;
-                } else if (vx < 0) {
-                    animation.facingRight = false;
-                }
-            }
+//            /// Atualiza a orientação do personagem com base na direção da velocidade
+//            if (velocity != null && animation != null) {
+//                float vx = velocity.velocity.x;
+//
+//                if (vx > 0.01f) {
+//                    animation.facingRight = true;
+//                } else if (vx < -0.01f) {
+//                    animation.facingRight = false;
+//                }
+//
+//            }
 
             /// Atualiza a posição lógica (TransformComponent) com a posição do corpo físico
             transform.position.set(

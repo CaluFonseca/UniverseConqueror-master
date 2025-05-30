@@ -2,6 +2,8 @@ package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
+import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.UniverseConqueror.Utils.Timer;
@@ -21,18 +23,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.UniverseConqueror.GameLauncher;
 
-/// Tela de pausa que implementa controle de som, navegação e exibição do tempo
+/// ecrã de pausa que implementa controle de som, navegação e exibição do tempo
 public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen {
 
-    private final GameLauncher game;       /// Referência ao launcher para controle de tela
-    private final GameScreen gameScreen;   /// Tela principal para voltar do pause
+    private final GameLauncher game;       /// Referência ao launcher para controle do ecrã
+    private final GameScreen gameScreen;   /// ecrã principal para voltar do pause
     private final AssetManager assetManager; /// AssetManager para carregar recursos
 
     private Stage stage;                   /// Cena para UI
     private Skin skin;                     /// Skin para botões e labels
     private Table table;                   /// Layout principal
     private SpriteBatch batch;             /// Batch para renderizar background
-    private Texture background;            /// Textura de fundo da tela de pausa
+    private Texture background;            /// Textura de fundo do ecrã de pausa
 
     private boolean isAudioOn = true;      /// Estado do áudio ligado/desligado
     private Timer pauseTimer;              /// Temporizador para contar tempo de pausa
@@ -45,7 +47,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         this.assetManager = assetManager;
     }
 
-    /// Configura a cena e a interface ao mostrar a tela
+    /// Configura a cena e a interface ao mostrar o ecrã
     @Override
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
@@ -140,7 +142,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
         timerLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
     }
 
-    /// Renderiza a tela de pausa, fundo, UI e atualiza timer
+    /// Renderiza o ecrã de pausa, fundo, UI e atualiza timer
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -178,7 +180,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     /// Sai do jogo e apaga estado salvo
     @Override public void exitGame() { GameStateManager.delete(); Gdx.app.exit(); }
 
-    /// Reinicia o jogo, para sons, marca novo jogo e abre tela principal
+    /// Reinicia o jogo, para sons, marca novo jogo e abre ecrã principal
     @Override
     public void restartGame() {
         SoundManager.getInstance().stop();

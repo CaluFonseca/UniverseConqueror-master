@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class BulletRenderSystem extends IteratingSystem {
 
-    /// Batch usado para desenhar as texturas na tela
+    /// Batch usado para desenhar as texturas no ecrã
     private SpriteBatch batch;
 
     /// Mappers para acesso rápido aos componentes necessários

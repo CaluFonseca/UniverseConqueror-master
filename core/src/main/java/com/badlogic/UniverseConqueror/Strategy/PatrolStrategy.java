@@ -4,6 +4,7 @@
 package com.badlogic.UniverseConqueror.Strategy;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 
@@ -32,6 +33,7 @@ public class PatrolStrategy implements EnemyStrategy {
     /// @param deltaTime tempo decorrido desde o último frame (em segundos)
     @Override
     public void update(Entity enemy, float deltaTime) {
+
         PhysicsComponent pc = enemy.getComponent(PhysicsComponent.class);
         VelocityComponent velocity = enemy.getComponent(VelocityComponent.class);
         StateComponent state = enemy.getComponent(StateComponent.class);

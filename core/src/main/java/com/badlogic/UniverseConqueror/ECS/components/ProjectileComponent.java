@@ -24,6 +24,6 @@ public class ProjectileComponent implements Component {
     /// Textura usada para renderizar o projétil
     public Texture texture;
 
-    /// Flag para indicar se o projétil saiu da tela
+    /// Flag para indicar se o projétil saiu do ecrã
     public boolean isOutOfBounds = false;
 }

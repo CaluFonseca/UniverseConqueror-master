@@ -3,6 +3,8 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
+import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -19,7 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-/// Tela de Game Over, exibe opções para reiniciar, voltar ao menu ou sair do jogo
+/// Ecrã de Game Over, exibe opções para reiniciar, voltar ao menu ou sair do jogo
 public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScreen {
     private final GameLauncher game;
     private Stage stage;
@@ -36,7 +38,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         this.assetManager = assetManager;
     }
 
-    /// Inicializa elementos gráficos, sons e layout da tela
+    /// Inicializa elementos gráficos, sons e layout do ecrã
     @Override
     public void show() {
         stage = new Stage(new FitViewport(1920, 1080));
@@ -58,7 +60,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         table.center();
         table.setFillParent(true);
 
-        // Cria título e botões da tela
+        // Cria título e botões do ecrã
         Label gameOverLabel = new Label("GAME OVER", skin, "title");
         gameOverLabel.setFontScale(1.8f);
         table.add(gameOverLabel).padBottom(50).row();
@@ -96,7 +98,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         return button;
     }
 
-    /// Renderiza a tela limpando o fundo e desenhando o stage
+    /// Renderiza o ecrã limpando o fundo e desenhando o stage
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -116,7 +118,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         stage.getViewport().update(width, height, true);
     }
 
-    /// Quando a tela é ocultada, libera recursos
+    /// Quando o ecrã é ocultada, libera recursos
     @Override
     public void hide() {
         dispose();
@@ -128,7 +130,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
     @Override
     public void resume() {}
 
-    /// Libera recursos utilizados pela tela
+    /// Libera recursos utilizados pelo ecrã
     @Override
     public void dispose() {
         stage.dispose();

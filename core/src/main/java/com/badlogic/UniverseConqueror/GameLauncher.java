@@ -1,5 +1,5 @@
 /// Classe principal que inicia o jogo. Responsável por carregar recursos, configurar gerenciadores,
-/// e definir a tela inicial. Estende `Game` da LibGDX.
+/// e definir o ecrã inicial. Estende `Game` da LibGDX.
 
 package com.badlogic.UniverseConqueror;
 
@@ -26,7 +26,7 @@ public class GameLauncher extends Game {
     /// SpriteBatch compartilhado para renderizar elementos gráficos.
     public SpriteBatch batch;
 
-    /// Referência para a tela principal do jogo.
+    /// Referência para o ecrã principal do jogo.
     private GameScreen gameScreen;
 
     /// AssetManager estático para acesso global aos recursos.
@@ -35,7 +35,7 @@ public class GameLauncher extends Game {
     /// Flag para indicar se o jogo atual é novo (sem carregamento de estado).
     public boolean isNewGame = false;
 
-    /// Método principal de criação do jogo. Carrega recursos e define a tela inicial.
+    /// Método principal de criação do jogo. Carrega recursos e define o ecrã inicial.
     @Override
     public void create() {
         assetManager = new AssetManager();
@@ -113,10 +113,10 @@ public class GameLauncher extends Game {
         // Inicializa o SpriteBatch compartilhado
         batch = new SpriteBatch();
 
-        // Instancia a tela do jogo (mas não a ativa ainda)
+        // Instancia o ecrã do jogo (mas não a ativa ainda)
         gameScreen = new GameScreen(this, assetManager);
 
-        // Define o menu principal como tela inicial
+        // Define o menu principal como ecrã inicial
         setScreen(new MainMenuScreen(this, assetManager));
     }
     private void loadEnemyAnimations() {
@@ -165,7 +165,7 @@ public class GameLauncher extends Game {
         }
     }
 
-    /// Inicia um novo jogo, apagando o estado anterior e reinicializando a tela.
+    /// Inicia um novo jogo, apagando o estado anterior e reinicializando o ecrã.
     public void startGame() {
         GameStateManager.delete();
         setScreen(new GameScreen(this, assetManager));

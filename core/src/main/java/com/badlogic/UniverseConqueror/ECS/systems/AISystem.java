@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.AIComponent;
+import com.badlogic.UniverseConqueror.ECS.components.KnockbackComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
 import com.badlogic.UniverseConqueror.ECS.components.VelocityComponent;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -24,6 +25,8 @@ public class AISystem extends IteratingSystem {
     /// Processa cada entidade com IA a cada frame
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        KnockbackComponent knockback = entity.getComponent(KnockbackComponent.class);
+        if (knockback != null) return; // Ignora AI enquanto sofre knockback
         AIComponent ai = aim.get(entity);
         PositionComponent position = pm.get(entity);
         VelocityComponent velocity = vm.get(entity);

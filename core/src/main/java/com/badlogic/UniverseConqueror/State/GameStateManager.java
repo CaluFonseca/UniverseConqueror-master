@@ -14,7 +14,6 @@ public class GameStateManager {
         Json json = new Json();
         FileHandle file = Gdx.files.local(SAVE_PATH);
         file.writeString(json.prettyPrint(state), false);
-        // System.out.println("Jogo salvo em: " + file.file().getAbsolutePath());
     }
 
     /// Carrega o estado do jogo a partir do arquivo JSON. Retorna null se não existir arquivo salvo.

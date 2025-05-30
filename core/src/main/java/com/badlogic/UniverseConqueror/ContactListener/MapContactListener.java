@@ -1,9 +1,6 @@
 package com.badlogic.UniverseConqueror.ContactListener;
 
-import com.badlogic.UniverseConqueror.ECS.components.BodyComponent;
-import com.badlogic.UniverseConqueror.ECS.components.KnockbackComponent;
-import com.badlogic.UniverseConqueror.ECS.components.PlayerComponent;
-import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.events.DamageTakenEvent;
 import com.badlogic.UniverseConqueror.ECS.events.EndGameEvent;
 import com.badlogic.UniverseConqueror.ECS.events.EventBus;
@@ -45,10 +42,10 @@ public class MapContactListener implements ContactListener {
             System.out.println("Collision Detected mapa"+ bodyA +"ou"+bodyB);
             if(colA==true) {
 
-                // applyKnockbackIfEntity(bodyB,bodyA);
+                 applyKnockbackIfEntity(bodyB,bodyA);
             }
             else{
-                // applyKnockbackIfEntity(bodyA,bodyB);
+                 applyKnockbackIfEntity(bodyA,bodyB);
             }
         }
         if (playerEntity == null) return;
@@ -72,39 +69,94 @@ public class MapContactListener implements ContactListener {
         }
     }
 
-    private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
-        Entity entity = getEntity(entityBody);
-        if (entity == null) return;
+//    private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
+//        Entity entity = getEntity(entityBody);
+//        if (entity == null) return;
+//
+//        if (entity.getComponent(KnockbackComponent.class) != null) return;
+//
+//        PositionComponent pos = entity.getComponent(PositionComponent.class);
+//        BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
+//
+//        if (pos == null || bodyComp == null) return;
+//
+//        Vector2 entityPos = pos.position;
+//        Vector2 tilePos = mapBody.getPosition();
+//
+//        Vector2 direction = entityPos.cpy().sub(tilePos).nor();
+//
+////        // Empurra levemente o corpo antes de aplicar knockback
+////        Vector2 displacement = direction.cpy().scl(0.5f); // desloca meio metro para fora
+////        bodyComp.body.setTransform(bodyComp.body.getPosition().add(displacement), bodyComp.body.getAngle());
+//
+//        // Cria componente de knockback
+//        KnockbackComponent knockback = new KnockbackComponent();
+//        knockback.impulse.set(direction.scl(20f)); // impulso real do knockback
+//        knockback.timeRemaining = 0.2f;
+//        knockback.duration = 0.2f;
+//        knockback.hasBeenApplied = false;
+//
+//        entity.add(knockback);
+//
+//        System.out.println("[DEBUG] Knockback aplicado à entidade: " + entity + " com direção: " + knockback.impulse);
+//    }
 
-        if (entity.getComponent(KnockbackComponent.class) != null) return;
 
-        PositionComponent pos = entity.getComponent(PositionComponent.class);
-        BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
+//private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
+//    Entity entity = getEntity(entityBody);
+//    if (entity == null) return;
+//
+////    if (entity.getComponent(KnockbackComponent.class) != null) return;
+//
+//    PositionComponent pos = entity.getComponent(PositionComponent.class);
+//    BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
+//
+//    if (pos == null || bodyComp == null) return;
+//
+//    Vector2 entityPos = pos.position;
+//    Vector2 tilePos = mapBody.getPosition();
+//
+//    Vector2 direction = entityPos.cpy().sub(tilePos).nor();
+//
+//    KnockbackComponent knockback = new KnockbackComponent();
+//    knockback.impulse.set(direction.scl(10f)); // força da velocidade
+//    knockback.timeRemaining = 0.2f;
+//    knockback.duration = 0.2f;
+//    knockback.hasBeenApplied = false;
+//
+//    entity.add(knockback);
+//}
 
-        if (pos == null || bodyComp == null) return;
+private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
+    Entity entity = getEntity(entityBody);
+    if (entity == null) return;
 
-        Vector2 entityPos = pos.position;
-        Vector2 tilePos = mapBody.getPosition();
+//    // ✅ Só aplica knockback se for um inimigo
+//    if (entity.getComponent(EnemyComponent.class) == null) return;
 
-        Vector2 direction = entityPos.cpy().sub(tilePos).nor();
+    if (entity.getComponent(KnockbackComponent.class) != null) return;
 
-//        // Empurra levemente o corpo antes de aplicar knockback
-//        Vector2 displacement = direction.cpy().scl(0.5f); // desloca meio metro para fora
-//        bodyComp.body.setTransform(bodyComp.body.getPosition().add(displacement), bodyComp.body.getAngle());
+    PositionComponent pos = entity.getComponent(PositionComponent.class);
+    BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
 
-        // Cria componente de knockback
+    if (pos == null || bodyComp == null) return;
+
+    Vector2 entityPos = pos.position;
+    Vector2 tilePos = mapBody.getPosition();
+
+    Vector2 direction = entityPos.cpy().sub(tilePos).nor();
+
+    if (entity.getComponent(KnockbackComponent.class) == null)
+    {
         KnockbackComponent knockback = new KnockbackComponent();
-        knockback.impulse.set(direction.scl(20f)); // impulso real do knockback
-        knockback.timeRemaining = 0.2f;
-        knockback.duration = 0.2f;
-        knockback.hasBeenApplied = false;
-
+        knockback.impulse = direction.scl(100f); // Ou qualquer força desejada
+        knockback.timeRemaining = 0.3f;
         entity.add(knockback);
-
-        System.out.println("[DEBUG] Knockback aplicado à entidade: " + entity + " com direção: " + knockback.impulse);
+        System.out.println("[DEBUG] Knockback aplicado ao inimigo: " + entity + " com direção: " + direction);
     }
 
 
+}
 
 
 
@@ -122,25 +174,14 @@ public class MapContactListener implements ContactListener {
     }
 
     private boolean isMapCollision(Body body) {
-//        for (Fixture fixture : body.getFixtureList()) {
-//            Object userData = fixture.getUserData();
-//            System.out.println("[DEBUG] Fixture userData: " + userData);
-//            if ("map".equals(userData)) {
-//                System.out.println("[DEBUG] isMapCollision: Fixture com userData 'map' encontrada");
-//                return true;
-//            }
-//        }
         for (Fixture fixture : body.getFixtureList()) {
             if ("map".equals(fixture.getUserData())) {
-                System.out.println("[DEBUG] isMapCollision: Fixture com userData 'map' encontrada");
                 return  true;
-                //applyKnockbackFromMap(getEntity(body),body);   return true;
             }
         }
         return false;
-        //    System.out.println("[DEBUG] isMapCollision: Nenhuma fixture com userData 'map' encontrada");
-        // return false;
     }
+
     private Entity getEntity(Body body) {
         Object userData = body.getUserData();
         return (userData instanceof Entity) ? (Entity) userData : null;

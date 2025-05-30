@@ -4,6 +4,7 @@
 package com.badlogic.UniverseConqueror.Strategy;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.OrthographicCamera;

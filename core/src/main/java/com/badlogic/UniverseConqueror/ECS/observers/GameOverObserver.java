@@ -3,6 +3,8 @@ package com.badlogic.UniverseConqueror.ECS.observers;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.events.*;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.UniverseConqueror.Screens.GameOverScreen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.ashley.core.Entity;
@@ -27,7 +29,7 @@ public class GameOverObserver implements Observer {
         /// Verifica se o evento é de morte e se a entidade é o jogador
         if (event instanceof DeathEvent deathEvent) {
             if (deathEvent.entity == player) {
-                /// Interrompe todos os sons e troca a tela para Game Over
+                /// Interrompe todos os sons e troca o ecrã para Game Over
                 SoundManager.getInstance().stop();
                 gameLauncher.setScreen(new GameOverScreen(gameLauncher, assetManager));
             }

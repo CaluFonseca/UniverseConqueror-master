@@ -1,6 +1,6 @@
-package com.badlogic.UniverseConqueror.Screens;
+package com.badlogic.UniverseConqueror.Interfaces;
 
-/// Interface para telas que suportam sons de clique e hover
+/// Interface para ecrãs que suportam sons de clique e hover
 public interface SoundEnabledScreen {
     /// Método para tocar som de clique
     void playClickSound();

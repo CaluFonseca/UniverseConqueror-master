@@ -1,8 +1,8 @@
 package com.badlogic.UniverseConqueror.ECS.observers;
 
 import com.badlogic.UniverseConqueror.ECS.events.EndGameEvent;
-import com.badlogic.UniverseConqueror.ECS.events.GameEvent;
-import com.badlogic.UniverseConqueror.ECS.events.Observer;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Screens.EndScreen;
 import com.badlogic.gdx.assets.AssetManager;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 /// Observador responsável por responder ao fim do jogo.
 /// Ao receber um EndGameEvent, coleta informações relevantes
-/// (itens, vida, tempo, inimigos mortos) e muda para a tela de fim.
+/// (itens, vida, tempo, inimigos mortos) e muda para o ecrã de fim.
 public class EndGameObserver implements Observer {
 
     private final GameLauncher game;
@@ -50,7 +50,7 @@ public class EndGameObserver implements Observer {
             float totalTime = timer.getTime();
             int enemiesKilled = enemiesKilledSupplier.get();
 
-            /// Transição para tela final
+            /// Transição para ecrã final
             game.setScreen(new EndScreen(game, assetManager, items, health, totalTime, enemiesKilled));
         }
     }

@@ -20,7 +20,6 @@ public class BodyRemovalSystem extends EntitySystem {
     /// Marca um corpo para remoção no próximo update
     public void markForRemoval(Body body) {
         bodiesToDestroy.add(body);
-        // System.out.println("[BodyRemovalSystem] Corpo marcado para destruição: " + body);
     }
 
     /// Remove todos os corpos marcados durante o update

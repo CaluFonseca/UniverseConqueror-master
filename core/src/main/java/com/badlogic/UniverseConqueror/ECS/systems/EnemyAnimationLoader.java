@@ -63,7 +63,6 @@ public class EnemyAnimationLoader {
         /// Carrega cada frame baseado no nome do arquivo (ex: frame-01.png até frame-NN.png)
         for (int i = 1; i <= frameCount; i++) {
             String filePath = basePath + String.format("%02d.png", i);
-            //System.out.println("Loading enemy animation: " + filePath);
 
             /// Carrega a textura do asset manager
             Texture texture = assetManager.get(filePath, Texture.class);

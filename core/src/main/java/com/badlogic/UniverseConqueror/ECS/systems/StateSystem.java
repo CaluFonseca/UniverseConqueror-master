@@ -29,7 +29,14 @@ public class StateSystem extends IteratingSystem {
         state.timeInState += deltaTime;
 
         if (health == null || state == null) return;
+        if (state.get() == StateComponent.State.HURT) {
+            state.timeInState += deltaTime;
 
+            if (state.timeInState >= health.hurtDuration) {
+                state.set(StateComponent.State.IDLE); // ou outro estado
+                state.timeInState = 0f;
+            }
+        }
         // Define se o personagem está ferido (menos de 25 de vida)
         boolean isInjured = health.currentHealth < 25;
         // Verifica se está em movimento baseado no vetor de velocidade (len2 evita sqrt para desempenho)

@@ -3,6 +3,8 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
+import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
@@ -18,7 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-/// Tela final do nível que mostra estatísticas e opções para reiniciar ou sair do jogo
+/// ecrã final do nível que mostra estatísticas e opções para reiniciar ou sair do jogo
 public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen {
 
     private final GameLauncher game;
@@ -32,7 +34,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
 
     private final int enemiesKilled;
 
-    /// Construtor que inicializa a tela com as estatísticas do jogo e configura UI e som
+    /// Construtor que inicializa o ecrã com as estatísticas do jogo e configura UI e som
     public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime, int enemiesKilled) {
         this.game = game;
         this.assetManager = assetManager;
@@ -102,7 +104,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         return button;
     }
 
-    /// Renderiza a tela limpando o fundo e desenhando o stage
+    /// Renderiza o ecrã limpando o fundo e desenhando o stage
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -112,7 +114,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         stage.draw();
     }
 
-    /// Libera recursos da tela
+    /// Libera recursos do ecrã
     @Override
     public void dispose() {
         stage.dispose();

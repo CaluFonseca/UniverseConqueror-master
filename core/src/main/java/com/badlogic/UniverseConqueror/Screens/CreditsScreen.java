@@ -3,7 +3,7 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 
-/// Tela de créditos do jogo, herdando da BaseInfosScreen
+/// ecrã de créditos do jogo, herdando da BaseInfosScreen
 public class CreditsScreen extends BaseInfosScreen {
 
     /// Construtor que passa o texto dos créditos para a classe base

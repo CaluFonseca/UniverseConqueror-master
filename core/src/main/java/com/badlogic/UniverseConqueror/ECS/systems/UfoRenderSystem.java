@@ -34,7 +34,7 @@ public class UfoRenderSystem extends IteratingSystem {
         batch.end(); // Termina de desenhar
     }
 
-    // Processa cada entidade: atualiza animação e desenha o frame correto na tela
+    // Processa cada entidade: atualiza animação e desenha o frame correto no ecrã
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         AnimationComponent anim = am.get(entity);

@@ -3,7 +3,7 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 
-/// Tela de controles do jogo, herdando da BaseInfosScreen
+/// ecrã de controles do jogo, herdando da BaseInfosScreen
 public class ControlsScreen extends BaseInfosScreen {
 
     /// Construtor que passa o texto dos controles para a classe base

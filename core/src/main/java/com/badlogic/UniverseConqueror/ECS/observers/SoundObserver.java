@@ -1,9 +1,9 @@
 package com.badlogic.UniverseConqueror.ECS.observers;
 
-import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.events.*;
-import com.badlogic.ashley.core.Entity;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 
 /// Observador responsável por reproduzir sons com base nos eventos do jogo.
 public class SoundObserver implements Observer {

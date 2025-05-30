@@ -63,13 +63,7 @@ public class PlayerInputSystem extends IteratingSystem {
         AnimationComponent animation = am.get(entity);
         HealthComponent health = hm.get(entity);
         JumpComponent jump = jumpMapper.get(entity);
-        // SoundComponent sound = smSound.get(entity);
-        KnockbackComponent knockback = entity.getComponent(KnockbackComponent.class);
 
-        /// Se estiver sofrendo knockback, ignora input para movimento
-        if (knockback != null) {
-            return;
-        }
 
         /// Inicializa variáveis para movimento
         float dx = 0f, dy = 0f;
@@ -110,31 +104,30 @@ public class PlayerInputSystem extends IteratingSystem {
             dy = dir.y;
         }
 
-        /// Checa se teclas F ou H estão pressionadas para desativar movimento
-        boolean isFPressed = Gdx.input.isKeyPressed(Input.Keys.F);
-        boolean isHPressed = Gdx.input.isKeyPressed(Input.Keys.H);
+        // ===TIPO DE MOVIMENTO ===
+        boolean isFollowingPath = Gdx.input.isKeyPressed(Input.Keys.F) || Gdx.input.isKeyPressed(Input.Keys.H);
 
-        if (isFPressed || isHPressed) {
-            /// Desativa movimento — mantém velocity atual para não mudar estado
-            isMoving = false;
-        } else {
-            /// Atualiza velocidade e movimento normalmente
+        if (!isFollowingPath) {
             isMoving = dx != 0 || dy != 0;
+            if (dx > 0) animation.facingRight = true;
+            else if (dx < 0) animation.facingRight = false;
             velocity.velocity.set(dx * Constants.PHYSICS_MULTIPLIER, dy * Constants.PHYSICS_MULTIPLIER);
+        } else {
+            isMoving = false;
+
         }
 
-        /// Se estado for HURT ou DEATH, ignora input
+        // === BLOQUEIO POR ESTADO ===
         if (state.get() == StateComponent.State.HURT || state.get() == StateComponent.State.DEATH) return;
 
-        /// Defesa ativada com TAB
+        // === DEFESA ===
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             state.set(StateComponent.State.DEFENSE);
             EventBus.get().notify(new DefenseEvent(entity));
         }
 
-        /// Lógica para salto, ataque e movimentos especiais só se vida >= 25
+        // === MOVIMENTOS AVANÇADOS ===
         if (health != null && health.currentHealth >= 25f) {
-            /// Salto com espaço
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
                 if (jump.canJump) {
                     jump.isJumping = true;
@@ -144,17 +137,14 @@ public class PlayerInputSystem extends IteratingSystem {
                 }
             }
 
-            /// Ativa super ataque com tecla E
             if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
                 state.set(StateComponent.State.SUPER_ATTACK);
             }
 
-            /// Atira com botão esquerdo do mouse
             if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                 fireBullet(entity, state.get() == StateComponent.State.SUPER_ATTACK);
             }
 
-            /// Atualiza estado de movimento para rápido ou normal
             if (isMoving && isShiftPressed) {
                 state.set(StateComponent.State.FAST_MOVE);
                 EventBus.get().notify(new FastMoveEvent(entity));
@@ -163,106 +153,21 @@ public class PlayerInputSystem extends IteratingSystem {
                 EventBus.get().notify(new WalkEvent(entity));
             }
         } else {
-            /// Caso vida baixa, pode andar só normal
             if (isMoving) {
                 state.set(StateComponent.State.WALK);
                 EventBus.get().notify(new WalkEvent(entity));
             }
         }
 
-        // Comentado: ajuste da direção do sprite baseado no movimento horizontal
-//        if (dx > 0) animation.facingRight = true;
-//        else if (dx < 0) animation.facingRight = false;
     }
 
-    /// Lógica para disparar projéteis, bullet ou fireball
     private void fireBullet(Entity entity, boolean fireball) {
-        StateComponent state = sm.get(entity);
-        PhysicsComponent physics = phm.get(entity);
         AttackComponent attack = acm.get(entity);
-        AnimationComponent animation = am.get(entity);
-        //SoundComponent sound = smSound.get(entity);
-
-        /// Só atira se tiver ataque disponível
         if (attack.remainingAttackPower > 0) {
-            Vector2 mousePosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            Vector3 mousePosition3D = camera.unproject(new Vector3(mousePosition.x, mousePosition.y, 0));
-
-            TextureRegion currentFrame = animation.currentFrame;
-            float frameWidth = currentFrame.getRegionWidth();
-            float frameHeight = currentFrame.getRegionHeight();
-
-            float playerX = physics.body.getPosition().x;
-            float playerY = physics.body.getPosition().y;
-            float originX = playerX + frameWidth / 2f;
-            float originY = playerY + frameHeight / 2f - 65f;
-
-            /// Define a direção do personagem olhando para o mouse
-            animation.facingRight = mousePosition3D.x >= playerX;
-
-            /// Calcula posição inicial do projétil de acordo com a direção do personagem
-            float offsetX = 40f;
-            float bulletX = animation.facingRight
-                ? playerX + 20f
-                : playerX - 120f;
-
-            float bulletYOffset = fireball ? -30f : -10f;
-            float bulletY = (playerY + frameHeight * 0.1f) + bulletYOffset;
-
-            Vector2 bulletStartPosition = new Vector2(bulletX, bulletY);
-
-            Vector2 target = new Vector2(mousePosition3D.x, mousePosition3D.y);
-
-            ProjectileComponent.ProjectileType type = fireball
-                ? ProjectileComponent.ProjectileType.FIREBALL
-                : ProjectileComponent.ProjectileType.BULLET;
-
-            /// Dispara fireball se tiver poder suficiente
-            if (fireball) {
-                if (attack.remainingAttackPower >= 5) {
-                    attack.remainingAttackPower -= 5;
-                    state.set(StateComponent.State.SUPER_ATTACK);
-
-                    Entity bullet = bulletFactory.obtainProjectile(
-                        world, bulletStartPosition.x, bulletStartPosition.y,
-                        target, ProjectileComponent.ProjectileType.FIREBALL
-                    );
-                    bulletSystem.spawnedFromFactory(bullet);
-
-                    SoundManager.getInstance().play("fireball"); // som de sucesso
-                    EventBus.get().notify(new AttackStartedEvent(entity, true));
-                } else {
-                    SoundManager.getInstance().play("emptyGun"); // som de erro
-                    EventBus.get().notify(new NoAmmoEvent(entity));
-                }
-            } else {
-                /// Dispara bullet comum se tiver poder suficiente
-                if (attack.remainingAttackPower >= 1) {
-                    attack.remainingAttackPower -= 1;
-                    state.set(StateComponent.State.ATTACK);
-
-                    Entity bullet = bulletFactory.obtainProjectile(
-                        world, bulletStartPosition.x, bulletStartPosition.y,
-                        target, ProjectileComponent.ProjectileType.BULLET
-                    );
-                    bulletSystem.spawnedFromFactory(bullet);
-
-                    SoundManager.getInstance().play("bullet"); // som de sucesso
-                    EventBus.get().notify(new AttackStartedEvent(entity, false));
-                } else {
-                    SoundManager.getInstance().play("emptyGun"); // som de erro
-                    EventBus.get().notify(new NoAmmoEvent(entity));
-                }
-            }
-
-            attack.remainingAttackPower = Math.max(attack.remainingAttackPower, 0);
-
-            /// Ajusta a direção do sprite conforme a posição do projétil
-            animation.facingRight = mousePosition3D.x > bulletStartPosition.x;
-
-        } else {
-            /// Caso não tenha munição, notifica
-            EventBus.get().notify(new NoAmmoEvent(entity));
+            Vector2 mouse = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+            Vector3 world = camera.unproject(new Vector3(mouse.x, mouse.y, 0));
+            EventBus.get().notify(new ProjectileFiredEvent(entity, new Vector2(world.x, world.y), fireball));
         }
     }
+
 }

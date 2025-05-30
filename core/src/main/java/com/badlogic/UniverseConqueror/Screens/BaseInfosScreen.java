@@ -1,6 +1,8 @@
 package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
+import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -18,9 +20,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-/// Classe abstrata base para telas de informação, com UI e sons padrões
+/// Classe abstrata base para ecrãs de informação, com UI e sons padrões
 public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, NavigableScreen {
-    protected Game game;               /// Instância do jogo para controle de telas
+    protected Game game;               /// Instância do jogo para controle de ecrãs
     protected BitmapFont font;         /// Fonte para desenhar texto
     protected SpriteBatch batch;       /// Batch para renderizar texto e gráficos
     protected GlyphLayout layout;      /// Para medir e posicionar o texto
@@ -29,7 +31,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
     protected Skin skin;               /// Skin para estilo visual dos widgets
     protected TextButton backButton;  /// Botão "Back" para voltar ao menu principal
 
-    protected String screenText;       /// Texto exibido na tela
+    protected String screenText;       /// Texto exibido no ecrã
     protected final AssetManager assetManager;  /// Gerenciador de assets (skins, sons, etc)
 
     /// Construtor que inicializa recursos e UI, recebendo texto e assetManager
@@ -76,7 +78,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         Gdx.input.setInputProcessor(stage);
     }
 
-    /// Limpa a tela, desenha texto e desenha a stage com atores
+    /// Limpa o ecrã, desenha texto e desenha a stage com atores
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
@@ -88,7 +90,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.draw();
     }
 
-    /// Desenha o texto centralizado na tela usando GlyphLayout e BitmapFont
+    /// Desenha o texto centralizado no ecrã usando GlyphLayout e BitmapFont
     private void drawScreenText() {
         layout.setText(font, screenText);
 
@@ -100,33 +102,32 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         batch.end();
     }
 
-    /// Atualiza a viewport do stage para o novo tamanho da tela
+    /// Atualiza a viewport do stage para o novo tamanho do ecrã
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
-    /// Quando a tela é escondida, descarta recursos
+    /// Quando o ecrã é escondido, descarta recursos
     @Override
     public void hide() {
         dispose();
     }
 
-    /// Pausa da tela, vazio (opcional)
+    /// Pausa do ecrã, vazio (opcional)
     @Override
     public void pause() {}
 
-    /// Retoma da tela, vazio (opcional)
+    /// Retoma do ecrã, vazio (opcional)
     @Override
     public void resume() {}
 
-    /// Libera os recursos gráficos da tela
+    /// Libera os recursos gráficos do ecrã
     @Override
     public void dispose() {
         font.dispose();
         batch.dispose();
         stage.dispose();
-        // assetManager.dispose(); // cuidado: pode ser compartilhado entre telas
     }
 
     /// Toca o som de clique de botão
@@ -141,7 +142,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         SoundManager.getInstance().play("hoverButton");
     }
 
-    /// Navega para a tela do menu principal
+    /// Navega para o ecrã do menu principal
     @Override
     public void goToMainMenu() {
         game.setScreen(new MainMenuScreen(game, assetManager));
@@ -153,7 +154,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         Gdx.app.exit();
     }
 
-    /// Reinício do jogo (vazio - opcional para esta tela)
+    /// Reinício do jogo (vazio - opcional para este ecrã)
     @Override
     public void restartGame() {
         // Optional for BaseInfosScreen

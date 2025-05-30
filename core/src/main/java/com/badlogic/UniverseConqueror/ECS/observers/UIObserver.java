@@ -1,6 +1,8 @@
 package com.badlogic.UniverseConqueror.ECS.observers;
 
 import com.badlogic.UniverseConqueror.ECS.events.*;
+import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
+import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 /// Observador que atualiza os elementos da UI com base nos eventos do jogo.
