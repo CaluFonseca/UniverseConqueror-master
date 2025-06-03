@@ -1,85 +1,74 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
-import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.entity.BulletFactory;
 import com.badlogic.UniverseConqueror.ECS.events.*;
-import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.UniverseConqueror.Utils.Constants;
 import com.badlogic.UniverseConqueror.Utils.Joystick;
 import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 
-public class PlayerInputSystem extends IteratingSystem {
-    /// Mappers para acessar os componentes das entidades
-    private final ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
-    private final ComponentMapper<PhysicsComponent> phm = ComponentMapper.getFor(PhysicsComponent.class);
-    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
-    private final ComponentMapper<AnimationComponent> am = ComponentMapper.getFor(AnimationComponent.class);
-    private final ComponentMapper<AttackComponent> acm = ComponentMapper.getFor(AttackComponent.class);
-    private final ComponentMapper<JumpComponent> jumpMapper = ComponentMapper.getFor(JumpComponent.class);
-    private final ComponentMapper<HealthComponent> hm = ComponentMapper.getFor(HealthComponent.class);
-    //private final ComponentMapper<SoundComponent> smSound = ComponentMapper.getFor(SoundComponent.class);
+public class PlayerInputSystem extends BaseIteratingSystem {
 
-    /// Referências para mundo físico, joystick, câmera, engine, sistema e fábrica de projéteis
+    /// Dependências externas
     private final World world;
-    private final Joystick joystick;
+    private Joystick joystick;
     private final OrthographicCamera camera;
     private final PooledEngine engine;
     private final BulletSystem bulletSystem;
     private final BulletFactory bulletFactory;
 
-    private Entity player; /// Referência à entidade jogador
+    private Entity player; /// Entidade principal do jogador
 
-    /// Construtor inicializa o sistema com as dependências necessárias
-    public PlayerInputSystem(World world, Joystick joystick, BulletSystem bulletSystem, OrthographicCamera camera, PooledEngine engine, BulletFactory bulletFactory) {
-        super(Family.all(PlayerComponent.class, AttackComponent.class, VelocityComponent.class, PhysicsComponent.class, StateComponent.class, AnimationComponent.class).get());
+    /// Construtor com todas as dependências necessárias
+    public PlayerInputSystem(World world, Joystick joystick, BulletSystem bulletSystem,
+                             OrthographicCamera camera, PooledEngine engine, BulletFactory bulletFactory) {
+        super(Family.all(PlayerComponent.class, AttackComponent.class, VelocityComponent.class,
+            PhysicsComponent.class, StateComponent.class, AnimationComponent.class).get());
         this.world = world;
         this.joystick = joystick;
-        this.bulletSystem = bulletSystem;
         this.camera = camera;
         this.engine = engine;
+        this.bulletSystem = bulletSystem;
         this.bulletFactory = bulletFactory;
     }
 
-    /// Define qual entidade é o jogador para este sistema
+    /// Define a entidade principal do jogador
     public void setPlayer(Entity player) {
         this.player = player;
+    }
+
+    public void setJoystick(Joystick joystick) {
+        this.joystick = joystick;
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
 
-        StateComponent state = sm.get(entity);
-        PhysicsComponent physics = phm.get(entity);
-        VelocityComponent velocity = vm.get(entity);
-        AnimationComponent animation = am.get(entity);
-        HealthComponent health = hm.get(entity);
-        JumpComponent jump = jumpMapper.get(entity);
+        /// Obtém os componentes relevantes via BaseIteratingSystem
+        StateComponent state = ComponentMappers.state.get(entity);
+        PhysicsComponent physics = ComponentMappers.physics.get(entity);
+        VelocityComponent velocity = ComponentMappers.velocity.get(entity);
+        AnimationComponent animation = ComponentMappers.animation.get(entity);
+        HealthComponent health = ComponentMappers.health.get(entity);
+        JumpComponent jump = ComponentMappers.jump.get(entity);
+        AttackComponent attack = ComponentMappers.attack.get(entity);
 
-
-        /// Inicializa variáveis para movimento
         float dx = 0f, dy = 0f;
         boolean isMoving = false;
 
-        /// Detecta se tecla Shift está pressionada para movimento rápido
-        boolean isShiftPressed = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
-        float currentSpeed;
-        if (health != null && health.currentHealth >= 25f && isShiftPressed) {
-            currentSpeed = Constants.SPEED_FAST; /// Velocidade rápida se vida > 25 e shift pressionado
-        } else {
-            currentSpeed = Constants.SPEED; /// Velocidade normal
-        }
+        /// Define velocidade com base na vida e se Shift está pressionado
+        boolean shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+        float currentSpeed = (health != null && health.currentHealth >= 25f && shift) ? Constants.SPEED_FAST : Constants.SPEED;
 
+        /// Movimento via teclado
         boolean keyPressed = false;
-        /// Checa teclas WASD ou setas para movimento horizontal e vertical
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             dx -= currentSpeed * deltaTime;
             keyPressed = true;
@@ -96,56 +85,61 @@ public class PlayerInputSystem extends IteratingSystem {
             dy -= currentSpeed * deltaTime;
             keyPressed = true;
         }
+       // System.out.println("Key pressed: " + keyPressed + ", joystick moving: " + (joystick != null && joystick.isMoving()));
 
-        /// Caso nenhuma tecla do teclado, usa joystick se disponível e estiver em movimento
+        //System.out.println("Joystick moving: " + joystick != null && joystick.isMoving());
+        /// Se não houver tecla pressionada, usa joystick (se estiver ativo)
         if (!keyPressed && joystick != null && joystick.isMoving()) {
             Vector2 dir = joystick.getDirection();
             dx = dir.x;
             dy = dir.y;
         }
 
-        // ===TIPO DE MOVIMENTO ===
+        /// Verifica se está seguindo caminho automaticamente (via F ou H)
         boolean isFollowingPath = Gdx.input.isKeyPressed(Input.Keys.F) || Gdx.input.isKeyPressed(Input.Keys.H);
 
         if (!isFollowingPath) {
+//            if (!keyPressed && joystick != null && joystick.isMoving()) {
+//                Vector2 dir = joystick.getDirection(); // vetor normalizado
+//                dx = dir.x ;
+//                dy = dir.y ;
+//            }
             isMoving = dx != 0 || dy != 0;
             if (dx > 0) animation.facingRight = true;
             else if (dx < 0) animation.facingRight = false;
             velocity.velocity.set(dx * Constants.PHYSICS_MULTIPLIER, dy * Constants.PHYSICS_MULTIPLIER);
         } else {
             isMoving = false;
-
         }
 
-        // === BLOQUEIO POR ESTADO ===
-        if (state.get() == StateComponent.State.HURT || state.get() == StateComponent.State.DEATH) return;
+        /// Se estiver em estado inválido, ignora inputs
+        if (state.get() == StateComponent.State.HURT || state.get() == StateComponent.State.DEATH)
+            return;
 
-        // === DEFESA ===
+        /// Defesa com TAB
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             state.set(StateComponent.State.DEFENSE);
             EventBus.get().notify(new DefenseEvent(entity));
         }
 
-        // === MOVIMENTOS AVANÇADOS ===
+        /// Saltar (SPACE) e Super Ataque (E)
         if (health != null && health.currentHealth >= 25f) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                if (jump.canJump) {
-                    jump.isJumping = true;
-                    physics.body.applyForceToCenter(new Vector2(0, Constants.JUMP_FORCE), true);
-                    EventBus.get().notify(new JumpEvent(entity));
-                    return;
-                }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jump.canJump) {
+                jump.isJumping = true;
+                physics.body.applyForceToCenter(new Vector2(0, Constants.JUMP_FORCE), true);
+                EventBus.get().notify(new JumpEvent(entity));
+                return;
             }
 
             if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
                 state.set(StateComponent.State.SUPER_ATTACK);
             }
 
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && (joystick == null || !joystick.isMoving())) {
                 fireBullet(entity, state.get() == StateComponent.State.SUPER_ATTACK);
             }
 
-            if (isMoving && isShiftPressed) {
+            if (isMoving && shift) {
                 state.set(StateComponent.State.FAST_MOVE);
                 EventBus.get().notify(new FastMoveEvent(entity));
             } else if (isMoving) {
@@ -158,16 +152,16 @@ public class PlayerInputSystem extends IteratingSystem {
                 EventBus.get().notify(new WalkEvent(entity));
             }
         }
-
     }
 
+    /// Dispara um projétil normal ou fireball
     private void fireBullet(Entity entity, boolean fireball) {
-        AttackComponent attack = acm.get(entity);
+        AttackComponent attack = ComponentMappers.attack.get(entity);
         if (attack.remainingAttackPower > 0) {
-            Vector2 mouse = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            Vector3 world = camera.unproject(new Vector3(mouse.x, mouse.y, 0));
-            EventBus.get().notify(new ProjectileFiredEvent(entity, new Vector2(world.x, world.y), fireball));
+            Vector3 mouse = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            Vector3 worldPos = camera.unproject(mouse);
+            Vector2 direction = new Vector2(worldPos.x, worldPos.y);
+            EventBus.get().notify(new ProjectileFiredEvent(entity, direction, fireball));
         }
     }
-
 }

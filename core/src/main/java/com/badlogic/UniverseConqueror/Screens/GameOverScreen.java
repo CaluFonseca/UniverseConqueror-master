@@ -3,8 +3,7 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
-import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
-import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
+import com.badlogic.UniverseConqueror.Interfaces.*;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -22,61 +21,27 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /// Ecrã de Game Over, exibe opções para reiniciar, voltar ao menu ou sair do jogo
-public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScreen {
+public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScreen, BaseScreen {
     private final GameLauncher game;
     private Stage stage;
     private Skin skin;
     private Table table;
     private SpriteBatch batch;
     private Texture background;
-
+    private final ScreenManager screenManager;
     private final AssetManager assetManager;
 
     /// Construtor recebe referência ao jogo e ao asset manager para carregar recursos
-    public GameOverScreen(GameLauncher game, AssetManager assetManager) {
+    public GameOverScreen(GameLauncher game, AssetManager assetManager, ScreenManager screenManager) {
         this.game = game;
         this.assetManager = assetManager;
+        this.screenManager = screenManager;
     }
 
     /// Inicializa elementos gráficos, sons e layout do ecrã
     @Override
     public void show() {
-        stage = new Stage(new FitViewport(1920, 1080));
-        Gdx.input.setInputProcessor(stage);
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-
-        // Toca som de game over
-        SoundManager.getInstance().play("gameOver");
-
-        batch = new SpriteBatch();
-        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
-        background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
-
-        // Ajusta volume e toca música do menu
-        MusicManager.getInstance().setVolume(0.2f);
-        MusicManager.getInstance().play("menu", true);
-
-        table = new Table();
-        table.center();
-        table.setFillParent(true);
-
-        // Cria título e botões do ecrã
-        Label gameOverLabel = new Label("GAME OVER", skin, "title");
-        gameOverLabel.setFontScale(1.8f);
-        table.add(gameOverLabel).padBottom(50).row();
-
-        float buttonWidth = 400f;
-        float buttonHeight = 80f;
-
-        TextButton restartButton = createButton("Reiniciar", this::restartGame);
-        TextButton mainMenuButton = createButton("Menu Principal", this::goToMainMenu);
-        TextButton exitButton = createButton("Sair", this::exitGame);
-
-        table.add(restartButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(mainMenuButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(exitButton).size(buttonWidth, buttonHeight).pad(10).row();
-
-        stage.addActor(table);
+        initializeUI();
     }
 
     /// Cria botão com texto e ação, com sons para clique e hover
@@ -152,7 +117,7 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
     /// Volta para o menu principal
     @Override
     public void goToMainMenu() {
-        game.setScreen(new MainMenuScreen(game, assetManager));
+        screenManager.show(ScreenType.MAIN_MENU);
     }
 
     /// Sai do jogo
@@ -167,6 +132,61 @@ public class GameOverScreen implements Screen, SoundEnabledScreen, NavigableScre
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
         game.setNewGame(true);
-        game.setScreen(new GameScreen(game, assetManager));
+     //   game.setScreen(new GameScreen(game, assetManager));
+        screenManager.show(ScreenType.GAME);
+    }
+
+    @Override
+    public void initializeUI() {
+            stage = new Stage(new FitViewport(1920, 1080));
+            Gdx.input.setInputProcessor(stage);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+
+            SoundManager.getInstance().play("gameOver");
+
+            batch = new SpriteBatch();
+            skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
+            background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
+
+            MusicManager.getInstance().setVolume(0.2f);
+            MusicManager.getInstance().play("menu", true);
+
+            table = new Table();
+            table.center();
+            table.setFillParent(true);
+
+            Label gameOverLabel = new Label("GAME OVER", skin, "title");
+            gameOverLabel.setFontScale(1.8f);
+            table.add(gameOverLabel).padBottom(50).row();
+
+            float buttonWidth = 400f;
+            float buttonHeight = 80f;
+
+            TextButton restartButton = createButton("Reiniciar", this::restartGame);
+            TextButton mainMenuButton = createButton("Menu Principal", this::goToMainMenu);
+            TextButton exitButton = createButton("Sair", this::exitGame);
+
+            table.add(restartButton).size(buttonWidth, buttonHeight).pad(10).row();
+            table.add(mainMenuButton).size(buttonWidth, buttonHeight).pad(10).row();
+            table.add(exitButton).size(buttonWidth, buttonHeight).pad(10).row();
+
+            stage.addActor(table);
+        }
+
+
+    @Override
+    public void initializeSystems() {
+
+    }
+
+    @Override
+    public void registerObservers() {
+
+    }
+
+    @Override
+    public void disposeResources() {
+        if (stage != null) stage.dispose();
+        if (batch != null) batch.dispose();
     }
 }

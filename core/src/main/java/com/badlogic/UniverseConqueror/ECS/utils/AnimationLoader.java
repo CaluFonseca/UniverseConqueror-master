@@ -1,4 +1,4 @@
-package com.badlogic.UniverseConqueror.ECS.systems;
+package com.badlogic.UniverseConqueror.ECS.utils;
 
 import com.badlogic.UniverseConqueror.ECS.components.StateComponent;
 import com.badlogic.gdx.assets.AssetManager;

@@ -70,4 +70,5 @@ public class CameraSystem extends EntitySystem {
     public OrthographicCamera getCamera() {
         return camera;
     }
+
 }

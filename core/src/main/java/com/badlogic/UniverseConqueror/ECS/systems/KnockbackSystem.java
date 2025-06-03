@@ -1,39 +1,38 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.BodyComponent;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.UniverseConqueror.ECS.components.KnockbackComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PhysicsComponent;
-import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 
-public class KnockbackSystem extends IteratingSystem {
+/// Sistema responsável por aplicar efeitos de knockback (impulso) em entidades com física
+public class KnockbackSystem extends BaseIteratingSystem {
 
-    /// Mapeadores de componentes para acesso rápido
-    private final ComponentMapper<KnockbackComponent> km = ComponentMapper.getFor(KnockbackComponent.class);
-    private final ComponentMapper<BodyComponent> bm = ComponentMapper.getFor(BodyComponent.class);
-    private final ComponentMapper<PhysicsComponent> pm = ComponentMapper.getFor(PhysicsComponent.class);
-
-    /// Sistema processa todas as entidades que possuem Knockback e corpo físico
+    /// Construtor define a família de entidades com Knockback e Physics
     public KnockbackSystem() {
         super(Family.all(KnockbackComponent.class, PhysicsComponent.class).get());
     }
 
     @Override
-    protected void processEntity (Entity entity,float deltaTime){
-            KnockbackComponent knockback = km.get(entity);
-            BodyComponent body = bm.get(entity);
+    protected void processEntity(Entity entity, float deltaTime) {
+        KnockbackComponent knockback = ComponentMappers.knockback.get(entity);
+        BodyComponent body = ComponentMappers.body.get(entity);
 
-            if (!knockback.hasBeenApplied) {
-                body.body.setLinearVelocity(knockback.impulse); // Aplica velocidade diretamente
-                knockback.hasBeenApplied = true;
-            }
+        /// Aplica o impulso de knockback se ainda não foi aplicado
+        if (!knockback.hasBeenApplied) {
+            body.body.setLinearVelocity(knockback.impulse); // Aplica como velocidade direta
+            knockback.hasBeenApplied = true;
+        }
 
-            knockback.timeRemaining -= deltaTime;
+        /// Diminui o tempo restante do efeito
+        knockback.timeRemaining -= deltaTime;
 
-            if (knockback.timeRemaining <= 0f) {
-                body.body.setLinearVelocity(0f, 0f); // Para o movimento após o tempo
-                entity.remove(KnockbackComponent.class);
-            }
+        /// Quando o tempo expira, para o corpo e remove o componente
+        if (knockback.timeRemaining <= 0f) {
+            body.body.setLinearVelocity(0f, 0f);
+            entity.remove(KnockbackComponent.class);
         }
     }
-
+}

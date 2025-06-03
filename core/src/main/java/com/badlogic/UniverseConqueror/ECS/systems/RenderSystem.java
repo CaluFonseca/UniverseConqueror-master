@@ -1,60 +1,62 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 
-public class RenderSystem extends IteratingSystem {
-    private final SpriteBatch batch;
-    private final OrthographicCamera camera;
+import static com.badlogic.UniverseConqueror.Utils.Constants.MIN_FLIP_THRESHOLD;
 
-    private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
-    private final ComponentMapper<AnimationComponent> am = ComponentMapper.getFor(AnimationComponent.class);
+/// Sistema que renderiza entidades com animações, exceto UFOs.
+public class RenderSystem extends BaseRenderSystem {
+
 
     public RenderSystem(SpriteBatch batch, OrthographicCamera camera) {
-        super(Family.all(TransformComponent.class, AnimationComponent.class).exclude(UfoComponent.class) .get());
-        this.batch = batch;
-        this.camera = camera;
-    }
-
-    @Override
-    public void update(float deltaTime) {
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        super.update(deltaTime);
-        batch.end();
+        super(
+            Family.all(TransformComponent.class, AnimationComponent.class, BodyComponent.class)
+                .exclude(UfoComponent.class).get(),
+            batch,
+            camera
+        );
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        StateComponent state = entity.getComponent(StateComponent.class);
-        AnimationComponent anim = entity.getComponent(AnimationComponent.class);
-      //  if (state != null && state.get() == StateComponent.State.DEATH)return;
-//        if (anim == null || anim.currentFrame == null) return;
+        AnimationComponent anim = ComponentMappers.animation.get(entity);
+        TransformComponent transform = ComponentMappers.transform.get(entity);
+        BodyComponent body = ComponentMappers.body.get(entity);
 
-        TransformComponent transform = tm.get(entity);
-        AnimationComponent animation = am.get(entity);
+        if (anim == null || transform == null || body == null || anim.currentFrame == null) return;
 
-        if (animation.currentFrame != null) {
-            TextureRegion frame = new TextureRegion(animation.currentFrame);
-            if ((animation.facingRight && frame.isFlipX()) || (!animation.facingRight && !frame.isFlipX())) {
-                frame.flip(true, false);
+        // Detecta direção (AI ou física)
+        AIComponent ai = entity.getComponent(AIComponent.class);
+        if (ai != null && ai.strategy != null) {
+            Vector2 dir = ai.strategy.getDirection();
+            if (Math.abs(dir.x) > MIN_FLIP_THRESHOLD) {
+                anim.facingRight = dir.x < 0;
             }
-//            // Flip logic
-//            if (frame.isFlipX()) frame.flip(true, false);
-//            if (!animation.facingRight) frame.flip(true, false);
-
-            float x = transform.position.x;
-            float y = transform.position.y;
-
-            batch.draw(frame, x - frame.getRegionWidth() / 2f, y - frame.getRegionHeight() / 2f);
+        } else {
+            float velocityX = body.body.getLinearVelocity().x;
+            if (Math.abs(velocityX) > MIN_FLIP_THRESHOLD) {
+                anim.facingRight = velocityX > 0;
+            }
         }
+
+        // Desenha o frame
+        TextureRegion frame = anim.currentFrame;
+        float x = transform.position.x;
+        float y = transform.position.y;
+        float w = frame.getRegionWidth();
+        float h = frame.getRegionHeight();
+
+        float drawX = anim.facingRight ? x - w / 2f : x + w / 2f;
+        float drawW = anim.facingRight ? w : -w;
+
+        batch.draw(frame, drawX, y - h / 2f, drawW, h);
     }
+
 }
-
-
-
-

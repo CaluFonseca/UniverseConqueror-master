@@ -1,11 +1,10 @@
 package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.UniverseConqueror.ECS.systems.AnimationLoader;
+import com.badlogic.UniverseConqueror.ECS.utils.AnimationLoader;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Vector2;

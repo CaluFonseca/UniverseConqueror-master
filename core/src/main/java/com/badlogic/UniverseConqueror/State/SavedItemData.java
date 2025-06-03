@@ -24,18 +24,18 @@ public class SavedItemData {
         this.position = position.cpy();
     }
 
-    /// Cria a entidade do item correspondente a partir dos dados salvos
-    public Entity createEntity(PooledEngine engine, World world, AssetManager assetManager) {
-        // Determina o caminho da textura baseado no nome do item
-        String texturePath = switch (name) {
-            case "Vida" -> AssetPaths.ITEM_VIDA;
-            case "Ataque" -> AssetPaths.ITEM_ATAQUE;
-            case "SuperAtaque" -> AssetPaths.ITEM_SUPER_ATAQUE;
-            default -> throw new IllegalArgumentException("Item desconhecido: " + name);
-        };
-
-        // Cria a entidade usando o ItemFactory e retorna
-        ItemFactory factory = new ItemFactory(name, position.x, position.y, texturePath, assetManager);
-        return factory.createEntity(engine, world);
-    }
+//    /// Cria a entidade do item correspondente a partir dos dados salvos
+//    public Entity createEntity(PooledEngine engine, World world, AssetManager assetManager) {
+//        // Determina o caminho da textura baseado no nome do item
+//        String texturePath = switch (name) {
+//            case "Vida" -> AssetPaths.ITEM_VIDA;
+//            case "Ataque" -> AssetPaths.ITEM_ATAQUE;
+//            case "SuperAtaque" -> AssetPaths.ITEM_SUPER_ATAQUE;
+//            default -> throw new IllegalArgumentException("Item desconhecido: " + name);
+//        };
+//
+//        // Cria a entidade usando o ItemFactory e retorna
+//        ItemFactory factory = new ItemFactory(name, position.x, position.y, texturePath, assetManager);
+//        return factory.createEntity(engine, world);
+//    }
 }

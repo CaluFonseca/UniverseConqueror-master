@@ -3,46 +3,47 @@ package com.badlogic.UniverseConqueror.ECS.systems;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.events.*;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 
-public class StateSoundSystem extends IteratingSystem {
-
-    private final ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
-    private final ComponentMapper<EnemyComponent> em = ComponentMapper.getFor(EnemyComponent.class);
-    private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
+/// Sistema responsável por tocar sons e notificar eventos com base em mudanças de estado
+public class StateSoundSystem extends BaseIteratingSystem {
 
     private final OrthographicCamera camera;
 
+    /// Construtor recebe a câmera para verificar visibilidade de inimigos
     public StateSoundSystem(OrthographicCamera camera) {
         super(Family.all(StateComponent.class).get());
         this.camera = camera;
     }
 
+    /// Processa cada entidade a cada frame
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        StateComponent state = sm.get(entity);
-        boolean isEnemy = em.has(entity);
-        EnemyComponent enemyComponent = em.get(entity);
+        StateComponent state = ComponentMappers.state.get(entity);
+        boolean isEnemy = ComponentMappers.enemy.has(entity);
+        EnemyComponent enemyComponent = ComponentMappers.enemy.get(entity);
         boolean isUfo = isEnemy && enemyComponent.type == EnemyComponent.BehaviorType.UFO;
 
-        // Incrementa o tempo na animação/estado atual
+        /// Atualiza tempo de permanência no estado atual
         state.timeInState += deltaTime;
 
-        // Para som de fastmove quando não está no estado, e não é inimigo ou UFO
+        /// Interrompe som de fastmove se o estado não for mais FAST_MOVE e não for inimigo
         if (state.currentState != StateComponent.State.FAST_MOVE && !isEnemy && !isUfo) {
             SoundManager.getInstance().stop("fastmove");
         }
 
-        // Detecta mudança de estado para disparar sons e eventos
+        /// Detecta mudança de estado e dispara eventos/sons
         if (state.currentState != state.previousState) {
             handleStateChange(entity, state, isEnemy, isUfo);
             state.previousState = state.currentState;
             state.timeInState = 0f;
         }
 
+        /// Som e eventos contínuos baseados em estado atual
         if (!isEnemy) {
             handlePlayerLoopedSounds(entity, state);
         } else {
@@ -54,6 +55,7 @@ public class StateSoundSystem extends IteratingSystem {
         }
     }
 
+    /// Lida com mudanças de estado únicas e emite sons/eventos correspondentes
     private void handleStateChange(Entity entity, StateComponent state, boolean isEnemy, boolean isUfo) {
         switch (state.currentState) {
             case JUMP -> EventBus.get().notify(new JumpEvent(entity));
@@ -68,6 +70,7 @@ public class StateSoundSystem extends IteratingSystem {
         }
     }
 
+    /// Sons e eventos cíclicos enquanto o jogador anda ou está ferido
     private void handlePlayerLoopedSounds(Entity entity, StateComponent state) {
         switch (state.currentState) {
             case WALK -> {
@@ -85,32 +88,35 @@ public class StateSoundSystem extends IteratingSystem {
         }
     }
 
+    /// Sons ambientes de inimigos baseados no estado atual, se estiverem visíveis na câmera
     private void handleEnemyAmbientSound(Entity entity, StateComponent state, boolean isUfo) {
         String ambientKey = switch (state.currentState) {
             case CHASE -> isUfo ? "chaseUfo" : "chaseAlien";
-            case PATROL -> "patrolAlien"; // UFOs não patrulham
+            case PATROL -> "patrolAlien";
             default -> null;
         };
 
         SoundManager soundManager = SoundManager.getInstance();
 
         if (ambientKey != null) {
-            // Toca som em loop único por entidade, evita duplicação
             if (!soundManager.isLooping(ambientKey)) {
                 soundManager.loopUnique(entity, ambientKey);
             } else if (!ambientKey.equals(soundManager.getCurrentLoopKey(entity))) {
-                soundManager.stopLoopForEntity(entity); // para som antigo incorreto
+                soundManager.stopLoopForEntity(entity);
             }
         } else {
             soundManager.stopLoopForEntity(entity);
         }
     }
 
+    /// Verifica se a entidade está dentro da área visível pela câmera
     private boolean isInCameraView(Entity entity) {
-        if (!pm.has(entity)) return false;
-        Vector2 position = pm.get(entity).position;
+        if (!ComponentMappers.position.has(entity)) return false;
+        Vector2 position = ComponentMappers.position.get(entity).position;
+
         float halfW = camera.viewportWidth * 0.5f * camera.zoom;
         float halfH = camera.viewportHeight * 0.5f * camera.zoom;
+
         return position.x >= camera.position.x - halfW && position.x <= camera.position.x + halfW &&
             position.y >= camera.position.y - halfH && position.y <= camera.position.y + halfH;
     }

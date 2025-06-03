@@ -5,10 +5,13 @@ package com.badlogic.UniverseConqueror;
 
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.Interfaces.ScreenManager;
+import com.badlogic.UniverseConqueror.Interfaces.ScreenType;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.UniverseConqueror.Screens.GameScreen;
 import com.badlogic.UniverseConqueror.Screens.MainMenuScreen;
+import com.badlogic.UniverseConqueror.Utils.DefaultScreenManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
@@ -23,6 +26,7 @@ import static com.badlogic.UniverseConqueror.Utils.AssetPaths.*;
 
 public class GameLauncher extends Game {
 
+    private ScreenManager screenManager;
     /// SpriteBatch compartilhado para renderizar elementos gráficos.
     public SpriteBatch batch;
 
@@ -113,11 +117,11 @@ public class GameLauncher extends Game {
         // Inicializa o SpriteBatch compartilhado
         batch = new SpriteBatch();
 
-        // Instancia o ecrã do jogo (mas não a ativa ainda)
-        gameScreen = new GameScreen(this, assetManager);
+        // Inicializa o gerenciador de ecrãs
+        screenManager = new DefaultScreenManager(this, assetManager);
 
         // Define o menu principal como ecrã inicial
-        setScreen(new MainMenuScreen(this, assetManager));
+        screenManager.show(ScreenType.MAIN_MENU);
     }
     private void loadEnemyAnimations() {
         loadFormattedFrames(AssetPaths.ENEMY_ATTACK, 17);
@@ -164,11 +168,15 @@ public class GameLauncher extends Game {
             assetManager.load(path, Texture.class);
         }
     }
-
+    public void startNewGame() {
+        GameStateManager.delete();
+        this.isNewGame = true;
+        screenManager.show(ScreenType.GAME);
+    }
     /// Inicia um novo jogo, apagando o estado anterior e reinicializando o ecrã.
     public void startGame() {
         GameStateManager.delete();
-        setScreen(new GameScreen(this, assetManager));
+        screenManager.show(ScreenType.GAME);
     }
 
     /// Retorna a instância da GameScreen atual.
@@ -184,5 +192,13 @@ public class GameLauncher extends Game {
     /// Define o estado de novo jogo.
     public void setNewGame(boolean isNewGame) {
         this.isNewGame = isNewGame;
+    }
+
+    public ScreenManager getScreenManager() {
+        return screenManager;
+    }
+
+    public void goToMainMenu() {
+        screenManager.show(ScreenType.MAIN_MENU);
     }
 }

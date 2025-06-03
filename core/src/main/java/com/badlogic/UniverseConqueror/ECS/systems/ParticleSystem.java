@@ -1,73 +1,65 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.UniverseConqueror.ECS.components.ParticleComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
 import com.badlogic.UniverseConqueror.ECS.components.VelocityComponent;
-import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class ParticleSystem extends EntitySystem {
+/// Sistema responsável por renderizar efeitos de partículas associados a entidades
+public class ParticleSystem extends BaseIteratingSystem {
 
-    /// Batch usado para desenhar as partículas
+    /// Batch usado para desenhar os efeitos de partículas
     private final SpriteBatch batch;
 
-    /// Câmera do jogo para aplicar projeção correta
+    /// Câmera usada para configurar a projeção do batch
     private final OrthographicCamera camera;
 
-    /// Mapeadores de componentes
-    private final ComponentMapper<ParticleComponent> pm = ComponentMapper.getFor(ParticleComponent.class);
-    private final ComponentMapper<PositionComponent> posm = ComponentMapper.getFor(PositionComponent.class);
-    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
-
-    /// Lista de entidades com partículas
-    private ImmutableArray<Entity> entities;
-
+    /// Construtor: define a família de entidades com partículas e posição
     public ParticleSystem(SpriteBatch batch, OrthographicCamera camera) {
+        super(Family.all(ParticleComponent.class, PositionComponent.class).get());
         this.batch = batch;
         this.camera = camera;
     }
 
-    @Override
-    public void addedToEngine(Engine engine) {
-        /// Seleciona todas as entidades que têm partículas e posição
-        entities = engine.getEntitiesFor(Family.all(ParticleComponent.class, PositionComponent.class).get());
-    }
-
+    /// Inicia o batch antes de processar entidades, finaliza após
     @Override
     public void update(float deltaTime) {
-        /// Configura a projeção do batch para seguir a câmera
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        super.update(deltaTime);
+        batch.end();
+    }
 
-        for (Entity entity : entities) {
-            ParticleComponent particle = pm.get(entity);
-            PositionComponent position = posm.get(entity);
-            VelocityComponent velocity = vm.has(entity) ? vm.get(entity) : null;
+    /// Processa uma única entidade com partículas
+    @Override
+    protected void processEntity(Entity entity, float deltaTime) {
+        ParticleComponent particle = ComponentMappers.particle.get(entity);
+        PositionComponent position = ComponentMappers.position.get(entity);
+        VelocityComponent velocity = ComponentMappers.velocity.has(entity) ? ComponentMappers.velocity.get(entity) : null;
 
-            /// Altera o ângulo das partículas com base na direção da velocidade (se existir)
-            if (velocity != null && particle.effect != null) {
-                float angle = velocity.velocity.angleDeg() + 180f; // direção oposta à do movimento
 
-                for (var emitter : particle.effect.getEmitters()) {
-                    emitter.getAngle().setHigh(angle + 40f);
-                    emitter.getAngle().setLow(angle - 40f);
+        /// Se houver velocidade, ajusta o ângulo do emissor para seguir a direção contrária
+        if (velocity != null && particle.effect != null) {
+            float angle = velocity.velocity.angleDeg() + 180f;
 
-                    emitter.getVelocity().setLow(100f);
-                    emitter.getVelocity().setHigh(300f);
-                }
-            }
-
-            /// Atualiza a posição da partícula e desenha
-            if (particle.effect != null) {
-                float px = position.position.x + particle.offset.x;
-                float py = position.position.y + particle.offset.y;
-                particle.effect.setPosition(px, py);
-                particle.effect.draw(batch, deltaTime);
+            for (var emitter : particle.effect.getEmitters()) {
+                emitter.getAngle().setHigh(angle + 40f);
+                emitter.getAngle().setLow(angle - 40f);
+                emitter.getVelocity().setLow(100f);
+                emitter.getVelocity().setHigh(300f);
             }
         }
 
-        batch.end();
+        /// Atualiza posição da partícula com base na entidade e desenha o efeito
+        if (particle.effect != null) {
+            float px = position.position.x + particle.offset.x;
+            float py = position.position.y + particle.offset.y;
+            particle.effect.setPosition(px, py);
+            particle.effect.draw(batch, deltaTime);
+        }
     }
 }

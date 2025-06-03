@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.Interfaces.BaseScreen;
 import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
 import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
@@ -24,7 +25,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.UniverseConqueror.GameLauncher;
 
 /// ecrã de pausa que implementa controle de som, navegação e exibição do tempo
-public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen {
+public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen, BaseScreen {
 
     private final GameLauncher game;       /// Referência ao launcher para controle do ecrã
     private final GameScreen gameScreen;   /// ecrã principal para voltar do pause
@@ -39,7 +40,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     private boolean isAudioOn = true;      /// Estado do áudio ligado/desligado
     private Timer pauseTimer;              /// Temporizador para contar tempo de pausa
     private Label timerLabel;              /// Label para mostrar o tempo de pausa
-
+    private boolean uiInitialized = false;
     /// Construtor, inicializa referências
     public PauseScreen(GameLauncher game, GameScreen gameScreen, AssetManager assetManager) {
         this.game = game;
@@ -50,63 +51,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     /// Configura a cena e a interface ao mostrar o ecrã
     @Override
     public void show() {
-        stage = new Stage(new FitViewport(1920, 1080));
-        Gdx.input.setInputProcessor(stage);
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-
-        batch = new SpriteBatch();
-        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
-        background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
-
-        MusicManager.getInstance().play("menu", true);
-
-        pauseTimer = new Timer(Float.MAX_VALUE);
-        pauseTimer.start();
-
-        table = new Table();
-        table.center();
-        table.setFillParent(true);
-
-        Label pauseLabel = new Label("PAUSE", skin, "title");
-        pauseLabel.setFontScale(1.5f);
-        table.add(pauseLabel).padBottom(50).row();
-
-        TextButton resumeButton = createButton("Resume", () -> game.setScreen(gameScreen));
-        TextButton restartButton = createButton("Restart", this::restartGame);
-        TextButton mainMenuButton = createButton("Main Menu", this::goToMainMenu);
-        TextButton exitButton = createButton("Exit", this::exitGame);
-
-        TextButton audioToggleButton = new TextButton("Sound: On", skin);
-        audioToggleButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                playClickSound();
-                isAudioOn = !isAudioOn;
-                if (isAudioOn) {
-                    MusicManager.getInstance().unmute();
-                    audioToggleButton.setText("Sound: On");
-                } else {
-                    MusicManager.getInstance().mute();
-                    audioToggleButton.setText("Sound: Off");
-                }
-            }
-        });
-        addHoverSound(audioToggleButton);
-
-        timerLabel = new Label("00:00:00", skin);
-        timerLabel.setFontScale(2f);
-        table.add(timerLabel).padBottom(30).row();
-
-        float buttonWidth = 400f;
-        float buttonHeight = 80f;
-
-        table.add(resumeButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(restartButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(mainMenuButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(exitButton).size(buttonWidth, buttonHeight).pad(10).row();
-        table.add(audioToggleButton).size(buttonWidth, buttonHeight).pad(10).row();
-
-        stage.addActor(table);
+        initializeUI();
     }
 
     /// Cria botão com texto e ação associada, adicionando sons
@@ -160,15 +105,14 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     }
 
     @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
-    @Override public void hide() { dispose(); }
+    @Override public void hide() {   MusicManager.getInstance().stop();  }
     @Override public void pause() {}
     @Override public void resume() { }
 
     /// Libera recursos
     @Override
     public void dispose() {
-        stage.dispose();
-        batch.dispose();
+        disposeResources();
     }
 
     /// Toca som de clique
@@ -176,7 +120,7 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     /// Toca som de hover
     @Override public void playHoverSound() { SoundManager.getInstance().play("hoverButton"); }
     /// Vai para o menu principal
-    @Override public void goToMainMenu() { game.setScreen(new MainMenuScreen(game, assetManager)); }
+    @Override public void goToMainMenu() { ((GameLauncher) game).goToMainMenu(); }
     /// Sai do jogo e apaga estado salvo
     @Override public void exitGame() { GameStateManager.delete(); Gdx.app.exit(); }
 
@@ -185,7 +129,91 @@ public class PauseScreen implements Screen, SoundEnabledScreen, NavigableScreen 
     public void restartGame() {
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
-        game.setNewGame(true);
-        game.setScreen(new GameScreen(game, assetManager));
+        game.startNewGame();
+    }
+
+    @Override
+    public void initializeUI() {
+
+        stage = new Stage(new FitViewport(1920, 1080));
+        Gdx.input.setInputProcessor(stage);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+
+        batch = new SpriteBatch();
+        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
+        background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
+
+        MusicManager.getInstance().play("menu", true);
+
+        pauseTimer = new Timer(Float.MAX_VALUE);
+        pauseTimer.start();
+
+        table = new Table();
+        table.center();
+        table.setFillParent(true);
+
+        Label pauseLabel = new Label("PAUSE", skin, "title");
+        pauseLabel.setFontScale(1.5f);
+        table.add(pauseLabel).padBottom(30).row(); // menos padding que antes
+
+        timerLabel = new Label("00:00:00", skin);
+        timerLabel.setFontScale(2f);
+        table.add(timerLabel).padBottom(40).row(); // agora logo abaixo do título
+
+        float buttonWidth = 400f;
+        float buttonHeight = 80f;
+
+        table.add(createButton("Resume", this::resumeWithRestore))
+            .size(buttonWidth, buttonHeight)
+            .pad(10)
+            .row();
+        table.add(createButton("Restart", this::restartGame)).size(buttonWidth, buttonHeight).pad(10).row();
+        table.add(createButton("Main Menu", this::goToMainMenu)).size(buttonWidth, buttonHeight).pad(10).row();
+        table.add(createButton("Exit", this::exitGame)).size(buttonWidth, buttonHeight).pad(10).row();
+
+        TextButton audioToggleButton = new TextButton("Sound: On", skin);
+        audioToggleButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                playClickSound();
+                isAudioOn = !isAudioOn;
+                if (isAudioOn) {
+                    MusicManager.getInstance().unmute();
+                    audioToggleButton.setText("Sound: On");
+                } else {
+                    MusicManager.getInstance().mute();
+                    audioToggleButton.setText("Sound: Off");
+                }
+            }
+        });
+        addHoverSound(audioToggleButton);
+        table.add(audioToggleButton).size(buttonWidth, buttonHeight).pad(10).row();
+
+
+        stage.addActor(table);
+    }
+    private void resumeWithRestore() {
+        playClickSound();
+        GameScreen restoredGame = new GameScreen(game, assetManager);
+        game.setScreen(restoredGame);
+    }
+
+
+
+    @Override
+    public void initializeSystems() {
+
+    }
+
+    @Override
+    public void registerObservers() {
+
+    }
+
+    @Override
+    public void disposeResources() {
+        if (stage != null) stage.dispose();
+        if (batch != null) batch.dispose();
+        if (skin != null) skin.dispose();
     }
 }

@@ -1,26 +1,19 @@
-/// Estratégia de patrulha para inimigos.
-/// O inimigo se move entre pontos definidos em sequência, formando um caminho de patrulha.
-
 package com.badlogic.UniverseConqueror.Strategy;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 
-public class PatrolStrategy implements EnemyStrategy {
+public class PatrolStrategy extends AbstractEnemyStrategy {
 
     /// Pontos que o inimigo deve patrulhar.
-    private Vector2[] patrolPoints;
+    private final Vector2[] patrolPoints;
 
     /// Índice do ponto atual no caminho de patrulha.
     private int currentPoint = 0;
 
     /// Velocidade de movimento do inimigo durante a patrulha.
-    private float speed = 20f;
-
-    /// Direção atual do movimento.
-    private final Vector2 direction = new Vector2();
+    private final float speed = 20f;
 
     /// Construtor que recebe os pontos de patrulha.
     /// @param patrolPoints sequência de pontos a serem patrulhados
@@ -33,48 +26,37 @@ public class PatrolStrategy implements EnemyStrategy {
     /// @param deltaTime tempo decorrido desde o último frame (em segundos)
     @Override
     public void update(Entity enemy, float deltaTime) {
-
         PhysicsComponent pc = enemy.getComponent(PhysicsComponent.class);
         VelocityComponent velocity = enemy.getComponent(VelocityComponent.class);
         StateComponent state = enemy.getComponent(StateComponent.class);
-        PositionComponent position = enemy.getComponent(PositionComponent.class);
         HealthComponent health = enemy.getComponent(HealthComponent.class);
 
-        /// Ignora atualização se o inimigo estiver morto ou sem componentes necessários.
         if (health != null && health.isDead()) return;
         if (pc == null || velocity == null) return;
 
-        /// Obtém o ponto de destino atual e calcula a direção até ele.
         Vector2 target = patrolPoints[currentPoint];
         Vector2 pos = pc.body.getPosition();
-        direction.set(target).sub(pos);
 
-        /// Se o inimigo chegou próximo ao ponto, muda para o próximo.
-        if (direction.len() < 0.1f) {
-            velocity.velocity.set(0, 0);
-            direction.set(0, 0);
+        // Direção até o ponto de patrulha
+        Vector2 rawDir = target.cpy().sub(pos);
+
+        // Verifica se o inimigo chegou ao ponto de patrulha
+        if (rawDir.len2() < 2f) {
+            velocity.velocity.setZero();
             currentPoint = (currentPoint + 1) % patrolPoints.length;
-        } else {
-            /// Move na direção do ponto de patrulha com velocidade ajustada.
-            direction.nor().scl(speed);
-            velocity.velocity.set(direction);
-
-            /// Atualiza o estado para PATROL, se aplicável.
-            if (state != null && state.get() != StateComponent.State.PATROL && state.currentState != StateComponent.State.HURT) {
-                state.set(StateComponent.State.PATROL);
-            }
+            pc.body.setLinearVelocity(0, 0);
+            return;
         }
 
-        /// Atualiza a posição lógica da entidade com base na física.
-        if (position != null) {
-            position.position.set(pc.body.getPosition());
-        }
-    }
+        // Movimento e orientação
+        direction.set(rawDir).nor().scl(speed);
+        velocity.velocity.set(direction);
+        pc.body.setLinearVelocity(velocity.velocity);
 
-    /// Retorna a direção atual do movimento.
-    /// @return vetor normalizado representando a direção
-    @Override
-    public Vector2 getDirection() {
-        return direction;
+        // Estado de patrulha
+        if (state != null && state.get() != StateComponent.State.PATROL && state.currentState != StateComponent.State.HURT) {
+            state.set(StateComponent.State.PATROL);
+        }
+
     }
 }

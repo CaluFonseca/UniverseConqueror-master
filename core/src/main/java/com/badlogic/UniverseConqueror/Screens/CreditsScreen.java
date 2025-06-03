@@ -1,10 +1,11 @@
 package com.badlogic.UniverseConqueror.Screens;
 
+import com.badlogic.UniverseConqueror.Interfaces.BaseScreen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 
 /// ecrã de créditos do jogo, herdando da BaseInfosScreen
-public class CreditsScreen extends BaseInfosScreen {
+public class CreditsScreen extends BaseInfosScreen implements BaseScreen {
 
     /// Construtor que passa o texto dos créditos para a classe base
     public CreditsScreen(Game game, AssetManager assetManager) {
@@ -14,5 +15,25 @@ public class CreditsScreen extends BaseInfosScreen {
                 "Paulo Ferreira - \n" +
                 "Vítor Hugo Freitas - 20241067",
             assetManager);
+    }
+
+    @Override
+    public void initializeUI() {
+
+    }
+
+    @Override
+    public void initializeSystems() {
+
+    }
+
+    @Override
+    public void registerObservers() {
+
+    }
+
+    @Override
+    public void disposeResources() {
+
     }
 }

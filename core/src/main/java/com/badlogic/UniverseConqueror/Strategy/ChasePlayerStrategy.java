@@ -1,85 +1,77 @@
 package com.badlogic.UniverseConqueror.Strategy;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
-import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.ashley.core.Entity;
 
-public class ChasePlayerStrategy implements EnemyStrategy {
+/// Estratégia para perseguir o jogador
+public class ChasePlayerStrategy extends AbstractEnemyStrategy {
 
-    /// Entidade alvo (normalmente o jogador)
-    private final Entity target;
-    /// Velocidade de movimentação do inimigo
-    private final float speed;
-    /// Vetor auxiliar para cálculo de direção
-    private final Vector2 direction = new Vector2();
-    /// Câmera para uso eventual (ex: culling)
-    private final OrthographicCamera camera;
+    private final Entity target;  /// O alvo (jogador) que o inimigo deve perseguir.
+    private final float speed;  /// A velocidade do inimigo ao perseguir o jogador.
+    private final OrthographicCamera camera;  /// A câmera usada para visualização, pode ser utilizada para efeitos relacionados ao movimento do inimigo.
 
-    /// Construtor recebe o alvo, câmera e velocidade
+    /**
+     * Construtor da estratégia de perseguição ao jogador.
+     *
+     * @param target A entidade alvo (o jogador) que será perseguida.
+     * @param camera A câmera ortográfica usada para visualização (potencialmente afetando o comportamento do inimigo).
+     * @param speed A velocidade com que o inimigo persegue o jogador.
+     */
     public ChasePlayerStrategy(Entity target, OrthographicCamera camera, float speed) {
-        this.target = target;
-        this.camera = camera;
-        this.speed = speed;
+        this.target = target;  /// Atribui o alvo (jogador) a ser perseguido.
+        this.camera = camera;  /// Atribui a câmera para manipulação, se necessário.
+        this.speed = speed;  /// Atribui a velocidade da perseguição.
     }
 
     @Override
     public void update(Entity enemy, float deltaTime) {
-        if (target == null) return; // Sem alvo, não faz nada
+        if (target == null) return;  /// Se o alvo (jogador) não estiver presente, não faz nada.
 
-        // Obtém componentes essenciais do inimigo e do alvo
-        PhysicsComponent enemyPhysics = enemy.getComponent(PhysicsComponent.class);
-        PhysicsComponent targetPhysics = target.getComponent(PhysicsComponent.class);
-        VelocityComponent velocity = enemy.getComponent(VelocityComponent.class);
-        StateComponent state = enemy.getComponent(StateComponent.class);
-        HealthComponent health = enemy.getComponent(HealthComponent.class);
+        // Obtém os componentes necessários para o inimigo e o alvo
+        PhysicsComponent enemyPhysics = enemy.getComponent(PhysicsComponent.class);  /// Componente de física do inimigo.
+        PhysicsComponent targetPhysics = target.getComponent(PhysicsComponent.class);  /// Componente de física do alvo (jogador).
+        VelocityComponent velocity = enemy.getComponent(VelocityComponent.class);  /// Componente de velocidade do inimigo.
+        StateComponent state = enemy.getComponent(StateComponent.class);  /// Componente de estado (como atacar, patrulhar, etc.).
+        HealthComponent health = enemy.getComponent(HealthComponent.class);  /// Componente de saúde do inimigo.
 
-        // Se algum componente está ausente ou inimigo está morto, não atualiza movimento
-        if (enemyPhysics == null || targetPhysics == null || velocity == null || health == null || health.isDead()) return;
+        // Verifica se algum componente necessário está ausente ou se o inimigo está morto
+        if (enemyPhysics == null || targetPhysics == null || velocity == null || health == null || health.isDead())
+            return;  /// Se qualquer componente essencial estiver ausente ou o inimigo estiver morto, a atualização é interrompida.
 
-        // Posições do inimigo e alvo no mundo
-        Vector2 enemyPos = enemyPhysics.body.getPosition();
-        Vector2 targetPos = targetPhysics.body.getPosition();
+        // Obtém a posição do inimigo e do alvo
+        Vector2 enemyPos = enemyPhysics.body.getPosition();  /// Posição do inimigo no mundo.
+        Vector2 targetPos = targetPhysics.body.getPosition();  /// Posição do alvo (jogador) no mundo.
 
-        // Calcula vetor direção do inimigo até o alvo
-        direction.set(targetPos).sub(enemyPos);
+        // Calcula a direção normalizada entre o inimigo e o alvo
+        calculateDirection(enemyPos, targetPos);  /// Método da classe base que calcula a direção entre o inimigo e o alvo.
 
-        // Atualiza animação para virar para esquerda/direita conforme direção
+        float distance = enemyPos.dst(targetPos);  /// Calcula a distância entre o inimigo e o alvo.
+
+        // Obtém o componente de animação do inimigo
         AnimationComponent animation = enemy.getComponent(AnimationComponent.class);
 
-        float distance = direction.len();
-        if (animation != null && distance >= 100f) {
-            float threshold = 0.01f;
-            if (direction.x > threshold) {
-                animation.facingRight = false;
-            } else if (direction.x < -threshold) {
-                animation.facingRight = true;
-            }
-        }
-
-        // Se está perto demais, para e muda estado para patrulha ou chase dependendo do tipo
+        // Se a distância entre o inimigo e o alvo for menor que 100, o inimigo para de se mover e volta ao estado de patrulha
         if (distance < 100f) {
-            velocity.velocity.setZero();
-            if (state.currentState != StateComponent.State.HURT) {
-                if (enemy.getComponent(UfoComponent.class) != null) {
-                    state.set(StateComponent.State.CHASE);
+            velocity.velocity.setZero();  /// Se o inimigo estiver muito perto do alvo, ele para de se mover.
+            if (state.currentState != StateComponent.State.HURT) {  /// Se o inimigo não estiver ferido
+                if (enemy.getComponent(UfoComponent.class) != null) {  /// Se o inimigo for um UFO
+                    if (state.currentState != StateComponent.State.CHASE && state.currentState != StateComponent.State.HURT) {
+                        state.set(StateComponent.State.CHASE);  /// Altera o estado do inimigo para "Perseguindo"
+                    }
                 } else {
-                    state.set(StateComponent.State.PATROL);
+                    if (state.currentState != StateComponent.State.PATROL && state.currentState != StateComponent.State.HURT) {
+                        state.set(StateComponent.State.PATROL);  /// Se não for um UFO, o inimigo volta ao estado de patrulha
+                    }
                 }
             }
         } else {
-            // Caso contrário, normaliza direção e aplica velocidade configurada
-            direction.nor().scl(speed);
-            velocity.velocity.set(direction);
-            if (state.currentState != StateComponent.State.HURT) {
-                state.set(StateComponent.State.CHASE);
+            // Se o inimigo está distante o suficiente, ele continua se movendo em direção ao jogador
+            velocity.velocity.set(direction.scl(speed));  /// A velocidade do inimigo é ajustada com base na direção e velocidade
+            if (state.currentState != StateComponent.State.CHASE && state.currentState != StateComponent.State.HURT) {
+                state.set(StateComponent.State.CHASE);  /// Altera o estado do inimigo para "Perseguindo"
             }
         }
-    }
-
-    @Override
-    public Vector2 getDirection() {
-        return direction;
     }
 }

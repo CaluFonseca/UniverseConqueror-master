@@ -2,6 +2,7 @@ package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -13,12 +14,6 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.EnumSet;
 
 public class PathFollowSystem extends IteratingSystem {
-    /// Mapeadores para componentes usados no sistema
-    private ComponentMapper<PathComponent> pathMapper = ComponentMapper.getFor(PathComponent.class);
-    private ComponentMapper<PositionComponent> posMapper = ComponentMapper.getFor(PositionComponent.class);
-    private ComponentMapper<VelocityComponent> velMapper = ComponentMapper.getFor(VelocityComponent.class);
-    private ComponentMapper<PhysicsComponent> phyMapper = ComponentMapper.getFor(PhysicsComponent.class);
-    private ComponentMapper<AnimationComponent> animMapper = ComponentMapper.getFor(AnimationComponent.class);
 
     public PathFollowSystem() {
         /// Configura família para entidades que têm Path, Position e Velocity
@@ -27,12 +22,10 @@ public class PathFollowSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        /// Obtém os componentes relevantes da entidade
-        PathComponent path = pathMapper.get(entity);
-        PhysicsComponent physics = phyMapper.get(entity);
-        VelocityComponent velocity = velMapper.get(entity);
-        AnimationComponent animation = animMapper.get(entity);
-
+        PathComponent path = ComponentMappers.path.get(entity);
+        PhysicsComponent physics = ComponentMappers.physics.get(entity);
+        VelocityComponent velocity = ComponentMappers.velocity.get(entity);
+        AnimationComponent animation = ComponentMappers.animation.get(entity);
         /// Se não há waypoints, para o movimento
         if (path.waypoints.isEmpty()) {
             velocity.velocity.setZero(); /// para movimento

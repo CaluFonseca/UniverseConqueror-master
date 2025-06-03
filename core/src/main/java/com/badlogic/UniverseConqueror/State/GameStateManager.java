@@ -30,5 +30,8 @@ public class GameStateManager {
         FileHandle file = Gdx.files.local(SAVE_PATH);
         if (file.exists()) file.delete();
     }
-
+    public static boolean hasSave() {
+        FileHandle file = Gdx.files.local(SAVE_PATH);
+        return file.exists();
+    }
 }

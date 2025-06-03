@@ -5,10 +5,14 @@ import com.badlogic.UniverseConqueror.ECS.components.TextureComponent;
 import com.badlogic.UniverseConqueror.ECS.components.TransformComponent;
 import com.badlogic.UniverseConqueror.ECS.components.BodyComponent;
 import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.UniverseConqueror.Pathfinding.MapGraphBuilder;
+import com.badlogic.UniverseConqueror.Pathfinding.Node;
+import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -43,8 +47,14 @@ public class ItemFactory {
         entity.add(transformComponent);
 
         /// Cria e adiciona o componente de textura para representação visual.
+//        TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
+//        textureComponent.texture = itemTexture;
+//        entity.add(textureComponent);
+
+        Texture itemTexture  = assetManager.get(texturePath, Texture.class);
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
-        textureComponent.texture = itemTexture;
+        textureComponent.texture = itemTexture ;
+
         entity.add(textureComponent);
 
         /// Cria e adiciona o componente de corpo para colisão (Box2D).
@@ -87,5 +97,15 @@ public class ItemFactory {
         shape.dispose();
 
         return body;
+    }
+
+    public static ItemFactory createItem(String name, Vector2 position, AssetManager assetManager) {
+        String texturePath = switch (name) {
+            case "Vida" -> AssetPaths.ITEM_VIDA;
+            case "Ataque" -> AssetPaths.ITEM_ATAQUE;
+            case "SuperAtaque" -> AssetPaths.ITEM_SUPER_ATAQUE;
+            default -> throw new IllegalArgumentException("Item desconhecido: " + name);
+        };
+        return new ItemFactory(name, position.x, position.y, texturePath, assetManager);
     }
 }

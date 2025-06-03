@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.UniverseConqueror.Pathfinding.*;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -16,8 +17,6 @@ public class PathRequestSystem extends EntitySystem {
     /// Referência ao algoritmo A* para encontrar caminhos
     private final AStarPathfinder pathfinder;
 
-    /// Mapeador para PositionComponent (posição das entidades)
-    private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
 
     /// Famílias para filtrar entidades específicas
     private final Family playerFamily = Family.all(PlayerComponent.class, PositionComponent.class).get();
@@ -56,8 +55,8 @@ public class PathRequestSystem extends EntitySystem {
             Entity player = players.first();
             Entity spaceship = spaceships.first(); // Assume 1 spaceship
 
-            Vector2 playerPos = pm.get(player).position;
-            Vector2 spaceshipPos = pm.get(spaceship).position;
+            Vector2 playerPos = ComponentMappers.position.get(player).position;
+            Vector2 spaceshipPos = ComponentMappers.position.get(spaceship).position;
 
             /// Obtém os nodes do grafo para as posições do player e da spaceship
             Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
@@ -93,8 +92,9 @@ public class PathRequestSystem extends EntitySystem {
             Entity targetItem = findClosestItem(player, items);
             if (targetItem == null) return;
 
-            Vector2 playerPos = pm.get(player).position;
-            Vector2 targetPos = pm.get(targetItem).position;
+            Vector2 playerPos = ComponentMappers.position.get(player).position;
+            Vector2 targetPos = ComponentMappers.position.get(targetItem).position;
+
 
             Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
             Node endNode = mapGraphBuilder.getNodeAtWorldPosition(targetPos.x, targetPos.y);
@@ -121,12 +121,12 @@ public class PathRequestSystem extends EntitySystem {
 
     /// Método para encontrar o item mais próximo do jogador
     private Entity findClosestItem(Entity player, ImmutableArray<Entity> items) {
-        Vector2 playerPos = pm.get(player).position;
+        Vector2 playerPos = ComponentMappers.position.get(player).position;
         Entity closest = null;
         float minDistance = Float.MAX_VALUE;
 
         for (Entity item : items) {
-            Vector2 itemPos = pm.get(item).position;
+            Vector2 itemPos = ComponentMappers.position.get(item).position;
             float dist = playerPos.dst2(itemPos);
 
             if (dist < minDistance) {

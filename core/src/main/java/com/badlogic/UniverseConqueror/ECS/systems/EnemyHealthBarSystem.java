@@ -2,22 +2,19 @@ package com.badlogic.UniverseConqueror.ECS.systems;
 
 // Importa os componentes usados para acessar dados das entidades
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 // Sistema responsável por desenhar barras de vida sobre os inimigos
-public class EnemyHealthBarSystem extends IteratingSystem {
+public class EnemyHealthBarSystem extends BaseIteratingSystem {
 
     private final ShapeRenderer shapeRenderer; // Utilizado para desenhar formas básicas (barras)
     private final OrthographicCamera camera;   // Câmera usada para posicionar corretamente a barra no mundo
 
-    // Mapeadores para acessar rapidamente os componentes
-    private final ComponentMapper<HealthComponent> hm = ComponentMapper.getFor(HealthComponent.class);
-    private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
 
     // Construtor, define a família de entidades que têm Enemy, Health e Position
     public EnemyHealthBarSystem(OrthographicCamera camera) {
@@ -38,8 +35,8 @@ public class EnemyHealthBarSystem extends IteratingSystem {
     // Processa cada inimigo com barra de vida
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        HealthComponent health = hm.get(entity);     // Acessa vida
-        PositionComponent position = pm.get(entity); // Acessa posição
+        HealthComponent health = ComponentMappers.health.get(entity);
+        PositionComponent position = ComponentMappers.position.get(entity);
 
         if (health == null || position == null) return; // Segurança
         if (!health.wasDamagedThisFrame && health.currentHealth == health.maxHealth) return; // Se não teve dano e vida cheia, não desenha

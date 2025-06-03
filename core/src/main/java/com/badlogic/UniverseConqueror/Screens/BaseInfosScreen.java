@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
+import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
 import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.gdx.Game;
@@ -145,7 +146,7 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
     /// Navega para o ecrã do menu principal
     @Override
     public void goToMainMenu() {
-        game.setScreen(new MainMenuScreen(game, assetManager));
+        ((GameLauncher) game).goToMainMenu();
     }
 
     /// Sai do jogo

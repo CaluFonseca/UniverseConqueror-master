@@ -2,8 +2,9 @@ package com.badlogic.UniverseConqueror.ECS.entity;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.Interfaces.EnemyStrategy;
+import com.badlogic.UniverseConqueror.State.SavedEnemyData;
 import com.badlogic.UniverseConqueror.Strategy.*;
-import com.badlogic.UniverseConqueror.ECS.systems.EnemyAnimationLoader;
+import com.badlogic.UniverseConqueror.ECS.utils.EnemyAnimationLoader;
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -231,14 +232,37 @@ public class EnemyFactory  {
     /// Altera o estado e reinicia a anima\u00e7\u00e3o do inimigo
     public static void changeState(Entity enemy, StateComponent.State newState) {
         StateComponent state = enemy.getComponent(StateComponent.class);
-        if (state != null && state.get() != newState) {
-            state.set(newState);
-            state.timeInState = 0f;
+        AnimationComponent anim = enemy.getComponent(AnimationComponent.class);
 
-            AnimationComponent anim = enemy.getComponent(AnimationComponent.class);
-            if (anim != null) {
-                anim.stateTime = 0f;
-            }
+        if (state != null && anim != null && state.get() != newState) {
+            state.set(newState);
+            anim.stateTime = 0f;
         }
     }
+
+    public static Entity createEnemyFromData(
+        PooledEngine engine,
+        World world,
+        AssetManager assetManager,
+        Entity player,
+        OrthographicCamera camera,
+        SavedEnemyData data
+    ) {
+        // Defina qual tipo criar, baseado em data.type
+        switch (data.type.toLowerCase()) {
+            case "patrol":
+                return createPatrollingEnemy(engine, world, data.position, assetManager, player, camera, data.patrolStart, data.patrolEnd);
+
+            case "chase":
+                return createChasingEnemy(engine, world, data.position, assetManager, player, camera);
+
+            case "ufo":
+                return createUfoEnemy(engine, world, data.position, assetManager, player, camera);
+
+            default:
+                // Pode lançar exceção ou criar um inimigo padrão
+                return createChasingEnemy(engine, world, data.position, assetManager, player, camera);
+        }
+    }
+
 }

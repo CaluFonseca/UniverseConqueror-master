@@ -31,7 +31,7 @@ public class CameraInputSystem extends EntitySystem {
 
     /// Mapper do componente de câmera
     private final ComponentMapper<CameraComponent> cm = ComponentMapper.getFor(CameraComponent.class);
-
+    private boolean followingPlayer = true;
     /// Construtor recebe a câmera e configura o input
     public CameraInputSystem(OrthographicCamera camera) {
         this.camera = camera;
@@ -146,5 +146,15 @@ public class CameraInputSystem extends EntitySystem {
     /// Retorna o adaptador de entrada para registrar no Gdx.input.setInputProcessor
     public InputAdapter getInputAdapter() {
         return inputAdapter;
+    }
+
+
+
+    public void setFollowingPlayer(boolean follow) {
+        this.followingPlayer = follow;
+    }
+    public boolean toggleFollow() {
+        followingPlayer = !followingPlayer;
+        return followingPlayer;
     }
 }

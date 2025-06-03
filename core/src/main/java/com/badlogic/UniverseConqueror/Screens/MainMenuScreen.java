@@ -3,6 +3,9 @@ package com.badlogic.UniverseConqueror.Screens;
 import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.BaseScreen;
+import com.badlogic.UniverseConqueror.Interfaces.ScreenManager;
+import com.badlogic.UniverseConqueror.Interfaces.ScreenType;
 import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Game;
@@ -21,7 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public class MainMenuScreen implements Screen, SoundEnabledScreen {
+public class MainMenuScreen implements Screen, SoundEnabledScreen, BaseScreen {
     /// SpriteBatch para desenhar texturas e elementos gráficos
     private SpriteBatch batch;
     /// Palco para gerenciar a UI
@@ -41,10 +44,10 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     private TextButton controlsButton;
     private TextButton creditsButton;
     /// Slider para controle de volume
-    private Slider volumeSlider;
+   // private Slider volumeSlider;
     /// Referência ao jogo para trocar ecrãs
     private Game game;
-
+    private final ScreenManager screenManager;
     /// Controle de som ligado/desligado
     private boolean isAudioOn = true;
     /// Volume atual da música
@@ -54,81 +57,12 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     private final AssetManager assetManager;
 
     /// Construtor inicializa os componentes essenciais do menu principal
-    public MainMenuScreen(Game game, AssetManager assetManager) {
+    public MainMenuScreen(Game game, AssetManager assetManager, ScreenManager screenManager) {
         this.game = game;
         this.assetManager = assetManager;
-
-        batch = new SpriteBatch();
-        stage = new Stage(new FitViewport(1920, 1080));
-
-        font = new BitmapFont();
-        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
-        background = assetManager.get(AssetPaths.BACKGROUND_MAIN, Texture.class);
-        MusicManager.getInstance().play("menu", true);
-
-        Table table = new Table();
-        table.center();
-        table.setFillParent(true);
-
-        float buttonWidth = 400f;
-        float buttonHeight = 80f;
-
-        /// Botão Play que inicia o jogo e para a música do menu
-        playButton = createButton("Play", () -> {
-            MusicManager.getInstance().stop();
-            ((GameLauncher) game).startGame();
-        });
-
-        /// Botão para alternar o som ligado/desligado
-        audioButton = createButton("Som: On", this::toggleAudio);
-
-        /// Botão para aumentar o volume
-        volumeUpButton = createButton("Volume +", () -> {
-            currentVolume = Math.min(currentVolume + 0.1f, 1.0f);
-            volumeSlider.setValue(currentVolume);
-            setMusicVolume();
-        });
-
-        /// Botão para diminuir o volume
-        volumeDownButton = createButton("Volume -", () -> {
-            currentVolume = Math.max(currentVolume - 0.1f, 0.0f);
-            volumeSlider.setValue(currentVolume);
-            setMusicVolume();
-        });
-
-        /// Botão para abrir ecrã de controles, parando a música
-        controlsButton = createButton("Controlos", () -> {
-            stopMusic();
-            game.setScreen(new ControlsScreen(game, assetManager));
-        });
-
-        /// Botão para abrir ecrã de créditos, parando a música
-        creditsButton = createButton("Creditos", () -> {
-            stopMusic();
-            game.setScreen(new CreditsScreen(game, assetManager));
-        });
-
-        /// Slider de volume que atualiza volume da música
-        volumeSlider = new Slider(0.0f, 1.0f, 0.01f, false, skin);
-        volumeSlider.setValue(currentVolume);
-        volumeSlider.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                currentVolume = volumeSlider.getValue();
-                setMusicVolume();
-            }
-        });
-
-        /// Adiciona botões na tabela com espaçamento
-        table.add(playButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-        table.add(audioButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-        table.add(volumeUpButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-        table.add(volumeDownButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-        table.add(controlsButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-        table.add(creditsButton).size(buttonWidth, buttonHeight).padBottom(20).row();
-
-        stage.addActor(table);
+        this.screenManager = screenManager;
     }
+
 
     /// Cria botão com texto e ação executada ao clicar
     private TextButton createButton(String text, Runnable action) {
@@ -177,6 +111,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     /// Chamado ao mostrar o ecrã, configura input e inicia música se necessário
     @Override
     public void show() {
+        initializeUI();
         Gdx.input.setInputProcessor(stage);
         if (isAudioOn && !MusicManager.getInstance().isPlaying("menu")) {
             MusicManager.getInstance().play("menu", true);
@@ -222,7 +157,7 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
         batch.dispose();
         font.dispose();
         stage.dispose();
-        assetManager.dispose();
+        //assetManager.dispose();
     }
 
     /// Toca som de clique em botão
@@ -235,5 +170,90 @@ public class MainMenuScreen implements Screen, SoundEnabledScreen {
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");
+    }
+
+    @Override
+    public void initializeUI() {
+        batch = new SpriteBatch();
+        stage = new Stage(new FitViewport(1920, 1080));
+        font = new BitmapFont();
+        skin = assetManager.get(AssetPaths.UI_SKIN_JSON, Skin.class);
+        background = assetManager.get(AssetPaths.BACKGROUND_MAIN, Texture.class);
+
+        MusicManager.getInstance().play("menu", true);
+
+        Table table = new Table();
+        table.center();
+        table.setFillParent(true);
+
+        float buttonWidth = 400f;
+        float buttonHeight = 80f;
+
+        playButton = createButton("Play", () -> {
+            MusicManager.getInstance().stop();
+            screenManager.show(ScreenType.GAME);
+        });
+
+        audioButton = createButton("Som: On", this::toggleAudio);
+
+        volumeUpButton = createButton("Volume +", () -> {
+            currentVolume = Math.min(currentVolume + 0.1f, 1.0f);
+          //  volumeSlider.setValue(currentVolume);
+            setMusicVolume();
+        });
+
+        volumeDownButton = createButton("Volume -", () -> {
+            currentVolume = Math.max(currentVolume - 0.1f, 0.0f);
+          //  volumeSlider.setValue(currentVolume);
+            setMusicVolume();
+        });
+
+        controlsButton = createButton("Controlos", () -> {
+            stopMusic();
+            screenManager.show(ScreenType.CONTROLS);
+        });
+
+        creditsButton = createButton("Creditos", () -> {
+            stopMusic();
+            screenManager.show(ScreenType.CREDITS);
+        });
+
+//        volumeSlider = new Slider(0.0f, 1.0f, 0.01f, false, skin);
+//        volumeSlider.setValue(currentVolume);
+//        volumeSlider.addListener(new ChangeListener() {
+//            @Override
+//            public void changed(ChangeEvent event, Actor actor) {
+//                currentVolume = volumeSlider.getValue();
+//                setMusicVolume();
+//            }
+//        });
+
+        table.add(playButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        table.add(audioButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        table.add(volumeUpButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        table.add(volumeDownButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        table.add(controlsButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        table.add(creditsButton).size(buttonWidth, buttonHeight).padBottom(20).row();
+        //table.add(volumeSlider).width(buttonWidth).padTop(10).row();
+
+        stage.addActor(table);
+    }
+
+
+    @Override
+    public void initializeSystems() {
+
+    }
+
+    @Override
+    public void registerObservers() {
+
+    }
+
+    @Override
+    public void disposeResources() {
+        if (batch != null) batch.dispose();
+        if (font != null) font.dispose();
+        if (stage != null) stage.dispose();
     }
 }

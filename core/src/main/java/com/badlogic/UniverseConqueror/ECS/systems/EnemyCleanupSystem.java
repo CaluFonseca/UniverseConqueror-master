@@ -1,18 +1,14 @@
 package com.badlogic.UniverseConqueror.ECS.systems;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.physics.box2d.Body;
+
 
 import java.util.function.Consumer;
 
 public class EnemyCleanupSystem extends EntitySystem {
-
-    /// Mapeadores de componentes
-    private final ComponentMapper<HealthComponent> hm = ComponentMapper.getFor(HealthComponent.class);
-    private final ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
-    private final ComponentMapper<PhysicsComponent> pm = ComponentMapper.getFor(PhysicsComponent.class);
 
     private final PooledEngine engine;
     private final BodyRemovalSystem bodyRemovalSystem;
@@ -45,8 +41,8 @@ public class EnemyCleanupSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         for (Entity enemy : enemies) {
-            HealthComponent health = hm.get(enemy);
-            StateComponent state = sm.get(enemy);
+            HealthComponent health = ComponentMappers.health.get(enemy);
+            StateComponent state = ComponentMappers.state.get(enemy);
 
             /// Ignora se o inimigo ainda não morreu
             if (!health.isDead()) continue;
@@ -57,7 +53,7 @@ public class EnemyCleanupSystem extends EntitySystem {
 
                 if (finished) {
                     /// Marca corpo para destruição
-                    PhysicsComponent pc = pm.get(enemy);
+                    PhysicsComponent pc = ComponentMappers.physics.get(enemy);
                     if (pc != null && pc.body != null) {
                         bodyRemovalSystem.markForRemoval(pc.body);
                         pc.body = null;

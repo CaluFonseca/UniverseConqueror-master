@@ -19,9 +19,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.UniverseConqueror.Interfaces.BaseScreen;
 
 /// ecrã final do nível que mostra estatísticas e opções para reiniciar ou sair do jogo
-public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen {
+public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen, BaseScreen {
 
     private final GameLauncher game;
     private final Stage stage;
@@ -35,56 +36,29 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
     private final int enemiesKilled;
 
     /// Construtor que inicializa o ecrã com as estatísticas do jogo e configura UI e som
-    public EndScreen(GameLauncher game, AssetManager assetManager, int collectedItems, int remainingHealth, float totalTime, int enemiesKilled) {
+    public EndScreen(GameLauncher game, AssetManager assetManager,
+                     int itemsCollected, int health, float totalTime, int enemiesKilled) {
         this.game = game;
         this.assetManager = assetManager;
-        this.collectedItems = collectedItems;
-        this.remainingHealth = remainingHealth;
+        this.collectedItems = itemsCollected;
+        this.remainingHealth = health;
         this.totalTime = totalTime;
         this.enemiesKilled = enemiesKilled;
 
         this.stage = new Stage(new ScreenViewport());
         this.skin = new Skin(Gdx.files.internal(AssetPaths.UI_SKIN_JSON));
+    }
 
+
+    @Override
+    public void show() {
         Gdx.input.setInputProcessor(stage);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
-        setupUI();
+        MusicManager.getInstance().play("menu", true);
+        MusicManager.getInstance().setVolume(0.3f);
+        initializeUI();
     }
-
-    /// Cria e posiciona os elementos da interface gráfica (labels, botões, etc)
-    private void setupUI() {
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
-        Label titleLabel = new Label("Fim de Nivel", skin, "title");
-        Label timeLabel = new Label("Tempo de jogo: " + String.format("%.2f", totalTime) + "s", skin);
-        Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
-        Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
-        Label enemyLabel = new Label("Inimigos derrotados: " + enemiesKilled, skin);
-
-        TextButton retryButton = createButton("Voltar a Jogar", () -> {
-            MusicManager.getInstance().stop();
-            restartGame();
-        });
-
-        TextButton exitButton = createButton("Sair", this::exitGame);
-
-        table.add(titleLabel).padBottom(20f).row();
-        table.add(timeLabel).padBottom(10f).row();
-        table.add(itemLabel).padBottom(10f).row();
-        table.add(healthLabel).padBottom(10f).row();
-        table.add(enemyLabel).padBottom(20f).row();
-        table.add(retryButton).width(400).pad(10).row();
-        table.add(exitButton).width(400).pad(10).row();
-
-        stage.addActor(table);
-
-        // Toca som indicando avanço de nível
-        SoundManager.getInstance().play("nextLevel");
-    }
-
     /// Cria um botão com texto e ação associada, incluindo sons para clique e hover
     private TextButton createButton(String text, Runnable action) {
         TextButton button = new TextButton(text, skin);
@@ -138,7 +112,7 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
     public void goToMainMenu() {
         SoundManager.getInstance().stop();
 
-        game.setScreen(new MainMenuScreen(game, assetManager));
+        ((GameLauncher) game).goToMainMenu();
     }
 
     /// Sai do jogo limpando estado salvo
@@ -153,6 +127,55 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
     public void restartGame() {
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
-        game.startGame();
+        game.startGame();  // Agora chama corretamente o método startGame()
+    }
+
+    @Override
+    public void initializeUI() {
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+
+        Label titleLabel = new Label("Fim de Nivel", skin, "title");
+        Label timeLabel = new Label("Tempo de jogo: " + String.format("%.2f", totalTime) + "s", skin);
+        Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
+        Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
+        Label enemyLabel = new Label("Inimigos derrotados: " + enemiesKilled, skin);
+
+        TextButton retryButton = createButton("Voltar a Jogar", () -> {
+            MusicManager.getInstance().stop();
+            restartGame();
+        });
+
+        TextButton exitButton = createButton("Sair", this::exitGame);
+
+        table.add(titleLabel).padBottom(20f).row();
+        table.add(timeLabel).padBottom(10f).row();
+        table.add(itemLabel).padBottom(10f).row();
+        table.add(healthLabel).padBottom(10f).row();
+        table.add(enemyLabel).padBottom(20f).row();
+        table.add(retryButton).width(400).pad(10).row();
+        table.add(exitButton).width(400).pad(10).row();
+
+        stage.addActor(table);
+
+        // Toca som indicando avanço de nível
+        SoundManager.getInstance().play("nextLevel");
+    }
+
+    @Override
+    public void initializeSystems() {
+
+    }
+
+    @Override
+    public void registerObservers() {
+
+    }
+
+    @Override
+    public void disposeResources() {
+        if (stage != null) stage.dispose();
+        if (skin != null) skin.dispose();
     }
 }

@@ -31,4 +31,6 @@ public class Constants {
     /// Velocidade usada em modo de movimento rápido, equivalente ao sprint.
     /// Duplicada de SPRINT_SPEED, mas pode ser usada para distinguir casos lógicos diferentes.
     public static final float SPEED_FAST = 10000f;
+
+    public static final float MIN_FLIP_THRESHOLD = 2f;
 }
