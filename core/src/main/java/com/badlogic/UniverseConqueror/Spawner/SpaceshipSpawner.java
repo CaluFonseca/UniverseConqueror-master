@@ -16,6 +16,7 @@ public class SpaceshipSpawner implements Spawner<Node> {
     private final AssetManager assetManager;
     private final MapGraphBuilder mapGraphBuilder;
 
+    //Spawn nave espacial
     public SpaceshipSpawner(PooledEngine engine, World world, AssetManager assetManager, MapGraphBuilder mapGraphBuilder) {
         this.engine = engine;
         this.world = world;
@@ -23,6 +24,7 @@ public class SpaceshipSpawner implements Spawner<Node> {
         this.mapGraphBuilder = mapGraphBuilder;
     }
 
+    //Método que gera a nave espacial no mapa em uma posição válida e adiciona a nave ao mundo do jogo.
     @Override
     public Node spawn() {
         Node node = mapGraphBuilder.getRandomWalkableNode();

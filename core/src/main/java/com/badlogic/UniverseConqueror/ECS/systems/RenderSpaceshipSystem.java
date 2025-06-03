@@ -7,7 +7,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-/// Sistema responsável por renderizar a nave espacial (spaceship) na tela
+// Sistema responsável por renderizar a nave espacial (spaceship) na tela
 public class RenderSpaceshipSystem extends BaseRenderSystem {
 
     public RenderSpaceshipSystem(SpriteBatch batch, OrthographicCamera camera) {

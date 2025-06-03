@@ -16,7 +16,6 @@ import java.util.EnumSet;
 public class PathFollowSystem extends IteratingSystem {
 
     public PathFollowSystem() {
-        /// Configura família para entidades que têm Path, Position e Velocity
         super(Family.all(PathComponent.class, PositionComponent.class, VelocityComponent.class).get());
     }
 
@@ -26,31 +25,29 @@ public class PathFollowSystem extends IteratingSystem {
         PhysicsComponent physics = ComponentMappers.physics.get(entity);
         VelocityComponent velocity = ComponentMappers.velocity.get(entity);
         AnimationComponent animation = ComponentMappers.animation.get(entity);
-        /// Se não há waypoints, para o movimento
+
         if (path.waypoints.isEmpty()) {
-            velocity.velocity.setZero(); /// para movimento
+            velocity.velocity.setZero(); // para movimento
             return;
         }
 
-        /// Obtém o próximo waypoint para onde a entidade deve ir
+        // Obtém o próximo waypoint para onde a entidade deve ir
         Vector2 target = path.waypoints.peek();
 
-        /// Obtém a posição atual da entidade pelo corpo físico Box2D
+        // Obtém a posição atual da entidade pelo corpo físico Box2D
         Vector2 currentPos = physics.body.getPosition();
 
-        /// Calcula vetor direção e distância entre posição atual e alvo
+        // Calcula vetor direção e distância entre posição atual e alvo
         Vector2 direction = new Vector2(target).sub(currentPos);
         float distance = direction.len();
 
-        /// Se estiver perto o suficiente do waypoint
+        // Se estiver perto o suficiente do waypoint
         if (distance < 50f) {
-            SoundManager.getInstance().play("wayPoint"); /// toca som de waypoint alcançado
-            path.waypoints.poll(); /// remove waypoint alcançado da fila
-            velocity.velocity.setZero(); /// para o movimento momentaneamente
+            SoundManager.getInstance().play("wayPoint");
+            path.waypoints.poll();
+            velocity.velocity.setZero();
         } else {
-            /// Define velocidade normalizada multiplicada pela velocidade desejada (100f)
             velocity.velocity.set(direction.nor().scl(100f));
-
             StateComponent state = entity.getComponent(StateComponent.class);
             if (state != null) {
                 boolean isFollowingPath = Gdx.input.isKeyPressed(Input.Keys.F) || Gdx.input.isKeyPressed(Input.Keys.H);
@@ -66,9 +63,7 @@ public class PathFollowSystem extends IteratingSystem {
         }
 
         if (animation != null) {
-            // Só aplica o flip se o player estiver em modo de seguir caminho
             boolean isFollowingPath = Gdx.input.isKeyPressed(Input.Keys.F) || Gdx.input.isKeyPressed(Input.Keys.H);
-
             if (isFollowingPath) {
                 float vx = velocity.velocity.x;
                 if (vx > 0.01f) {

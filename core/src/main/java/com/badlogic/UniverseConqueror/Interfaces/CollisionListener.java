@@ -16,7 +16,7 @@ public interface CollisionListener {
      * @param fixtureB O segundo fixture envolvido na colisão.
      * @param contact O contato entre os dois objetos, que contém informações sobre a colisão.
      */
-    void beginContact(Fixture fixtureA, Fixture fixtureB, Contact contact);  /// Método para tratar a lógica quando a colisão começa.
+    void beginContact(Fixture fixtureA, Fixture fixtureB, Contact contact);
 
     /**
      * Método chamado quando a colisão entre dois objetos termina.
@@ -25,5 +25,5 @@ public interface CollisionListener {
      * @param fixtureB O segundo fixture envolvido na colisão.
      * @param contact O contato entre os dois objetos, que contém informações sobre a colisão.
      */
-    void endContact(Fixture fixtureA, Fixture fixtureB, Contact contact);  /// Método para tratar a lógica quando a colisão termina.
+    void endContact(Fixture fixtureA, Fixture fixtureB, Contact contact);
 }

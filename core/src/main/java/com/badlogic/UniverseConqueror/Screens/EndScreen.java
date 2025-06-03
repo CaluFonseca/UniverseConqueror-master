@@ -4,139 +4,49 @@ import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
-import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.UniverseConqueror.Interfaces.BaseScreen;
-
-/// ecrã final do nível que mostra estatísticas e opções para reiniciar ou sair do jogo
-public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, NavigableScreen, BaseScreen {
-
-    private final GameLauncher game;
-    private final Stage stage;
-    private final Skin skin;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+/**
+ * Classe `EndScreen` representa o ecrã de finalização de nível do jogo.
+ * Exibe estatísticas do jogo como itens coletados, vida restante, tempo de jogo e inimigos derrotados.
+ * Também oferece opções para reiniciar o jogo ou sair.
+ */
+public class EndScreen extends BaseUIScreen implements NavigableScreen {
 
     private final int collectedItems;
     private final int remainingHealth;
     private final float totalTime;
-    private final AssetManager assetManager;
-
     private final int enemiesKilled;
 
-    /// Construtor que inicializa o ecrã com as estatísticas do jogo e configura UI e som
     public EndScreen(GameLauncher game, AssetManager assetManager,
                      int itemsCollected, int health, float totalTime, int enemiesKilled) {
-        this.game = game;
-        this.assetManager = assetManager;
+        super(game, assetManager);
         this.collectedItems = itemsCollected;
         this.remainingHealth = health;
         this.totalTime = totalTime;
         this.enemiesKilled = enemiesKilled;
-
-        this.stage = new Stage(new ScreenViewport());
-        this.skin = new Skin(Gdx.files.internal(AssetPaths.UI_SKIN_JSON));
     }
 
-
+    //Método que inicializa a interface UI
     @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+    public void initializeUI() {
+        background = assetManager.get(AssetPaths.BACKGROUND_PAUSE, Texture.class);
 
         MusicManager.getInstance().play("menu", true);
         MusicManager.getInstance().setVolume(0.3f);
-        initializeUI();
-    }
-    /// Cria um botão com texto e ação associada, incluindo sons para clique e hover
-    private TextButton createButton(String text, Runnable action) {
-        TextButton button = new TextButton(text, skin);
-        button.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                playClickSound();
-                action.run();
-            }
-        });
-        button.addListener(new ClickListener() {
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                playHoverSound();
-            }
-        });
-        return button;
-    }
+        SoundManager.getInstance().play("nextLevel");
 
-    /// Renderiza o ecrã limpando o fundo e desenhando o stage
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        stage.act(delta);
-        stage.draw();
-    }
-
-    /// Libera recursos do ecrã
-    @Override
-    public void dispose() {
-        stage.dispose();
-        skin.dispose();
-    }
-
-    /// Toca som ao clicar
-    @Override
-    public void playClickSound() {
-        SoundManager.getInstance().play("keyboardClick");
-    }
-
-    /// Toca som ao passar o mouse sobre botões
-    @Override
-    public void playHoverSound() {
-        SoundManager.getInstance().play("hoverButton");
-    }
-
-    /// Navega para o menu principal do jogo
-    @Override
-    public void goToMainMenu() {
-        SoundManager.getInstance().stop();
-
-        ((GameLauncher) game).goToMainMenu();
-    }
-
-    /// Sai do jogo limpando estado salvo
-    @Override
-    public void exitGame() {
-        GameStateManager.delete();
-        Gdx.app.exit();
-    }
-
-    /// Reinicia o jogo e para sons e músicas em execução
-    @Override
-    public void restartGame() {
-        SoundManager.getInstance().stop();
-        MusicManager.getInstance().stop();
-        game.startGame();  // Agora chama corretamente o método startGame()
-    }
-
-    @Override
-    public void initializeUI() {
         Table table = new Table();
         table.setFillParent(true);
         table.center();
 
-        Label titleLabel = new Label("Fim de Nivel", skin, "title");
+        Label titleLabel = new Label("Fim de Nível", skin, "title");
         Label timeLabel = new Label("Tempo de jogo: " + String.format("%.2f", totalTime) + "s", skin);
         Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
         Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
@@ -158,24 +68,27 @@ public class EndScreen extends ScreenAdapter implements SoundEnabledScreen, Navi
         table.add(exitButton).width(400).pad(10).row();
 
         stage.addActor(table);
-
-        // Toca som indicando avanço de nível
-        SoundManager.getInstance().play("nextLevel");
     }
 
     @Override
-    public void initializeSystems() {
-
+    public void restartGame() {
+        SoundManager.getInstance().stop();
+        MusicManager.getInstance().stop();
+        game.startGame();
     }
 
     @Override
-    public void registerObservers() {
-
+    public void exitGame() {
+        GameStateManager.delete();
+        Gdx.app.exit();
     }
 
     @Override
-    public void disposeResources() {
-        if (stage != null) stage.dispose();
-        if (skin != null) skin.dispose();
+    public void goToMainMenu() {
+        SoundManager.getInstance().stop();
+        game.goToMainMenu();
     }
+
+    @Override public void initializeSystems() {}
+    @Override public void registerObservers() {}
 }

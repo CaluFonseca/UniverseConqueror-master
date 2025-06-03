@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 
+//spawn de itens
 public class ItemSpawner implements Spawner<Void> {
 
     private final PooledEngine engine;
@@ -30,6 +31,7 @@ public class ItemSpawner implements Spawner<Void> {
         this.mapGraphBuilder = mapGraphBuilder;
     }
 
+    // Método responsável por criar os itens no mundo do jogo. Gera múltiplos itens de tipos diferentes.
     @Override
     public Void spawn() {
         for (int i = 0; i < 10; i++) {
@@ -43,6 +45,7 @@ public class ItemSpawner implements Spawner<Void> {
         return null;
     }
 
+    //Cria um item
     private ItemFactory createItem(String type, String assetPath) {
         Node node = mapGraphBuilder.getRandomWalkableNode();
         Vector2 worldPos = mapGraphBuilder.toWorldPosition(node);

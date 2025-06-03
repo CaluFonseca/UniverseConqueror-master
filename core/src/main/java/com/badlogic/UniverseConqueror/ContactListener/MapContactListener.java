@@ -19,12 +19,12 @@ import com.badlogic.gdx.physics.box2d.*;
  */
 public class MapContactListener implements CollisionListener {
 
-    private final ComponentMapper<KnockbackComponent> knockbackMapper = ComponentMapper.getFor(KnockbackComponent.class);  /// Mapeador de componentes para o Knockback
+    private final ComponentMapper<KnockbackComponent> knockbackMapper = ComponentMapper.getFor(KnockbackComponent.class);  // Mapeador de componentes para o Knockback
 
-    private final Engine engine;  /// Referência à engine do ECS (sistema de entidades e componentes).
-    private final ItemCollectionSystem itemCollectionSystem;  /// Sistema responsável pela coleta de itens.
-    private final java.util.function.Supplier<Integer> enemiesKilledSupplier;  /// Função que retorna o número de inimigos mortos.
-    private Runnable onEndLevelCallback;  /// Callback a ser executado quando o nível terminar.
+    private final Engine engine;
+    private final ItemCollectionSystem itemCollectionSystem;
+    private final java.util.function.Supplier<Integer> enemiesKilledSupplier;
+    private Runnable onEndLevelCallback;
 
     /**
      * Construtor para inicializar os componentes necessários.
@@ -51,46 +51,46 @@ public class MapContactListener implements CollisionListener {
 
     @Override
     public void beginContact(Fixture fixtureA, Fixture fixtureB, Contact contact) {
-        Body bodyA = fixtureA.getBody();  /// Obtém o primeiro corpo da colisão.
-        Body bodyB = fixtureB.getBody();  /// Obtém o segundo corpo da colisão.
+        Body bodyA = fixtureA.getBody();
+        Body bodyB = fixtureB.getBody();
 
-        Entity playerEntity = getPlayerEntity(bodyA, bodyB);  /// Verifica se algum dos corpos é o jogador.
+        Entity playerEntity = getPlayerEntity(bodyA, bodyB);
 
-        boolean colA = isMapCollision(bodyA);  /// Verifica se o primeiro corpo colidiu com o mapa.
-        boolean colB = isMapCollision(bodyB);  /// Verifica se o segundo corpo colidiu com o mapa.
+        boolean colA = isMapCollision(bodyA);
+        boolean colB = isMapCollision(bodyB);
 
         if (colA || colB) {
-            // Se uma colisão com o mapa foi detectada, pode aplicar efeitos de Knockback ou outras ações.
-            // Comentado no momento.
+            // Se uma colisão com o mapa foi detectada,Knockback
+
         }
 
-        if (playerEntity == null) return;  /// Se não for o jogador, não faz nada.
+        if (playerEntity == null) return;
 
         // Verifica se o jogador colidiu com a nave (fim de nível).
         if (isPlayerAndSpaceshipCollision(bodyA, bodyB)) {
-            int enemiesKilled = enemiesKilledSupplier.get();  /// Obtém o número de inimigos mortos.
-            EventBus.get().notify(new EndGameEvent(playerEntity, enemiesKilled));  /// Notifica o fim do jogo.
-            if (onEndLevelCallback != null) onEndLevelCallback.run();  /// Executa o callback, se definido.
+            int enemiesKilled = enemiesKilledSupplier.get();
+            EventBus.get().notify(new EndGameEvent(playerEntity, enemiesKilled));
+            if (onEndLevelCallback != null) onEndLevelCallback.run();
             return;
         }
 
         // Verifica se o jogador colidiu com um item.
         if (isPlayerAndItemCollision(bodyA, bodyB)) {
-            Entity itemEntity = (Entity) bodyB.getUserData();  /// Obtém a entidade do item.
-            collectItem(itemEntity, playerEntity);  /// Coleta o item.
-            engine.removeEntity(itemEntity);  /// Remove o item da engine.
+            Entity itemEntity = (Entity) bodyB.getUserData();
+            collectItem(itemEntity, playerEntity);
+            engine.removeEntity(itemEntity);
             return;
         }
 
         // Caso contrário, aplica dano ao jogador.
         if (!isBulletCollision(bodyA, bodyB) && !isEnemyCollision(bodyA, bodyB)) {
-            applyDamageToPlayer(playerEntity, 1);  /// Aplica dano ao jogador se não for uma colisão com bala ou inimigo.
+            applyDamageToPlayer(playerEntity, 1);
         }
     }
 
     @Override
     public void endContact(Fixture fixtureA, Fixture fixtureB, Contact contact) {
-        // Não há lógica implementada para o fim do contato no momento.
+
     }
 
     /**
@@ -100,29 +100,29 @@ public class MapContactListener implements CollisionListener {
      * @param mapBody O corpo do mapa (objeto com o qual ocorreu a colisão).
      */
     private void applyKnockbackIfEntity(Body entityBody, Body mapBody) {
-        Entity entity = getEntity(entityBody);  /// Obtém a entidade associada ao corpo.
-        if (entity == null) return;  /// Se não for uma entidade válida, retorna.
+        Entity entity = getEntity(entityBody);
+        if (entity == null) return;
 
-        // Verifica se a entidade já tem o componente Knockback.
+
         if (entity.getComponent(KnockbackComponent.class) != null) return;
 
-        PositionComponent pos = entity.getComponent(PositionComponent.class);  /// Obtém a posição da entidade.
-        BodyComponent bodyComp = entity.getComponent(BodyComponent.class);  /// Obtém o componente do corpo da entidade.
+        PositionComponent pos = entity.getComponent(PositionComponent.class);
+        BodyComponent bodyComp = entity.getComponent(BodyComponent.class);
 
-        if (pos == null || bodyComp == null) return;  /// Se não tiver a posição ou o corpo, retorna.
+        if (pos == null || bodyComp == null) return;
 
-        Vector2 entityPos = pos.position;  /// Posição da entidade.
-        Vector2 tilePos = mapBody.getPosition();  /// Posição do mapa (objeto com o qual colidiu).
+        Vector2 entityPos = pos.position;
+        Vector2 tilePos = mapBody.getPosition();
 
-        Vector2 direction = entityPos.cpy().sub(tilePos).nor();  /// Calcula a direção do impulso (oposta à direção da colisão).
+        Vector2 direction = entityPos.cpy().sub(tilePos).nor();
 
-        KnockbackComponent knockback = new KnockbackComponent();  /// Cria o componente de Knockback.
-        knockback.impulse = direction.scl(100f);  /// Define a força do impulso.
-        knockback.timeRemaining = 0.3f;  /// Define o tempo restante para o efeito de Knockback.
-        knockback.duration = 0.3f;  /// Define a duração do efeito de Knockback.
-        knockback.hasBeenApplied = false;  /// Define que o efeito ainda não foi aplicado.
+        KnockbackComponent knockback = new KnockbackComponent();
+        knockback.impulse = direction.scl(100f);
+        knockback.timeRemaining = 0.3f;
+        knockback.duration = 0.3f;
+        knockback.hasBeenApplied = false;
 
-        entity.add(knockback);  /// Adiciona o componente de Knockback à entidade.
+        entity.add(knockback);  // Adiciona o componente de Knockback à entidade.
     }
 
     /**
@@ -133,7 +133,7 @@ public class MapContactListener implements CollisionListener {
      * @return Verdadeiro se houve colisão com um inimigo.
      */
     private boolean isEnemyCollision(Body bodyA, Body bodyB) {
-        return hasComponent(bodyA, EnemyComponent.class) || hasComponent(bodyB, EnemyComponent.class);  /// Verifica se algum dos corpos é um inimigo.
+        return hasComponent(bodyA, EnemyComponent.class) || hasComponent(bodyB, EnemyComponent.class);
     }
 
     /**
@@ -144,7 +144,7 @@ public class MapContactListener implements CollisionListener {
      */
     private boolean isMapCollision(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("map".equals(fixture.getUserData())) return true;  /// Verifica se o fixture tem "map" como dado.
+            if ("map".equals(fixture.getUserData())) return true;
         }
         return false;
     }
@@ -157,8 +157,8 @@ public class MapContactListener implements CollisionListener {
      * @return Verdadeiro se a entidade possui o componente.
      */
     private boolean hasComponent(Body body, Class<? extends Component> componentClass) {
-        Object data = body.getUserData();  /// Obtém os dados do corpo.
-        return (data instanceof Entity && ((Entity) data).getComponent(componentClass) != null);  /// Verifica se a entidade tem o componente.
+        Object data = body.getUserData();
+        return (data instanceof Entity && ((Entity) data).getComponent(componentClass) != null);
     }
 
     /**
@@ -168,8 +168,8 @@ public class MapContactListener implements CollisionListener {
      * @return A entidade associada ao corpo.
      */
     private Entity getEntity(Body body) {
-        Object userData = body.getUserData();  /// Obtém os dados do corpo.
-        return (userData instanceof Entity) ? (Entity) userData : null;  /// Retorna a entidade se for válida.
+        Object userData = body.getUserData();
+        return (userData instanceof Entity) ? (Entity) userData : null;
     }
 
     /**
@@ -180,11 +180,11 @@ public class MapContactListener implements CollisionListener {
      * @return A entidade do jogador, ou null se não for o jogador.
      */
     private Entity getPlayerEntity(Body bodyA, Body bodyB) {
-        Entity a = getEntity(bodyA);  /// Obtém a entidade do primeiro corpo.
-        Entity b = getEntity(bodyB);  /// Obtém a entidade do segundo corpo.
-        if (a != null && a.getComponent(PlayerComponent.class) != null) return a;  /// Se o primeiro corpo for o jogador, retorna a entidade.
-        if (b != null && b.getComponent(PlayerComponent.class) != null) return b;  /// Se o segundo corpo for o jogador, retorna a entidade.
-        return null;  /// Retorna null se nenhum corpo for o jogador.
+        Entity a = getEntity(bodyA);
+        Entity b = getEntity(bodyB);
+        if (a != null && a.getComponent(PlayerComponent.class) != null) return a;
+        if (b != null && b.getComponent(PlayerComponent.class) != null) return b;
+        return null;
     }
 
     /**
@@ -195,15 +195,15 @@ public class MapContactListener implements CollisionListener {
      * @return Verdadeiro se a colisão foi entre o jogador e a nave.
      */
     private boolean isPlayerAndSpaceshipCollision(Body bodyA, Body bodyB) {
-        Entity a = getEntity(bodyA);  /// Obtém a entidade do primeiro corpo.
-        Entity b = getEntity(bodyB);  /// Obtém a entidade do segundo corpo.
+        Entity a = getEntity(bodyA);
+        Entity b = getEntity(bodyB);
 
-        boolean isPlayerA = a != null && a.getComponent(PlayerComponent.class) != null;  /// Verifica se o primeiro corpo é o jogador.
-        boolean isPlayerB = b != null && b.getComponent(PlayerComponent.class) != null;  /// Verifica se o segundo corpo é o jogador.
-        boolean isShipA = a != null && a.getComponent(EndLevelComponent.class) != null;  /// Verifica se o primeiro corpo é a nave de fim de nível.
-        boolean isShipB = b != null && b.getComponent(EndLevelComponent.class) != null;  /// Verifica se o segundo corpo é a nave de fim de nível.
+        boolean isPlayerA = a != null && a.getComponent(PlayerComponent.class) != null;
+        boolean isPlayerB = b != null && b.getComponent(PlayerComponent.class) != null;
+        boolean isShipA = a != null && a.getComponent(EndLevelComponent.class) != null;
+        boolean isShipB = b != null && b.getComponent(EndLevelComponent.class) != null;
 
-        return (isPlayerA && isShipB) || (isPlayerB && isShipA);  /// Verifica se houve colisão entre o jogador e a nave.
+        return (isPlayerA && isShipB) || (isPlayerB && isShipA);
     }
 
     /**
@@ -214,8 +214,8 @@ public class MapContactListener implements CollisionListener {
      * @return Verdadeiro se a colisão foi com um item.
      */
     private boolean isPlayerAndItemCollision(Body bodyA, Body bodyB) {
-        Fixture fixtureB = bodyB.getFixtureList().get(0);  /// Obtém o fixture do segundo corpo.
-        return "item".equals(fixtureB.getUserData());  /// Verifica se o fixture representa um item.
+        Fixture fixtureB = bodyB.getFixtureList().get(0);
+        return "item".equals(fixtureB.getUserData());
     }
 
     /**
@@ -226,9 +226,9 @@ public class MapContactListener implements CollisionListener {
      * @return Verdadeiro se a colisão foi com uma bala ou fireball.
      */
     private boolean isBulletCollision(Body bodyA, Body bodyB) {
-        Fixture fixtureB = bodyB.getFixtureList().get(0);  /// Obtém o fixture do segundo corpo.
-        String tag = String.valueOf(fixtureB.getUserData());  /// Obtém o dado do fixture como string.
-        return "bullet".equals(tag) || "fireball".equals(tag);  /// Verifica se a colisão foi com uma bala ou fireball.
+        Fixture fixtureB = bodyB.getFixtureList().get(0);
+        String tag = String.valueOf(fixtureB.getUserData());
+        return "bullet".equals(tag) || "fireball".equals(tag);
     }
 
     /**
@@ -239,7 +239,7 @@ public class MapContactListener implements CollisionListener {
      */
     private void collectItem(Entity item, Entity player) {
         if (item != null && player != null) {
-            itemCollectionSystem.collectItem(item, player);  /// Coleta o item no sistema de coleta.
+            itemCollectionSystem.collectItem(item, player);
         }
     }
 
@@ -251,7 +251,7 @@ public class MapContactListener implements CollisionListener {
      */
     private void applyDamageToPlayer(Entity playerEntity, int damageAmount) {
         if (playerEntity != null) {
-            EventBus.get().notify(new DamageTakenEvent(playerEntity, null, damageAmount));  /// Notifica o sistema de dano.
+            EventBus.get().notify(new DamageTakenEvent(playerEntity, null, damageAmount));
         }
     }
 }

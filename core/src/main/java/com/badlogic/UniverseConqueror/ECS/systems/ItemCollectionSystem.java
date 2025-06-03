@@ -7,7 +7,7 @@ import com.badlogic.UniverseConqueror.ECS.events.ItemCollectedEvent;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 
-/// Sistema responsável por detectar e processar a coleta de itens
+// Sistema responsável por detectar e processar a coleta de itens
 public class ItemCollectionSystem extends BaseIteratingSystem {
 
     private int collectedCount = 0;

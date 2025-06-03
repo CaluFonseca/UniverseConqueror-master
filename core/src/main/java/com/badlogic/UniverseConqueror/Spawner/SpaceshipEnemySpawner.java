@@ -20,6 +20,7 @@ public class SpaceshipEnemySpawner implements Spawner<Void> {
     private final MapGraphBuilder mapGraphBuilder;
     private final Node spaceshipNode;
 
+    //Spawn de inimigos
     public SpaceshipEnemySpawner(PooledEngine engine, World world, AssetManager assetManager,
                                  Entity player, OrthographicCamera camera,
                                  MapGraphBuilder mapGraphBuilder, Node spaceshipNode) {
@@ -32,6 +33,7 @@ public class SpaceshipEnemySpawner implements Spawner<Void> {
         this.spaceshipNode = spaceshipNode;
     }
 
+    //Método que realiza o spawn dos inimigos.
     @Override
     public Void spawn() {
         System.out.println("Starting spawn process...");
@@ -41,26 +43,17 @@ public class SpaceshipEnemySpawner implements Spawner<Void> {
         };
 
         for (int[] offset : offsets) {
-            System.out.println("Processing offset: [" + offset[0] + ", " + offset[1] + "]");
-
             Node patrolStart = mapGraphBuilder.findNearestWalkableOffset(spaceshipNode, offset[0], offset[1]);
             Node patrolEnd = mapGraphBuilder.findNearestWalkableOffset(spaceshipNode, offset[0] * 2, offset[1] * 2);
 
             if (patrolStart == null || patrolEnd == null) {
-                System.out.println("One or both patrol nodes are null for offset [" + offset[0] + ", " + offset[1] + "]");
                 continue;
             }
-
-            System.out.println("Patrol start node: " + patrolStart + ", Patrol end node: " + patrolEnd);
 
             Vector2 startWorld = mapGraphBuilder.toWorldPosition(patrolStart);
             Vector2 endWorld = mapGraphBuilder.toWorldPosition(patrolEnd);
 
-            System.out.println("Start world position: " + startWorld + ", End world position: " + endWorld);
-
-            // Debug if the world positions are valid.
             if (startWorld == null || endWorld == null) {
-                System.out.println("Invalid world positions for patrol start and end.");
                 continue;
             }
 
@@ -68,15 +61,8 @@ public class SpaceshipEnemySpawner implements Spawner<Void> {
             Entity enemy = EnemyFactory.createPatrollingEnemy(
                 engine, world, startWorld, assetManager, player, camera, startWorld, endWorld
             );
-            if (enemy == null) {
-                System.out.println("Failed to create enemy.");
-            } else {
-                System.out.println("Enemy created and added to the engine.");
                 engine.addEntity(enemy);
-            }
         }
-
-        System.out.println("Spawn process completed.");
         return null;
     }
 }

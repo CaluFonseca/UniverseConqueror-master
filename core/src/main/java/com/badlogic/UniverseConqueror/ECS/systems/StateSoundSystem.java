@@ -9,18 +9,18 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 
-/// Sistema responsável por tocar sons e notificar eventos com base em mudanças de estado
+// Sistema responsável por tocar sons e notificar eventos com base em mudanças de estado
 public class StateSoundSystem extends BaseIteratingSystem {
 
     private final OrthographicCamera camera;
 
-    /// Construtor recebe a câmera para verificar visibilidade de inimigos
+    // Construtor recebe a câmera para verificar visibilidade de inimigos
     public StateSoundSystem(OrthographicCamera camera) {
         super(Family.all(StateComponent.class).get());
         this.camera = camera;
     }
 
-    /// Processa cada entidade a cada frame
+    // Processa cada entidade
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         StateComponent state = ComponentMappers.state.get(entity);
@@ -28,22 +28,22 @@ public class StateSoundSystem extends BaseIteratingSystem {
         EnemyComponent enemyComponent = ComponentMappers.enemy.get(entity);
         boolean isUfo = isEnemy && enemyComponent.type == EnemyComponent.BehaviorType.UFO;
 
-        /// Atualiza tempo de permanência no estado atual
+        // Atualiza tempo de permanência no estado atual
         state.timeInState += deltaTime;
 
-        /// Interrompe som de fastmove se o estado não for mais FAST_MOVE e não for inimigo
+        // Interrompe som de fastmove se o estado não for mais FAST_MOVE e não for inimigo
         if (state.currentState != StateComponent.State.FAST_MOVE && !isEnemy && !isUfo) {
             SoundManager.getInstance().stop("fastmove");
         }
 
-        /// Detecta mudança de estado e dispara eventos/sons
+        // Detecta mudança de estado e dispara eventos/sons
         if (state.currentState != state.previousState) {
             handleStateChange(entity, state, isEnemy, isUfo);
             state.previousState = state.currentState;
             state.timeInState = 0f;
         }
 
-        /// Som e eventos contínuos baseados em estado atual
+        // Som e eventos contínuos baseados em estado atual
         if (!isEnemy) {
             handlePlayerLoopedSounds(entity, state);
         } else {
@@ -55,7 +55,7 @@ public class StateSoundSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Lida com mudanças de estado únicas e emite sons/eventos correspondentes
+    // Lida com mudanças de estado únicas e emite sons/eventos correspondentes
     private void handleStateChange(Entity entity, StateComponent state, boolean isEnemy, boolean isUfo) {
         switch (state.currentState) {
             case JUMP -> EventBus.get().notify(new JumpEvent(entity));
@@ -70,7 +70,7 @@ public class StateSoundSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Sons e eventos cíclicos enquanto o jogador anda ou está ferido
+    // Sons e eventos cíclicos enquanto o jogador anda ou está ferido
     private void handlePlayerLoopedSounds(Entity entity, StateComponent state) {
         switch (state.currentState) {
             case WALK -> {
@@ -88,7 +88,7 @@ public class StateSoundSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Sons ambientes de inimigos baseados no estado atual, se estiverem visíveis na câmera
+    // Sons ambientes de inimigos baseados no estado atual, se estiverem visíveis na câmera
     private void handleEnemyAmbientSound(Entity entity, StateComponent state, boolean isUfo) {
         String ambientKey = switch (state.currentState) {
             case CHASE -> isUfo ? "chaseUfo" : "chaseAlien";
@@ -109,7 +109,7 @@ public class StateSoundSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Verifica se a entidade está dentro da área visível pela câmera
+    // Verifica se a entidade está dentro da área visível pela câmera
     private boolean isInCameraView(Entity entity) {
         if (!ComponentMappers.position.has(entity)) return false;
         Vector2 position = ComponentMappers.position.get(entity).position;

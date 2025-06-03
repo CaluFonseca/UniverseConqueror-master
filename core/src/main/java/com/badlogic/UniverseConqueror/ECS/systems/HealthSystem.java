@@ -99,8 +99,4 @@ public class HealthSystem extends BaseIteratingSystem implements Observer {
         return health != null ? health.currentHealth : 0;
     }
 
-
-//    public void setEngine(Engine engine) {
-//        this.engine = engine;
-//    }
 }

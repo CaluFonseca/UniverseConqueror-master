@@ -8,15 +8,15 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-/// Sistema responsável por atualizar as animações de entidades com base no estado atual
+// Sistema responsável por atualizar as animações de entidades com base no estado atual
 public class AnimationSystem extends BaseIteratingSystem {
 
-    /// Construtor define o sistema para processar entidades que possuem AnimationComponent e StateComponent
+    // Construtor define o sistema para processar entidades que possuem AnimationComponent e StateComponent
     public AnimationSystem() {
         super(Family.all(AnimationComponent.class, StateComponent.class).get());
     }
 
-    /// Atualiza o frame da animação com base no tempo e estado atual da entidade
+    // Atualiza o frame da animação com base no tempo e estado atual da entidade
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         StateComponent state = ComponentMappers.state.get(entity);
@@ -38,7 +38,7 @@ public class AnimationSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Verifica se a animação de morte foi completamente reproduzida para a entidade
+    // Verifica se a animação de morte foi completamente reproduzida para a entidade
     public boolean isDeathAnimationFinished(Entity entity) {
         AnimationComponent anim = ComponentMappers.animation.get(entity);
         StateComponent state = ComponentMappers.state.get(entity);

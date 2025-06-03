@@ -2,6 +2,8 @@ package com.badlogic.UniverseConqueror.Screens;
 
 import com.badlogic.UniverseConqueror.Audio.SoundManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
+import com.badlogic.UniverseConqueror.Interfaces.InfoScreenUI;
+import com.badlogic.UniverseConqueror.Interfaces.InitializableScreen;
 import com.badlogic.UniverseConqueror.Interfaces.NavigableScreen;
 import com.badlogic.UniverseConqueror.Interfaces.SoundEnabledScreen;
 import com.badlogic.gdx.Game;
@@ -21,21 +23,25 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-/// Classe abstrata base para ecrãs de informação, com UI e sons padrões
-public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, NavigableScreen {
-    protected Game game;               /// Instância do jogo para controle de ecrãs
-    protected BitmapFont font;         /// Fonte para desenhar texto
-    protected SpriteBatch batch;       /// Batch para renderizar texto e gráficos
-    protected GlyphLayout layout;      /// Para medir e posicionar o texto
+// Classe abstrata base para ecrãs de informação, com UI e sons padrões
+public abstract class BaseInfosScreen implements Screen,
+    InitializableScreen,
+    InfoScreenUI,
+    SoundEnabledScreen,
+    NavigableScreen {
 
-    protected Stage stage;             /// Cena para controle dos atores (botões, etc)
-    protected Skin skin;               /// Skin para estilo visual dos widgets
-    protected TextButton backButton;  /// Botão "Back" para voltar ao menu principal
+    protected final Game game;
+    protected final String screenText;
+    protected final AssetManager assetManager;
 
-    protected String screenText;       /// Texto exibido no ecrã
-    protected final AssetManager assetManager;  /// Gerenciador de assets (skins, sons, etc)
+    protected BitmapFont font;
+    protected SpriteBatch batch;
+    protected GlyphLayout layout;
 
-    /// Construtor que inicializa recursos e UI, recebendo texto e assetManager
+    protected Stage stage;
+    protected Skin skin;
+    protected TextButton backButton;
+
     public BaseInfosScreen(Game game, String screenText, AssetManager assetManager) {
         this.game = game;
         this.screenText = screenText;
@@ -44,8 +50,8 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         initializeUI();
     }
 
-    /// Inicializa fontes, batch, stage e skin
-    private void initializeResources() {
+    @Override
+    public void initializeResources() {
         font = new BitmapFont();
         batch = new SpriteBatch();
         layout = new GlyphLayout();
@@ -53,8 +59,8 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         skin = assetManager.get("ui/uiskin.json", Skin.class);
     }
 
-    /// Inicializa o botão Back com listeners para click e hover, adiciona ao stage
-    private void initializeUI() {
+    @Override
+    public void initializeUI() {
         backButton = new TextButton("Back", skin);
         backButton.setPosition(20, 20);
         backButton.addListener(new ChangeListener() {
@@ -73,13 +79,11 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.addActor(backButton);
     }
 
-    /// Define o input processor para receber eventos de UI
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
     }
 
-    /// Limpa o ecrã, desenha texto e desenha a stage com atores
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
@@ -91,39 +95,29 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.draw();
     }
 
-    /// Desenha o texto centralizado no ecrã usando GlyphLayout e BitmapFont
-    private void drawScreenText() {
+    @Override
+    public void drawScreenText() {
         layout.setText(font, screenText);
-
         float x = (Gdx.graphics.getWidth() - layout.width) / 2;
         float y = (Gdx.graphics.getHeight() + layout.height) / 2;
-
         batch.begin();
         font.draw(batch, layout, x, y);
         batch.end();
     }
 
-    /// Atualiza a viewport do stage para o novo tamanho do ecrã
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
-    /// Quando o ecrã é escondido, descarta recursos
     @Override
     public void hide() {
         dispose();
     }
 
-    /// Pausa do ecrã, vazio (opcional)
-    @Override
-    public void pause() {}
+    @Override public void pause() {}
+    @Override public void resume() {}
 
-    /// Retoma do ecrã, vazio (opcional)
-    @Override
-    public void resume() {}
-
-    /// Libera os recursos gráficos do ecrã
     @Override
     public void dispose() {
         font.dispose();
@@ -131,33 +125,28 @@ public abstract class BaseInfosScreen implements Screen, SoundEnabledScreen, Nav
         stage.dispose();
     }
 
-    /// Toca o som de clique de botão
     @Override
     public void playClickSound() {
         SoundManager.getInstance().play("keyboardClick");
     }
 
-    /// Toca o som de hover do mouse em botão
     @Override
     public void playHoverSound() {
         SoundManager.getInstance().play("hoverButton");
     }
 
-    /// Navega para o ecrã do menu principal
     @Override
     public void goToMainMenu() {
         ((GameLauncher) game).goToMainMenu();
     }
 
-    /// Sai do jogo
     @Override
     public void exitGame() {
         Gdx.app.exit();
     }
 
-    /// Reinício do jogo (vazio - opcional para este ecrã)
     @Override
     public void restartGame() {
-        // Optional for BaseInfosScreen
+
     }
 }

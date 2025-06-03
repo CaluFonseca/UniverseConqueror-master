@@ -21,13 +21,12 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.ashley.core.ComponentMapper;
 
 /**
- * A classe `UIInitializer` é responsável por inicializar todos os elementos da interface do usuário (UI) do jogo,
+ * A classe `UIInitializer` é responsável por inicializar todos os elementos da UI do jogo,
  * incluindo a barra de saúde, o contador de itens coletados, o cronômetro, o joystick virtual, o ícone da câmera,
  * e o contador de inimigos mortos.
  */
 public class UIInitializer extends AbstractInitializer {
 
-    /// Referência ao ecrã principal do jogo, usada para configurar a interface
     GameScreen screen;
 
     /**
@@ -43,34 +42,34 @@ public class UIInitializer extends AbstractInitializer {
      * Método principal para inicializar todos os elementos da UI.
      */
     public void initialize() {
-        /// Remove o cursor padrão do sistema, substituindo-o pelo customizado do jogo
+        // Remove o cursor padrão do sistema, substituindo-o pelo customizado do jogo
         screen = context.getScreen();
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
 
-        /// Carrega a skin da interface e a fonte padrão para o HUD
+        // Carrega a skin da interface e a fonte padrão para o HUD
         context.setSkin(context.getAssetManager().get(AssetPaths.UI_SKIN_JSON, Skin.class));
-        context.setFont(new BitmapFont());  /// Define a fonte usada na interface
+        context.setFont(new BitmapFont());
 
 
         Table footerTable = new Table();
         footerTable.setFillParent(true);
         footerTable.bottom().center();
-        context.setStage(new Stage(new ScreenViewport()));  /// Cria a stage para adicionar os elementos da UI
-        context.getStage().addActor(footerTable);  /// Adiciona a tabela do rodapé à stage
+        context.setStage(new Stage(new ScreenViewport()));
+        context.getStage().addActor(footerTable);
 
         // Inicializa todos os componentes da interface
-        initializeLabels();  /// Inicializa os rótulos de informações (saúde, poder de ataque, itens)
-        initializeTimer();  /// Inicializa o cronômetro do jogo
-        initializeJoystick();  /// Inicializa o joystick virtual
-        initializeCameraIcon();  /// Inicializa o ícone da câmera (com alternância)
-        initializeEnemyCounter();  /// Inicializa o contador de inimigos mortos
+        initializeLabels();
+        initializeTimer();
+        initializeJoystick();
+        initializeCameraIcon();
+        initializeEnemyCounter();
     }
 
     /**
      * Inicializa os rótulos de informações na tela (saúde, ataque e itens).
      */
     private void initializeLabels() {
-        HUDContext hud = context.getHUDContext();  /// Obtém o contexto do HUD
+        HUDContext hud = context.getHUDContext();
 
         // Obtém o componente de saúde do jogador
         ComponentMapper<HealthComponent> healthMapper = ComponentMapper.getFor(HealthComponent.class);
@@ -105,19 +104,19 @@ public class UIInitializer extends AbstractInitializer {
         itemsBox.setBackground(hud.getItemsBackground());
         itemsBox.add(itemsLabel).pad(5);
 
-        // Cria uma tabela fixa no fundo central da tela
+        // Cria uma tabela fixa centrada no fundo
         Table bottomCenterTable = new Table();
         bottomCenterTable.setFillParent(true);
-        bottomCenterTable.align(Align.bottom);  // Alinha a tabela no fundo
-        bottomCenterTable.padBottom(20);  // Dá um pequeno afastamento da borda inferior
+        bottomCenterTable.align(Align.bottom);
+        bottomCenterTable.padBottom(20);
 
-        bottomCenterTable.add().expandX();  // Espaço à esquerda
+        bottomCenterTable.add().expandX();
         bottomCenterTable.add(healthBox).padRight(5).bottom();
         bottomCenterTable.add(attackBox).padRight(5).bottom();
         bottomCenterTable.add(itemsBox).bottom();
-        bottomCenterTable.add().expandX();  // Espaço à direita
+        bottomCenterTable.add().expandX();
 
-        context.getStage().addActor(bottomCenterTable);  /// Adiciona a tabela de informações ao stage
+        context.getStage().addActor(bottomCenterTable);
     }
 
     /**
@@ -125,34 +124,29 @@ public class UIInitializer extends AbstractInitializer {
      */
     private void initializeTimer() {
         HUDContext hud = context.getHUDContext();
-
         // Cria o rótulo do cronômetro e define a escala da fonte
         Label timerLabel = new Label("00:00:00", context.getSkin());
         timerLabel.setFontScale(2f);
-
-        // Define o rótulo no HUD
         hud.setTimerLabel(timerLabel);
-
-        // Cria a tabela para o cronômetro
         Table timerTable = new Table();
-        timerTable.top().setFillParent(true);  // Alinha a tabela ao topo
-        timerTable.add(hud.getTimerLabel()).expandX().center();  // Centraliza o cronômetro
+        timerTable.top().setFillParent(true);
+        timerTable.add(hud.getTimerLabel()).expandX().center();
 
         // Se o estado não foi restaurado, inicia o cronômetro
         if (!context.isRestoredState()) {
             context.getPlayingTimer().start();
         }
 
-        context.getStage().addActor(timerTable);  /// Adiciona a tabela do cronômetro ao stage
+        context.getStage().addActor(timerTable);
     }
 
     /**
      * Inicializa o joystick virtual e o adiciona ao stage.
      */
     private void initializeJoystick() {
-        Joystick joystick = context.getJoystick();  // Joystick já criado anteriormente
+        Joystick joystick = context.getJoystick();
         if (joystick != null) {
-            context.getStage().addActor(joystick);  // Adiciona o joystick ao stage
+            context.getStage().addActor(joystick);
         }
     }
 
@@ -173,25 +167,25 @@ public class UIInitializer extends AbstractInitializer {
         hud.setCameraIconImage(cameraIcon);
 
         Table uiTable = new Table();
-        uiTable.top().left();  // Alinha o ícone no canto superior esquerdo
+        uiTable.top().left();
         uiTable.setFillParent(true);
-        uiTable.add(hud.getCameraIconImage()).pad(10).size(48);  // Define o tamanho e o padding
+        uiTable.add(hud.getCameraIconImage()).pad(10).size(48);
 
         // Adiciona o listener para alternar o estado da câmera
         hud.getCameraIconImage().addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                context.getSystemContext().getCameraInputSystem().toggleCameraFollow();  // Alterna a câmera
-                boolean isFollowing = context.getSystemContext().getCameraInputSystem().isFollowingPlayer();  // Verifica o estado da câmera
-                hud.updateCameraIcon(isFollowing);  // Atualiza o ícone de câmera
+                context.getSystemContext().getCameraInputSystem().toggleCameraFollow();
+                boolean isFollowing = context.getSystemContext().getCameraInputSystem().isFollowingPlayer();
+                hud.updateCameraIcon(isFollowing);
             }
         });
 
-        context.getStage().addActor(uiTable);  /// Adiciona a tabela do ícone da câmera ao stage
+        context.getStage().addActor(uiTable);
     }
 
     /**
-     * Inicializa o contador de inimigos eliminados e o exibe na tela.
+     * Inicializa o contador de inimigos eliminados e o exibe no ecrã.
      */
     private void initializeEnemyCounter() {
         HUDContext hud = context.getHUDContext();
@@ -199,25 +193,21 @@ public class UIInitializer extends AbstractInitializer {
         // Cria a imagem do contador de kills
         Image killedCounterImage = new Image(new Texture("Killed_alien_counter.png"));
 
-        // Cria o rótulo do contador e aplica a configuração
         Label enemiesKilledLabel = new Label("0", context.getHUDContext().getSkin());
         enemiesKilledLabel.setFontScale(0.7f);
         enemiesKilledLabel.setAlignment(Align.center);
 
-        // Define o rótulo no HUDContext
         hud.setEnemiesKilledLabel(enemiesKilledLabel);
 
-        // Cria a pilha visual com a imagem e o rótulo
         Stack killsStack = new Stack();
         killsStack.add(killedCounterImage);
         killsStack.add(hud.getEnemiesKilledLabel());
 
-        // Cria a tabela e adiciona ao stage
         Table killsTable = new Table();
-        killsTable.top().right();  // Alinha no canto superior direito
+        killsTable.top().right();
         killsTable.setFillParent(true);
-        killsTable.add(killsStack).size(50, 60).pad(10);  // Define o tamanho e o padding
+        killsTable.add(killsStack).size(50, 60).pad(10);
 
-        context.getStage().addActor(killsTable);  /// Adiciona a tabela de kills ao stage
+        context.getStage().addActor(killsTable);
     }
 }

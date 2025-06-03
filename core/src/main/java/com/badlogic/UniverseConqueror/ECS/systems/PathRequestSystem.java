@@ -12,20 +12,18 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.List;
 
 public class PathRequestSystem extends EntitySystem {
-    /// Referência ao construtor do grafo do mapa (para obter nodes)
+
     private final MapGraphBuilder mapGraphBuilder;
-    /// Referência ao algoritmo A* para encontrar caminhos
     private final AStarPathfinder pathfinder;
 
 
-    /// Famílias para filtrar entidades específicas
     private final Family playerFamily = Family.all(PlayerComponent.class, PositionComponent.class).get();
     private final Family itemFamily = Family.all(ItemComponent.class, PositionComponent.class).get();
     private final Family spaceshipFamily = Family.all(TargetComponent.class, PositionComponent.class).get();
 
     private Engine engine;
 
-    /// Construtor recebe as referências do construtor do grafo e do pathfinder
+    // Construtor recebe as referências do construtor do grafo e do pathfinder
     public PathRequestSystem(MapGraphBuilder mapGraphBuilder, AStarPathfinder pathfinder) {
         this.mapGraphBuilder = mapGraphBuilder;
         this.pathfinder = pathfinder;
@@ -38,48 +36,48 @@ public class PathRequestSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        /// Cria novo PathComponent para armazenar o caminho calculado
+
         PathComponent pathComponent = new PathComponent();
 
-        /// Se tecla F foi pressionada, busca caminho até a spaceship
+        // Se tecla F foi pressionada, caminho até a spaceship
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
 
             pathComponent.type = PathComponent.PathType.SPACESHIP;
 
-            /// Obtém o player e a spaceship
+            // Obtém o player e a spaceship
             ImmutableArray<Entity> players = engine.getEntitiesFor(playerFamily);
             ImmutableArray<Entity> spaceships = engine.getEntitiesFor(spaceshipFamily);
 
             if (players.size() == 0 || spaceships.size() == 0) return;
 
             Entity player = players.first();
-            Entity spaceship = spaceships.first(); // Assume 1 spaceship
+            Entity spaceship = spaceships.first();
 
             Vector2 playerPos = ComponentMappers.position.get(player).position;
             Vector2 spaceshipPos = ComponentMappers.position.get(spaceship).position;
 
-            /// Obtém os nodes do grafo para as posições do player e da spaceship
+            // Obtém os nodes do grafo para as posições do player e da spaceship
             Node startNode = mapGraphBuilder.getNodeAtWorldPosition(playerPos.x, playerPos.y);
             Node endNode = mapGraphBuilder.getNodeAtWorldPosition(spaceshipPos.x, spaceshipPos.y);
 
             if (startNode == null || endNode == null) return;
 
-            /// Executa A* para encontrar o caminho
+            // Executa A* para encontrar o caminho
             List<Node> path = pathfinder.findPath(startNode, endNode);
 
             if (!path.isEmpty()) {
-                /// Converte nodes para posições do mundo e adiciona à fila do caminho
+                // Converte nodes para posições do mundo e adiciona à fila do caminho
                 for (Node node : path) {
                     pathComponent.waypoints.add(mapGraphBuilder.toWorldPosition(node));
                 }
 
-                player.remove(PathComponent.class); /// Remove caminho antigo se houver
-                player.add(pathComponent); /// Adiciona novo caminho ao player
+                player.remove(PathComponent.class); // Remove caminho antigo se houver
+                player.add(pathComponent); // Adiciona novo caminho ao player
 
             }
         }
 
-        /// Se tecla H foi pressionada, busca caminho até o item mais próximo
+        // Se tecla H foi pressionada,  caminho até o item mais próximo
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             pathComponent.type = PathComponent.PathType.ITEM;
 
@@ -119,7 +117,7 @@ public class PathRequestSystem extends EntitySystem {
         }
     }
 
-    /// Método para encontrar o item mais próximo do jogador
+    // Método para encontrar o item mais próximo do jogador
     private Entity findClosestItem(Entity player, ImmutableArray<Entity> items) {
         Vector2 playerPos = ComponentMappers.position.get(player).position;
         Entity closest = null;

@@ -5,12 +5,9 @@ import com.badlogic.UniverseConqueror.ECS.components.AnimationComponent;
 import com.badlogic.UniverseConqueror.ECS.components.StateComponent;
 import com.badlogic.UniverseConqueror.ECS.events.DeathEvent;
 import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
-import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
 import com.badlogic.UniverseConqueror.Interfaces.Observer;
 import com.badlogic.UniverseConqueror.Interfaces.ScreenManager;
-import com.badlogic.UniverseConqueror.Screens.GameOverScreen;
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.ashley.core.Entity;
@@ -19,8 +16,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 
 
 public class GameOverObserver implements Observer {
-
-    //private final GameLauncher gameLauncher;
     private final AssetManager assetManager;
     private final Entity player;
     private final ScreenManager screenManager;

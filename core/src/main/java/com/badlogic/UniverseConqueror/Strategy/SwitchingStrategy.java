@@ -1,5 +1,5 @@
-/// Estratégia que alterna dinamicamente entre patrulha e perseguição.
-/// O inimigo persegue o jogador se estiver próximo e visível, caso contrário patrulha.
+// Estratégia que alterna dinamicamente entre patrulha e perseguição.
+// O inimigo persegue o jogador se estiver próximo e visível, caso contrário patrulha.
 
 package com.badlogic.UniverseConqueror.Strategy;
 
@@ -11,29 +11,16 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 
 public class SwitchingStrategy extends AbstractEnemyStrategy {
-
-    /// Estratégia de patrulha utilizada quando o jogador não está próximo.
     private final EnemyStrategy patrolStrategy;
-
-    /// Estratégia de perseguição utilizada quando o jogador está próximo e visível.
     private final EnemyStrategy chaseStrategy;
-
-    /// Entidade-alvo (geralmente o jogador).
     private final Entity target;
-
-    /// Câmera usada para verificar visibilidade do jogador.
     private final OrthographicCamera camera;
-
-    /// Distância máxima para ativar a perseguição.
     private final float triggerDistance = 400f;
-
-    /// Estratégia atual em execução.
     private EnemyStrategy currentStrategy;
-
-    /// Mapper para acessar rapidamente o componente de estado.
     private final ComponentMapper<StateComponent> sm = ComponentMapper.getFor(StateComponent.class);
 
-    /// Construtor que define o alvo, estratégias e câmera.
+
+    // Construtor que define o alvo, estratégias e câmera.
     public SwitchingStrategy(Entity target, EnemyStrategy patrolStrategy, EnemyStrategy chaseStrategy, OrthographicCamera camera) {
         this.target = target;
         this.patrolStrategy = patrolStrategy;
@@ -42,7 +29,7 @@ public class SwitchingStrategy extends AbstractEnemyStrategy {
         this.currentStrategy = patrolStrategy;
     }
 
-    /// Verifica se uma posição está visível na câmera.
+    // Verifica se uma posição está visível na câmera.
     private boolean isInCameraView(Vector2 worldPos) {
         float camX = camera.position.x;
         float camY = camera.position.y;
@@ -53,7 +40,7 @@ public class SwitchingStrategy extends AbstractEnemyStrategy {
             worldPos.y >= camY - halfH && worldPos.y <= camY + halfH;
     }
 
-    /// Atualiza a estratégia do inimigo com base na visibilidade e distância do jogador.
+    // Atualiza a estratégia do inimigo com base na visibilidade e distância do jogador.
     @Override
     public void update(Entity enemy, float deltaTime) {
         if (target == null || camera == null || enemy == null) return;
@@ -74,7 +61,7 @@ public class SwitchingStrategy extends AbstractEnemyStrategy {
         // Bloqueia troca de estratégia se estiver morto.
         if (state.get() == StateComponent.State.DEATH) {
             currentStrategy.update(enemy, deltaTime);
-            direction.set(currentStrategy.getDirection()); // atualiza direção visível
+            direction.set(currentStrategy.getDirection());
             return;
         }
 
@@ -86,6 +73,6 @@ public class SwitchingStrategy extends AbstractEnemyStrategy {
         }
 
         currentStrategy.update(enemy, deltaTime);
-        direction.set(currentStrategy.getDirection()); // sincroniza direção visível
+        direction.set(currentStrategy.getDirection());
     }
 }

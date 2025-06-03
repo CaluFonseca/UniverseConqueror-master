@@ -4,53 +4,32 @@ import com.badlogic.UniverseConqueror.ECS.components.*;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.ECS.entity.PlayerFactory;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
-import com.badlogic.UniverseConqueror.State.SavedItemData;
-import com.badlogic.UniverseConqueror.Strategy.ChasePlayerStrategy;
 import com.badlogic.UniverseConqueror.Utils.Timer;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.ashley.core.*;
 import com.badlogic.UniverseConqueror.ECS.entity.SpaceshipFactory;
-import com.badlogic.UniverseConqueror.ECS.entity.EnemyFactory;
-
 
 public class GameStateService {
-
-    /// Referência ao motor de entidades do Ashley ECS (PooledEngine)
     private  PooledEngine engine;
-    /// Mundo físico do Box2D para física e colisões
     private  World world;
-    /// Gerenciador de ativos para carregar recursos (imagens, sons, etc)
     private  AssetManager assetManager;
-    /// Sistema para remoção segura de corpos Box2D marcados para exclusão
     private  BodyRemovalSystem bodyRemovalSystem;
-    /// Sistema que controla o poder de ataque do jogador
     private  AttackSystem attackSystem;
-    /// Sistema responsável pela coleta de itens no jogo
     private  ItemCollectionSystem itemCollectionSystem;
-    /// Temporizador para controlar o tempo de jogo
     private  Timer playingTimer;
-    /// Câmera ortográfica usada na renderização
     private  OrthographicCamera camera;
-    /// Sistema responsável pela entrada do jogador (teclado, joystick)
     private  PlayerInputSystem playerInputSystem;
-    /// Posição da nave espacial (objetivo do jogo)
     public Vector2 spaceshipPosition;
-
-    /// Entidade que representa o jogador
     private Entity player;
-    /// Flag que indica se o estado foi restaurado a partir de um save
     private boolean restoredState = false;
     private UfoSpawnerSystem ufoSpawnerSystem;
 
-
-    /// Construtor da classe com todas as dependências injetadas
+    // Construtor da classe
     public GameStateService(PooledEngine engine, World world, AssetManager assetManager,
                             BodyRemovalSystem bodyRemovalSystem,
                             AttackSystem attackSystem,
@@ -69,37 +48,35 @@ public class GameStateService {
         this.playerInputSystem = playerInputSystem;
     }
 
-    /// Define a entidade jogador que será gerenciada
+    // Define a entidade jogador
     public void setPlayer(Entity player) {
         this.player = player;
     }
 
-    /// Retorna a entidade jogador atual
+    // Retorna a entidade jogador
     public Entity getPlayer() {
         return player;
     }
 
-    /// Retorna se o estado do jogo foi restaurado de um save
+    // Retorna se o estado do jogo foi restaurado de um save
     public boolean wasRestored() {
         return restoredState;
     }
 
-    /// Salva o estado atual do jogo, coletando dados importantes das entidades
+    // Guarda o estado atual do jogo
     public void saveGameState() {
         GameState state = new GameState();
 
-        /// Obtém componentes importantes do jogador
         PositionComponent pos = player.getComponent(PositionComponent.class);
         HealthComponent health = player.getComponent(HealthComponent.class);
         AttackComponent attack = player.getComponent(AttackComponent.class);
 
-        /// Copia dados do jogador para o estado
         if (pos != null) state.playerPosition = pos.position.cpy();
         if (health != null) state.playerHealth = health.currentHealth;
         if (attack != null) state.playerAttack = attackSystem.getRemainingAttackPower();
         state.gameTime = playingTimer.getTime();
 
-        /// Salva os itens não coletados atualmente no mundo
+        // Guarda os itens não coletados atualmente no mundo
         ImmutableArray<Entity> items = engine.getEntitiesFor(Family.all(ItemComponent.class, TransformComponent.class).get());
         for (Entity e : items) {
             ItemComponent ic = e.getComponent(ItemComponent.class);
@@ -109,7 +86,7 @@ public class GameStateService {
             }
         }
 
-        /// Salva a posição da nave espacial, se existir no mundo
+        // Guarda a posição da nave espacial, se existir no mundo
         ImmutableArray<Entity> spaceships = engine.getEntitiesFor(Family.all(EndLevelComponent.class, PositionComponent.class).get());
         if (spaceships.size() > 0) {
             PositionComponent spPos = spaceships.first().getComponent(PositionComponent.class);
@@ -118,7 +95,7 @@ public class GameStateService {
             }
         }
 
-        /// Remove todas as balas do mundo para evitar problemas na restauração
+        // Remove todas as balas do mundo para evitar problemas na restauração
         ImmutableArray<Entity> bullets = engine.getEntitiesFor(Family.all(ProjectileComponent.class).get());
         for (Entity bullet : bullets) {
             BodyComponent bodyComponent = bullet.getComponent(BodyComponent.class);
@@ -128,13 +105,13 @@ public class GameStateService {
             engine.removeEntity(bullet);
         }
 
-        /// Salva os inimigos ativos, com suas posições e pontos de patrulha
+        // Guarda os inimigos ativos, com suas posições e pontos de patrulha
         ImmutableArray<Entity> enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, PositionComponent.class).get());
         for (Entity e : enemies) {
             PositionComponent posEnemy = e.getComponent(PositionComponent.class);
             EnemyComponent enemy = e.getComponent(EnemyComponent.class);
 
-            /// Converte o tipo do inimigo para string em minúsculas
+            // Converte o tipo do inimigo para string em minúsculas
             String type = enemy.type != null ? enemy.type.name().toLowerCase() : "chase";
             Vector2 patrolStart = enemy.patrolStart != null ? enemy.patrolStart.cpy() : posEnemy.position.cpy();
             Vector2 patrolEnd = enemy.patrolEnd != null ? enemy.patrolEnd.cpy() : posEnemy.position.cpy();
@@ -144,22 +121,21 @@ public class GameStateService {
                 if (playerPos != null) {
                     target = playerPos.position.cpy();
                 } else {
-                    target = posEnemy.position.cpy(); // fallback
+                    target = posEnemy.position.cpy();
                 }
             }
 
-            /// Salva os dados do inimigo
+            // Guarda os dados do inimigo
             state.enemies.add(new SavedEnemyData(posEnemy.position.cpy(), patrolStart, patrolEnd, type, target));
         }
 
-        /// Atualiza o sistema de remoção de corpos e o engine para sincronizar o estado
+        // Atualiza o sistema de remoção de corpos e o engine para sincronizar o estado
         bodyRemovalSystem.update(0f);
         engine.update(0f);
 
-        /// Salva a contagem de itens coletados
+        // Guarda a contagem de itens coletados
         state.collectedItemCount = itemCollectionSystem.getCollectedCount();
 
-        /// Finalmente salva o estado no arquivo
         GameStateManager.save(state);
     }
 
@@ -173,22 +149,14 @@ public class GameStateService {
         restoredState = true;
         return true;
     }
-    /// Método para restaurar o estado salvo — ainda não implementado
+    // Método para restaurar o estado salvo — ainda não implementado
     public Entity restoreState(GameState state) {
-//        // Limpa todas as entidades atuais para evitar duplicatas
-//        ImmutableArray<Entity> allEntities = engine.getEntities();
-//        for (Entity e : allEntities) {
-//            engine.removeEntity(e);
-//        }
-
-        // --- 1. Restaurar o jogador ---
         player = PlayerFactory.createPlayer(engine, state.playerPosition, world, assetManager);
-
 
         if (!engine.getEntities().contains(player, true)) {
             engine.addEntity(player);
         }
-        setPlayer(player); // atualiza referência interna do player no GameStateService
+        setPlayer(player);
 
         // Atualiza componentes do jogador (vida, ataque)
         HealthComponent health = player.getComponent(HealthComponent.class);
@@ -200,10 +168,8 @@ public class GameStateService {
         // Atualiza sistema de input para usar o jogador restaurado
         playerInputSystem.setPlayer(player);
 
-        // --- 2. Restaurar o timer ---
         playingTimer.setTime(state.gameTime);
 
-        // --- 3. Restaurar itens restantes ---
         for (SavedItemData itemData : state.remainingItems) {
             ItemFactory factory = ItemFactory.createItem(itemData.name, itemData.position, assetManager);
             Entity item = factory.createEntity(engine, world);
@@ -212,7 +178,7 @@ public class GameStateService {
         }
         SpriteBatch batchItem = new SpriteBatch();
         engine.addSystem(new RenderItemSystem(batchItem, camera));
-        // --- 4. Restaurar a nave (end level) ---
+
         if (state.spaceshipPosition != null) {
             SpaceshipFactory factory = new SpaceshipFactory(assetManager);
             Entity spaceship = factory.createSpaceship(state.spaceshipPosition, engine, world);
@@ -231,10 +197,8 @@ public class GameStateService {
 //        }
         SpriteBatch batchUfo = new SpriteBatch();
         engine.addSystem(new UfoRenderSystem(batchUfo, camera));
-        // --- 6. Restaurar contagem de itens coletados ---
         itemCollectionSystem.setCollectedCount(state.collectedItemCount);
 
-        // Marca que o estado foi restaurado com sucesso
         restoredState = true;
         if (ufoSpawnerSystem != null) {
             ufoSpawnerSystem.resetTimer();

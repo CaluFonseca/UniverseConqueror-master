@@ -21,53 +21,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
-//public class GameContext {
-//    private final AssetManager assetManager;
-//    private final ScreenManager screenManager;
-//    private final MusicManager musicManager;
-//    private final SoundManager soundManager;
-//    private final SpriteBatch spriteBatch;
-//    private boolean isNewGame;
-//
-//    public GameContext(AssetManager assetManager, ScreenManager screenManager, MusicManager musicManager, SoundManager soundManager, SpriteBatch spriteBatch) {
-//        this.assetManager = assetManager;
-//        this.screenManager = screenManager;
-//        this.musicManager = musicManager;
-//        this.soundManager = soundManager;
-//        this.spriteBatch = spriteBatch;
-//    }
-//    public SpriteBatch getBatch() {
-//        return spriteBatch;
-//    }
-//    // Métodos getters para acessar os serviços
-//    public AssetManager getAssetManager() {
-//        return assetManager;
-//    }
-//    public boolean isNewGame() {
-//        return isNewGame;
-//    }
-//    public void setNewGame(boolean isNewGame) {
-//        this.isNewGame = isNewGame;
-//    }
-//
-//    public ScreenManager getScreenManager() {
-//        return screenManager;
-//    }
-//
-//    public MusicManager getMusicManager() {
-//        return musicManager;
-//    }
-//
-//    public SoundManager getSoundManager() {
-//        return soundManager;
-//    }
-//
-//    public SpriteBatch getSpriteBatch() {
-//        return spriteBatch;
-//    }
-//
-//}
-
 public class GameContext {
     private  GameLauncher game;
     private  PooledEngine engine;
@@ -106,30 +59,45 @@ public class GameContext {
 
     // Getters
     public GameLauncher getGame() { return game; }
+
     public PooledEngine getEngine() { return engine; }
+
     public AssetManager getAssetManager() { return assetManager; }
+
     public OrthographicCamera getCamera() { return camera; }
-     public Stage getStage() { return stage; }
+
+    public Stage getStage() { return stage; }
+
     public Joystick getJoystick() { return joystick; }
+
     public void setJoystick(Joystick joystick) {
         this.joystick = joystick;
     }
+
     public Timer getPlayingTimer() { return playingTimer; }
+
     public GameStateService getGameStateService() { return gameStateService; }
+
     public MapGraphBuilder getMapGraphBuilder() { return mapGraphBuilder; }
+
     public AStarPathfinder getPathfinder() { return pathfinder; }
+
     public BulletFactory getBulletFactory() { return bulletFactory; }
 
     public Entity getPlayer() { return player; }
-    public void setPlayer(Entity player) { this.player = player; }
-    public GameScreen getScreen() {return screen; }
-    public void setScreen(GameScreen screen) { this.screen = screen; }
 
+    public void setPlayer(Entity player) { this.player = player; }
+
+    public GameScreen getScreen() {return screen; }
+
+    public void setScreen(GameScreen screen) { this.screen = screen; }
 
     public WorldContext getWorldContext() {
         return worldContext;
     }
+
     public HUDContext getHUDContext() { return hudContext; }
+
     public BitmapFont getFont() {
         return font;
     }
@@ -142,21 +110,26 @@ public class GameContext {
         this.stage = stage;
     }
 
-
     public boolean isRestoredState() { return restoredState; }
+
     public void setRestoredState(boolean value) { this.restoredState = value; }
+
     public static Texture getTexture(AssetManager assetManager, String path) {
         return assetManager.get(path, Texture.class);
     }
+
     public void setMapGraphBuilder(MapGraphBuilder mapGraphBuilder) {
         this.mapGraphBuilder = mapGraphBuilder;
     }
+
     public void setPathfinder(AStarPathfinder pathfinder) {
         this.pathfinder = pathfinder;
     }
+
     public void setBulletFactory(BulletFactory bulletFactory) {
         this.bulletFactory = bulletFactory;
     }
+
     public void setSystemContext(SystemContext systemContext) {
         this.systemContext = systemContext;
     }
@@ -164,6 +137,7 @@ public class GameContext {
     public SystemContext getSystemContext() {
         return systemContext;
     }
+
     public void setSkin(Skin skin) {
         this.hudContext.setSkin(skin);
     }
@@ -171,13 +145,14 @@ public class GameContext {
     public Skin getSkin() {
         return this.hudContext.getSkin();
     }
+
     public Timer getTimer() {
         return playingTimer;
     }
+
     public void setGameStateService(GameStateService gameStateService) {
         this.gameStateService = gameStateService;
     }
-
 
     public void updateCamera() {
         if (camera != null) {
@@ -227,6 +202,7 @@ public class GameContext {
             hudContext.getEnemiesKilledLabel().setText(enemiesKilledCount);
         }
     }
+
     public void dispose() {
         if (stage != null) {
             stage.dispose();
@@ -241,19 +217,16 @@ public class GameContext {
         }
 
         if (bulletFactory != null) {
-        //    bulletFactory.dispose();
+
         }
 
         if (gameStateService != null) {
-            //gameStateService.dispose(); // se implementar Disposable
+
         }
 
         if (assetManager != null) {
-            assetManager.dispose(); // cuidado: só se for gerenciado localmente
+            assetManager.dispose();
         }
-
-
     }
-
 }
 

@@ -17,11 +17,11 @@ import com.badlogic.gdx.physics.box2d.*;
  */
 public class BulletContactListener implements CollisionListener {
 
-    private final BulletFactory bulletFactory;  /// Fábrica de balas para gerenciar o reaproveitamento de balas.
+    private final BulletFactory bulletFactory;  // Fábrica de balas para gerenciar o reaproveitamento de balas.
 
     // Construtor que recebe a fábrica de balas
     public BulletContactListener(BulletFactory bulletFactory) {
-        this.bulletFactory = bulletFactory;  /// Inicializa a BulletFactory
+        this.bulletFactory = bulletFactory;
     }
 
     @Override
@@ -29,10 +29,10 @@ public class BulletContactListener implements CollisionListener {
         Body bodyA = fixtureA.getBody();
         Body bodyB = fixtureB.getBody();
 
-        // Caso a bala tenha colidido com o mapa
+        // Caso a bala tenha colidido com o mapa descarta a bala
         if ((isBullet(bodyA) && isMap(bodyB)) || (isBullet(bodyB) && isMap(bodyA))) {
             Body bulletBody = isBullet(bodyA) ? bodyA : bodyB;
-            disposeBullet(bulletBody);  /// Descartar a bala que colidiu com o mapa
+            disposeBullet(bulletBody);
         }
 
         // Caso a bala tenha colidido com um inimigo
@@ -56,8 +56,6 @@ public class BulletContactListener implements CollisionListener {
 
                 // Notificar o evento de dano recebido para o inimigo
                 EventBus.get().notify(new DamageTakenEvent(enemyEntity, bulletEntity, damage));
-
-                // Descartar a bala após aplicar o dano
                 disposeBullet(bulletBody);
             }
         }
@@ -75,7 +73,7 @@ public class BulletContactListener implements CollisionListener {
      */
     private boolean isEnemy(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("enemy".equals(fixture.getUserData())) return true;  /// Verifica se o fixture do corpo tem "enemy" como dado
+            if ("enemy".equals(fixture.getUserData())) return true;  // Verifica se o fixture do corpo tem "enemy" como dado
         }
         return false;
     }
@@ -105,7 +103,7 @@ public class BulletContactListener implements CollisionListener {
      */
     private boolean isMap(Body body) {
         for (Fixture fixture : body.getFixtureList()) {
-            if ("map".equals(fixture.getUserData())) return true;  /// Verifica se o fixture tem "map" como dado
+            if ("map".equals(fixture.getUserData())) return true;  // Verifica se o fixture tem "map" como dado
         }
         return false;
     }
@@ -118,7 +116,7 @@ public class BulletContactListener implements CollisionListener {
         if (bulletBody.getUserData() instanceof Entity bulletEntity) {
             // Se a entidade for um inimigo, não deve ser descartada
             if (bulletEntity.getComponent(EnemyComponent.class) != null) return;
-            Gdx.app.postRunnable(() -> bulletFactory.free(bulletEntity));  /// Descartar a bala usando a BulletFactory
+            Gdx.app.postRunnable(() -> bulletFactory.free(bulletEntity));  // Descartar a bala usando a BulletFactory
         }
     }
 }

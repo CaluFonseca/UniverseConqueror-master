@@ -9,23 +9,20 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-/// Sistema responsável por renderizar efeitos de partículas associados a entidades
+// Sistema responsável por renderizar efeitos de partículas associados a entidades
 public class ParticleSystem extends BaseIteratingSystem {
 
-    /// Batch usado para desenhar os efeitos de partículas
     private final SpriteBatch batch;
-
-    /// Câmera usada para configurar a projeção do batch
     private final OrthographicCamera camera;
 
-    /// Construtor: define a família de entidades com partículas e posição
+
     public ParticleSystem(SpriteBatch batch, OrthographicCamera camera) {
         super(Family.all(ParticleComponent.class, PositionComponent.class).get());
         this.batch = batch;
         this.camera = camera;
     }
 
-    /// Inicia o batch antes de processar entidades, finaliza após
+    // Inicia o batch antes de processar entidades
     @Override
     public void update(float deltaTime) {
         batch.setProjectionMatrix(camera.combined);
@@ -34,7 +31,7 @@ public class ParticleSystem extends BaseIteratingSystem {
         batch.end();
     }
 
-    /// Processa uma única entidade com partículas
+    // Processa uma única entidade com partículas
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ParticleComponent particle = ComponentMappers.particle.get(entity);
@@ -42,7 +39,6 @@ public class ParticleSystem extends BaseIteratingSystem {
         VelocityComponent velocity = ComponentMappers.velocity.has(entity) ? ComponentMappers.velocity.get(entity) : null;
 
 
-        /// Se houver velocidade, ajusta o ângulo do emissor para seguir a direção contrária
         if (velocity != null && particle.effect != null) {
             float angle = velocity.velocity.angleDeg() + 180f;
 
@@ -54,7 +50,7 @@ public class ParticleSystem extends BaseIteratingSystem {
             }
         }
 
-        /// Atualiza posição da partícula com base na entidade e desenha o efeito
+
         if (particle.effect != null) {
             float px = position.position.x + particle.offset.x;
             float py = position.position.y + particle.offset.y;

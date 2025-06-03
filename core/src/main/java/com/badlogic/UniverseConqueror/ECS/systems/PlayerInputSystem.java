@@ -16,7 +16,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class PlayerInputSystem extends BaseIteratingSystem {
 
-    /// Dependências externas
+    // Dependências externas
     private final World world;
     private Joystick joystick;
     private final OrthographicCamera camera;
@@ -24,9 +24,9 @@ public class PlayerInputSystem extends BaseIteratingSystem {
     private final BulletSystem bulletSystem;
     private final BulletFactory bulletFactory;
 
-    private Entity player; /// Entidade principal do jogador
+    private Entity player;
 
-    /// Construtor com todas as dependências necessárias
+    // Construtor
     public PlayerInputSystem(World world, Joystick joystick, BulletSystem bulletSystem,
                              OrthographicCamera camera, PooledEngine engine, BulletFactory bulletFactory) {
         super(Family.all(PlayerComponent.class, AttackComponent.class, VelocityComponent.class,
@@ -39,7 +39,7 @@ public class PlayerInputSystem extends BaseIteratingSystem {
         this.bulletFactory = bulletFactory;
     }
 
-    /// Define a entidade principal do jogador
+    // Define a entidade principal do jogador
     public void setPlayer(Entity player) {
         this.player = player;
     }
@@ -51,7 +51,7 @@ public class PlayerInputSystem extends BaseIteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
 
-        /// Obtém os componentes relevantes via BaseIteratingSystem
+        // Obtém os componentes relevantes via BaseIteratingSystem
         StateComponent state = ComponentMappers.state.get(entity);
         PhysicsComponent physics = ComponentMappers.physics.get(entity);
         VelocityComponent velocity = ComponentMappers.velocity.get(entity);
@@ -63,11 +63,11 @@ public class PlayerInputSystem extends BaseIteratingSystem {
         float dx = 0f, dy = 0f;
         boolean isMoving = false;
 
-        /// Define velocidade com base na vida e se Shift está pressionado
+        // Define velocidade com base na vida e se Shift está pressionado
         boolean shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
         float currentSpeed = (health != null && health.currentHealth >= 25f && shift) ? Constants.SPEED_FAST : Constants.SPEED;
 
-        /// Movimento via teclado
+        // Movimento via teclado
         boolean keyPressed = false;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             dx -= currentSpeed * deltaTime;
@@ -85,25 +85,18 @@ public class PlayerInputSystem extends BaseIteratingSystem {
             dy -= currentSpeed * deltaTime;
             keyPressed = true;
         }
-       // System.out.println("Key pressed: " + keyPressed + ", joystick moving: " + (joystick != null && joystick.isMoving()));
 
-        //System.out.println("Joystick moving: " + joystick != null && joystick.isMoving());
-        /// Se não houver tecla pressionada, usa joystick (se estiver ativo)
+        // joystick
         if (!keyPressed && joystick != null && joystick.isMoving()) {
             Vector2 dir = joystick.getDirection();
             dx = dir.x;
             dy = dir.y;
         }
 
-        /// Verifica se está seguindo caminho automaticamente (via F ou H)
+        // Verifica se está seguindo caminho automaticamente (via F ou H)
         boolean isFollowingPath = Gdx.input.isKeyPressed(Input.Keys.F) || Gdx.input.isKeyPressed(Input.Keys.H);
 
         if (!isFollowingPath) {
-//            if (!keyPressed && joystick != null && joystick.isMoving()) {
-//                Vector2 dir = joystick.getDirection(); // vetor normalizado
-//                dx = dir.x ;
-//                dy = dir.y ;
-//            }
             isMoving = dx != 0 || dy != 0;
             if (dx > 0) animation.facingRight = true;
             else if (dx < 0) animation.facingRight = false;
@@ -112,17 +105,17 @@ public class PlayerInputSystem extends BaseIteratingSystem {
             isMoving = false;
         }
 
-        /// Se estiver em estado inválido, ignora inputs
+        // Se estiver em estado inválido, ignora inputs
         if (state.get() == StateComponent.State.HURT || state.get() == StateComponent.State.DEATH)
             return;
 
-        /// Defesa com TAB
+        // Defesa com TAB
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             state.set(StateComponent.State.DEFENSE);
             EventBus.get().notify(new DefenseEvent(entity));
         }
 
-        /// Saltar (SPACE) e Super Ataque (E)
+        // Saltar (SPACE) e Super Ataque (E)
         if (health != null && health.currentHealth >= 25f) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jump.canJump) {
                 jump.isJumping = true;
@@ -154,7 +147,7 @@ public class PlayerInputSystem extends BaseIteratingSystem {
         }
     }
 
-    /// Dispara um projétil normal ou fireball
+    // Dispara um projétil normal ou fireball
     private void fireBullet(Entity entity, boolean fireball) {
         AttackComponent attack = ComponentMappers.attack.get(entity);
         if (attack.remainingAttackPower > 0) {

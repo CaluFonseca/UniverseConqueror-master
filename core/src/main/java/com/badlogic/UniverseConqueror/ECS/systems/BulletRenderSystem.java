@@ -6,7 +6,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-/// Sistema responsável por renderizar projéteis (balas)
+// Sistema responsável por renderizar projéteis (balas)
 public class BulletRenderSystem extends BaseIteratingSystem {
 
     private final SpriteBatch batch;

@@ -26,7 +26,9 @@ import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-
+/**
+ * Ecrã principal do jogo
+ */
 public class GameScreen implements Screen, BaseScreen {
 
     private final GameLauncher game;
@@ -57,22 +59,19 @@ public class GameScreen implements Screen, BaseScreen {
         initializeGraph();
         createJoystick();
         initializeSystems();
+        initializeGameState();
 
-        initializeGameState(); // create gameStateService
-
-        // Ensure the gameStateService is loaded properly
         if (!gameStateService.loadGameStateFromJson()) {
-            initializePlayerAndItems(); // Create player
-            gameStateService.setPlayer(player); // Update player in GameStateService
+            initializePlayerAndItems();
+            gameStateService.setPlayer(player);
             initializePathfinding();
             initializeEnemies();
             initializeCameraEntity();
         } else {
-            // Restoring game state
             Entity restoredPlayer = gameStateService.getPlayer();
             gameContext.setPlayer(restoredPlayer);
             player = restoredPlayer;
-            gameStateService.setPlayer(player); // Ensure the player is updated
+            gameStateService.setPlayer(player);
             pathfinder = gameContext.getPathfinder();
         }
 
@@ -81,18 +80,22 @@ public class GameScreen implements Screen, BaseScreen {
         registerObservers();
         createContactListener();
     }
+
+    //Método para registrar os observadores necessários para a gestão de eventos.
     @Override
     public void registerObservers() {
         new ObserverRegistrar(gameContext).initialize();
     }
 
+    //Criar joystick
     private void createJoystick() {
         Texture base = assetManager.get(AssetPaths.JOYSTICK_BASE, Texture.class);
         Texture knob = assetManager.get(AssetPaths.JOYSTICK_KNOB, Texture.class);
         Joystick joystick = new Joystick(base, knob, 100f, 100f, 60f);
         gameContext.setJoystick(joystick); // para o sistema usar
     }
-    /// Cria o listener de colisões do jogo
+
+    // Cria o listener de colisões do jogo
     private void createContactListener() {
         ContactListenerWrapper contactListenerWrapper = new ContactListenerWrapper(
             engine,
@@ -103,6 +106,7 @@ public class GameScreen implements Screen, BaseScreen {
         gameContext.getWorldContext().getWorld().setContactListener(contactListenerWrapper);
     }
 
+    //Inicializa os componentes essenciais como o motor ECS, a câmera, e o cronômetro.
     private void initializeEssentials() {
         engine = new PooledEngine();
         camera = new OrthographicCamera();
@@ -111,51 +115,45 @@ public class GameScreen implements Screen, BaseScreen {
         gameContext = new GameContext(game, this, engine, assetManager, playingTimer, camera);
     }
 
+    //Inicializa o contexto do jogo com as informações necessárias.
     private void initializeContext() {
         new WorldInitializer(gameContext, this).initialize();
     }
 
+    //Inicializa o mundo físico do jogo.
     private void initializeWorld() {
         gameContext.getWorldContext().setWorld(gameContext.getWorldContext().getWorld());
     }
 
+    //Inicializa a fábrica de projéteis que cria e gere os projéteis no jogo.
     private void initializeBulletFactory() {
         BulletFactory bulletFactory = new BulletFactory(assetManager, engine);
         gameContext.setBulletFactory(bulletFactory);
     }
 
+    //Inicializa o grafo de caminhos para o algoritmo de pathfinding.
     private void initializeGraph() {
         MapGraphBuilder builder = new MapGraphBuilder(gameContext.getWorldContext().getMap());
         gameContext.setMapGraphBuilder(builder);
     }
 
+    //Inicializa os sistemas do jogo, como sistemas de movimentação, ataque, física, etc.
     @Override
     public void initializeSystems() {
-//        SystemInitializer sysInit = new SystemInitializer(
-//            engine,
-//           ,
-//            gameContext.getCamera(),
-//         ,
-//
-//        ,
-//            assetManager);
-//        sysInit.initializeSystems();
         SystemInitializer sysInit = new SystemInitializer(gameContext, engine,  gameContext.getWorldContext().getWorld(), camera,
             gameContext.getWorldContext().getMap(),
             gameContext.getBulletFactory(),    gameContext.getJoystick(), assetManager);
-        sysInit.initialize();  // Initialize the systems
+        sysInit.initialize();
         SystemContext sysContext = SystemContext.createFrom(sysInit);
         gameContext.setSystemContext(sysContext);
     }
 
+    //Inicializa o jogador e os itens no jogo.
     private void initializePlayerAndItems() {
-        // Create an instance of PlayerInitializer
         PlayerInitializer playerInitializer = new PlayerInitializer(gameContext);
 
-// Call the initialize method to create and add the player to the engine
         playerInitializer.initialize();
         player = gameContext.getPlayer();
-
 
         Spawner<Void> itemSpawner = new ItemSpawner(
             engine, gameContext.getWorldContext().getWorld(),
@@ -163,21 +161,23 @@ public class GameScreen implements Screen, BaseScreen {
         itemSpawner.spawn();
     }
 
+    //InicializaUI
     @Override
     public void initializeUI() {
         new UIInitializer(gameContext).initialize();
     }
 
+    //Inicializa a entrada do jogador, configurando os controles.
     private void initializeInput() {
         InputAdapter globalInput = createGlobalInputAdapter();
         InputAdapter cameraInput = gameContext.getSystemContext().getCameraInputSystem().getInputAdapter();
         Stage stage = gameContext.getStage();
 
-        // globalInput comes first for priority
         InputMultiplexer multiplexer = new InputMultiplexer(globalInput, cameraInput, stage);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
+    //Cria o adaptador de entrada global para o controle de teclas.
     private InputAdapter createGlobalInputAdapter() {
         return new InputAdapter() {
             @Override
@@ -201,6 +201,7 @@ public class GameScreen implements Screen, BaseScreen {
         };
     }
 
+    //Atualiza o ícone da câmera dependendo se está seguindo o jogador ou não.
     private void updateCameraIcon(boolean isFollowing) {
         Image cameraIcon = gameContext.getHUDContext().getCameraIconImage();
         TextureRegion icon = isFollowing
@@ -210,6 +211,7 @@ public class GameScreen implements Screen, BaseScreen {
         cameraIcon.setDrawable(new TextureRegionDrawable(icon));
     }
 
+    //Inicializa a entidade da câmera. A câmera é responsável por seguir o jogador durante o jogo.
     private void initializeCameraEntity() {
         Entity cameraEntity = new Entity();
         CameraComponent cameraComponent = new CameraComponent();
@@ -218,6 +220,7 @@ public class GameScreen implements Screen, BaseScreen {
         engine.addEntity(cameraEntity);
     }
 
+    //Inicializa o serviço de estado do jogo, que é responsável por gravar e restaurar o estado.
     private void initializeGameState() {
         gameStateService = new GameStateService(
             engine,
@@ -234,6 +237,7 @@ public class GameScreen implements Screen, BaseScreen {
         gameContext.setGameStateService(gameStateService);
     }
 
+    //Inicializa o pathfinding, que é usado para encontrar caminhos entre os pontos no mapa
     private void initializePathfinding() {
         pathfinder = new AStarPathfinder(gameContext.getMapGraphBuilder().nodes);
         gameContext.setPathfinder(pathfinder);
@@ -242,6 +246,7 @@ public class GameScreen implements Screen, BaseScreen {
         engine.addSystem(new PathDebugRenderSystem(gameContext.getCamera()));
     }
 
+    //Inicializa os inimigos no jogo.
     private void initializeEnemies() {
         EnemyInitializer enemyInit = new EnemyInitializer(gameContext);
         Node spaceshipNode = enemyInit.initializeSpaceship();
@@ -269,6 +274,7 @@ public class GameScreen implements Screen, BaseScreen {
         ));
     }
 
+    // Atualiza a posição da câmera com base na posição do jogador.
     private void updateCameraPosition() {
         PositionComponent pos = player.getComponent(PositionComponent.class);
         CameraInputSystem cameraInputSystem = gameContext.getSystemContext().getCameraInputSystem();
@@ -285,30 +291,24 @@ public class GameScreen implements Screen, BaseScreen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Atualiza física
         gameContext.getWorldContext().getWorld().step(1 / 60f, 6, 2);
 
-        // Atualiza câmera
         gameContext.updateCamera();
         updateCameraPosition();
-        // Renderiza o mapa
+
         IsometricTiledMapRenderer renderer = gameContext.getWorldContext().getMapRenderer();
         renderer.setView(gameContext.getCamera());
         renderer.render();
 
-        // Atualiza ECS (renderiza o player e inimigos, por exemplo)
         engine.update(delta);
 
-        // Atualiza HUD
         gameContext.updateHUD();
 
-        // Renderiza debug físico (opcional)
         gameContext.getWorldContext().getDebugRenderer().render(
             gameContext.getWorldContext().getWorld(),
             gameContext.getCamera().combined
         );
 
-        // Renderiza Stage (HUD por cima de tudo)
         gameContext.getStage().act(delta);
         gameContext.getStage().draw();
     }

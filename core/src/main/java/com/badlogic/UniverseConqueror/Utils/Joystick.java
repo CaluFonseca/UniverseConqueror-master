@@ -1,6 +1,6 @@
-/// Classe que representa um joystick virtual 2D para controle de personagem em ecrãs sensíveis ao toque.
-/// Renderiza um botão circular que pode ser arrastado dentro de uma base circular.
-/// Usa eventos de toque da Scene2D.
+// Classe que representa um joystick virtual 2D para controle de personagem em ecrãs sensíveis ao toque.
+// Renderiza um botão circular que pode ser arrastado dentro de uma base circular.
+// Usa eventos de toque da Scene2D.
 
 package com.badlogic.UniverseConqueror.Utils;
 
@@ -13,31 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 
 public class Joystick extends Actor {
-
-    /// Textura da base do joystick.
     private final Texture baseTexture;
-
-    /// Textura do botão móvel (knob) do joystick.
     private final Texture knobTexture;
-
-    /// Círculo representando a área da base.
     private final Circle baseCircle;
-
-    /// Círculo representando a área do botão.
     private final Circle knobCircle;
-
-    /// Posição atual do botão (knob).
     private float knobX, knobY;
-
-    /// Indica se o botão está sendo arrastado.
     private boolean isDragging = false;
 
-    /// Construtor do joystick.
-    /// @param base textura da base
-    /// @param knob textura do botão
-    /// @param centerX posição X central da base
-    /// @param centerY posição Y central da base
-    /// @param radius raio da base
     public Joystick(Texture base, Texture knob, float centerX, float centerY, float radius) {
         this.baseTexture = base;
         this.knobTexture = knob;
@@ -46,16 +28,15 @@ public class Joystick extends Actor {
         this.knobX = centerX;
         this.knobY = centerY;
 
-        /// Define a área clicável do joystick (bounds para eventos).
         setBounds(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
-        /// Adiciona eventos de toque.
+        // Adiciona eventos de toque.
         addListener(new InputListener() {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 isDragging = true;
-                updateKnob(x, y); // Coordenadas relativas ao ator
+                updateKnob(x, y);
                 return true;
             }
 
@@ -72,9 +53,7 @@ public class Joystick extends Actor {
         });
     }
 
-    /// Retorna a direção normalizada do joystick.
-    /// Se o botão não estiver sendo arrastado, retorna (0,0).
-    /// @return vetor de direção escalado
+    // Retorna a direção normalizada do joystick.
     public Vector2 getDirection() {
         if (!isDragging) return new Vector2(0, 0);
         float dx = knobX - baseCircle.x;
@@ -82,13 +61,12 @@ public class Joystick extends Actor {
         return new Vector2(dx, dy).nor().scl(100f); // escala pode ser configurável
     }
 
-    /// Verifica se o joystick está em uso (movendo).
-    /// @return true se estiver arrastando o botão
+    // Verifica se o joystick está em uso
     public boolean isMoving() {
         return isDragging;
     }
 
-    /// Desenha o joystick no ecrã.
+    // Desenha o joystick no ecrã.
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(baseTexture, baseCircle.x - baseCircle.radius, baseCircle.y - baseCircle.radius,
@@ -97,8 +75,8 @@ public class Joystick extends Actor {
             knobCircle.radius * 2, knobCircle.radius * 2);
     }
 
-    /// Atualiza a posição do botão (knob) com base no toque.
-    /// Limita o movimento ao raio da base.
+    // Atualiza a posição do botão (knob) com base no toque.
+    // Limita o movimento ao raio da base.
     private void updateKnob(float x, float y) {
         Vector2 localTouch = new Vector2(x + getX(), y + getY());
         Vector2 dir = new Vector2(localTouch.x - baseCircle.x, localTouch.y - baseCircle.y);
@@ -111,13 +89,13 @@ public class Joystick extends Actor {
         knobY = baseCircle.y + dir.y;
     }
 
-    /// Reseta o botão para o centro da base.
+    // Reset o botão para o centro da base.
     private void resetKnob() {
         knobX = baseCircle.x;
         knobY = baseCircle.y;
     }
 
-    /// Libera os recursos das texturas.
+    // Liberta os recursos das texturas.
     public void dispose() {
         baseTexture.dispose();
         knobTexture.dispose();

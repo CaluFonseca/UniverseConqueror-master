@@ -23,7 +23,7 @@ public class SoundManager {
     private SoundManager(AssetManager assetManager) {
         this.assetManager = assetManager;
 
-        /// Caminhos de som mapeados por chave
+        // Caminhos de som mapeados por chave
         soundPaths.put("jump", AssetPaths.SOUND_JUMP);
         soundPaths.put("hurt", AssetPaths.SOUND_HURT);
         soundPaths.put("item", AssetPaths.SOUND_ITEM_PICKUP);
@@ -47,25 +47,25 @@ public class SoundManager {
         soundPaths.put("chaseUfo", AssetPaths.SOUND_CHASE_UFO);
     }
 
-    /// Inicializa o singleton do SoundManager.
+    // Inicializa o singleton do SoundManager.
     public static void init(AssetManager assetManager) {
         if (instance == null) instance = new SoundManager(assetManager);
     }
 
-    /// Retorna a instância singleton.
+    // Retorna a instância singleton.
     public static SoundManager getInstance() {
         if (instance == null) throw new IllegalStateException("SoundManager not initialized");
         return instance;
     }
 
-    /// Carrega todos os sons registrados.
+    // Carrega todos os sons registrados.
     public void loadAll() {
         for (String path : soundPaths.values()) {
             assetManager.load(path, Sound.class);
         }
     }
 
-    /// Toca um som uma única vez, com cooldown para evitar spam.
+    // Toca um som uma única vez, com cooldown para evitar spam.
     public void play(String key) {
         if (key == null) return;
 
@@ -82,7 +82,7 @@ public class SoundManager {
         soundCooldowns.put(key, currentTime);
     }
 
-    /// Toca um som em loop contínuo (sem controle por entidade).
+    // Toca um som em loop contínuo.
     public void loop(String key) {
         String path = soundPaths.get(key);
         if (path != null && assetManager.isLoaded(path)) {
@@ -91,7 +91,7 @@ public class SoundManager {
         }
     }
 
-    /// Para a reprodução de um som específico.
+    // Para a reprodução de um som específico.
     public void stop(String key) {
         String path = soundPaths.get(key);
         if (path != null && assetManager.isLoaded(path)) {
@@ -100,7 +100,7 @@ public class SoundManager {
         }
     }
 
-    /// Para todos os sons que estão sendo reproduzidos.
+    // Para todos os sons que estão sendo reproduzidos.
     public void stop() {
         for (String key : soundPaths.keySet()) {
             String path = soundPaths.get(key);
@@ -111,7 +111,7 @@ public class SoundManager {
         }
     }
 
-    /// Toca um som em loop apenas se a entidade ainda não estiver tocando um som.
+    // Toca um som em loop apenas se a entidade ainda não estiver tocando um som.
     public void loopUnique(Entity entity, String key) {
         if (entity == null || key == null) return;
         if (key.equals(entitySoundKeys.get(entity))) return;
@@ -127,17 +127,17 @@ public class SoundManager {
         }
     }
 
-    /// Verifica se o som está em loop por alguma entidade.
+    // Verifica se o som está em loop por alguma entidade.
     public boolean isLooping(String key) {
         return entitySoundKeys.containsValue(key);
     }
 
-    /// Retorna a chave do som atual da entidade, se houver.
+    // Retorna a chave do som atual da entidade.
     public String getCurrentLoopKey(Entity entity) {
         return entitySoundKeys.get(entity);
     }
 
-    /// Para o som em loop que está sendo tocado pela entidade.
+    // Para o som em loop que está sendo tocado pela entidade.
     public void stopLoopForEntity(Entity entity) {
         if (entity == null) return;
 

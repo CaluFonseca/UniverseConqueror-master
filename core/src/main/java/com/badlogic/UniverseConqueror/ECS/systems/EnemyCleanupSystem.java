@@ -13,11 +13,11 @@ public class EnemyCleanupSystem extends EntitySystem {
     private final PooledEngine engine;
     private final BodyRemovalSystem bodyRemovalSystem;
     private final AnimationSystem animationSystem;
-    private final Consumer<Entity> onEnemyKilled; /// Callback customizado para lógica extra quando inimigo morre
+    private final Consumer<Entity> onEnemyKilled;
 
     private ImmutableArray<Entity> enemies;
 
-    /// Construtor com dependências principais
+    // Construtor com dependências principais
     public EnemyCleanupSystem(PooledEngine engine,
                               BodyRemovalSystem bodyRemovalSystem,
                               AnimationSystem animationSystem,
@@ -28,7 +28,7 @@ public class EnemyCleanupSystem extends EntitySystem {
         this.onEnemyKilled = onEnemyKilled;
     }
 
-    /// Define os inimigos relevantes ao adicionar o sistema
+    // Define os inimigos relevantes ao adicionar o sistema
     @Override
     public void addedToEngine(Engine engine) {
         enemies = engine.getEntitiesFor(Family.all(
@@ -44,34 +44,29 @@ public class EnemyCleanupSystem extends EntitySystem {
             HealthComponent health = ComponentMappers.health.get(enemy);
             StateComponent state = ComponentMappers.state.get(enemy);
 
-            /// Ignora se o inimigo ainda não morreu
+            // Ignora se o inimigo ainda não morreu
             if (!health.isDead()) continue;
 
-            /// Verifica se a animação de morte já terminou
+            // Verifica se a animação de morte já terminou
             if (state.get() == StateComponent.State.DEATH) {
                 boolean finished = animationSystem.isDeathAnimationFinished(enemy);
 
                 if (finished) {
-                    /// Marca corpo para destruição
+                    // Marca corpo para destruição
                     PhysicsComponent pc = ComponentMappers.physics.get(enemy);
                     if (pc != null && pc.body != null) {
                         bodyRemovalSystem.markForRemoval(pc.body);
                         pc.body = null;
                     }
 
-                    /// Marca o componente de vida para sinalizar remoção
+                    // Marca o componente de vida para sinalizar remoção
                     health.scheduledForRemoval = true;
 
-                    /// Remove a entidade da engine
+                    // Remove a entidade da engine
                     engine.removeEntity(enemy);
                     enemy.removeAll(); // força limpeza total dos componentes
 
-                    /// Log de debug para inimigos UFOs
-                    if (enemy.getComponent(UfoComponent.class) != null) {
-                        System.err.println("[ALERTA] UFO levou dano ou entrou em DEATH: ID " + enemy.hashCode());
-                    }
-
-                    /// Executa ação personalizada ao matar o inimigo (ex: contador de kills)
+                    // Executa ação personalizada ao matar o inimigo, contador
                     onEnemyKilled.accept(enemy);
                 }
             }

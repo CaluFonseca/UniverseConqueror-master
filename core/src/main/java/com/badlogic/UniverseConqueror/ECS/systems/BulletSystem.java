@@ -75,20 +75,16 @@ public class BulletSystem extends EntitySystem {
         Entity bullet = bulletFactory.obtainProjectile(body.getWorld(), x, y, target, type);
         if (ComponentMappers.projectile.get(bullet) != null) {
             activeBullets.add(bullet);
-        } else {
-            System.err.println("[BulletSystem] ERRO: entidade retornada não tem ProjectileComponent! ID: " + bullet.hashCode());
         }
     }
 
     public void dispose() {
-        // Reservado para futuras liberações
+
     }
 
     public void spawnedFromFactory(Entity bullet) {
         if (ComponentMappers.projectile.get(bullet) != null) {
             activeBullets.add(bullet);
-        } else {
-            System.err.println("[BulletSystem] Entidade sem ProjectileComponent adicionada! ID: " + bullet.hashCode());
         }
     }
 

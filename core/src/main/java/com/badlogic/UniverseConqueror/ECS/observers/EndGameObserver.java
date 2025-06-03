@@ -17,9 +17,9 @@ import com.badlogic.UniverseConqueror.Utils.Timer;
 
 import java.util.function.Supplier;
 
-/// Observador responsável por responder ao fim do jogo.
-/// Ao receber um EndGameEvent, coleta informações relevantes
-/// (itens, vida, tempo, inimigos mortos) e muda para o ecrã de fim.
+// Observador responsável por responder ao fim do jogo.
+// Ao receber um EndGameEvent, recolhe informações relevantes
+// (itens, vida, tempo, inimigos mortos) e muda para o ecrã de fim.
 public class EndGameObserver implements Observer {
 
     private final ScreenManager screenManager;
@@ -42,19 +42,14 @@ public class EndGameObserver implements Observer {
     @Override
     public void onNotify(GameEvent event) {
         if (event instanceof EndGameEvent end && end.entity == player) {
-            /// Para os sons e música
+            // Para os sons e música
             SoundManager.getInstance().stop("patrolAlien");
             SoundManager.getInstance().stop("chaseAlien");
             SoundManager.getInstance().stop("chaseUfo");
             MusicManager.getInstance().stop();
             SoundManager.getInstance().play("nextLevel.mp3");
-            /// Coleta estatísticas finais
-//            int items = itemSystem.getCollectedCount();
-//            int health = player.getComponent(HealthComponent.class).currentHealth;
-//            float totalTime = timer.getTime();
-//            int enemiesKilled =  enemiesKilledSupplier.get();
 
-            /// Transição para ecrã final
+            // Transição para ecrã final
             screenManager.show(
                 ScreenType.END,
                 itemSystem.getCollectedCount(),

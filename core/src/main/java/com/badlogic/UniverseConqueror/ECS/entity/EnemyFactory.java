@@ -19,7 +19,7 @@ import static com.badlogic.UniverseConqueror.Utils.Constants.*;
 
 public class EnemyFactory  {
 
-    /// Cria um inimigo que patrulha entre pontos e persegue o jogador ao detectá-lo
+    // Cria um inimigo que patrulha entre pontos e persegue o jogador ao detectá-lo
     public static Entity createPatrollingEnemy(PooledEngine engine, World world, Vector2 start,
                                                AssetManager assetManager, Entity player, OrthographicCamera camera,
                                                Vector2... patrolPoints) {
@@ -58,13 +58,13 @@ public class EnemyFactory  {
         return enemy;
     }
 
-    /// Cria um inimigo que apenas persegue o jogador
+    // Cria um inimigo que apenas persegue o jogador
     public static Entity createChasingEnemy(PooledEngine engine, World world, Vector2 position,
                                             AssetManager assetManager, Entity player, OrthographicCamera camera) {
         return createPatrollingEnemy(engine, world, position, assetManager, player, camera, position, position);
     }
 
-    /// Cria um inimigo do tipo UFO com animações específicas
+    // Cria um inimigo do tipo UFO com animações específicas
     public static Entity createUfoEnemy(PooledEngine engine, World world, Vector2 position,
                                         AssetManager assetManager, Entity player, OrthographicCamera camera) {
 
@@ -110,7 +110,7 @@ public class EnemyFactory  {
         return enemy;
     }
 
-    /// Reinicializa todos os componentes do inimigo UFO
+    // Reinicializa todos os componentes do inimigo UFO
     public static void resetUfoEnemy(Entity enemy, Vector2 position, AssetManager assetManager,
                                      Entity player, OrthographicCamera camera, PooledEngine engine) {
 
@@ -182,7 +182,7 @@ public class EnemyFactory  {
 
     }
 
-    /// Adiciona anima\u00e7\u00f5es e estado inicial ao inimigo
+    // Adiciona animacoes e estado inicial ao inimigo
     private static void addAnimationComponents(Entity enemy, PooledEngine engine,
                                                AssetManager assetManager, String enemyType,
                                                StateComponent.State ignoredInitialState) {
@@ -206,7 +206,7 @@ public class EnemyFactory  {
         enemy.add(state);
     }
 
-    /// Cria corpo Box2D padr\u00e3o para inimigos
+    // Cria corpo Box2D padrao para inimigos
     private static BodyComponent createEnemyBody(Vector2 position, World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -229,7 +229,7 @@ public class EnemyFactory  {
         return bc;
     }
 
-    /// Altera o estado e reinicia a anima\u00e7\u00e3o do inimigo
+    // Altera o estado e reinicia a animacao do inimigo
     public static void changeState(Entity enemy, StateComponent.State newState) {
         StateComponent state = enemy.getComponent(StateComponent.class);
         AnimationComponent anim = enemy.getComponent(AnimationComponent.class);

@@ -24,13 +24,13 @@ public class EnemyInitializer extends AbstractInitializer {
     private Spawner<Void> spaceshipEnemySpawner;
 
     public EnemyInitializer(GameContext context) {
-        super(context);  // Chama o construtor da classe pai com o contexto
-        this.engine = context.getEngine();  // Acessando a engine do contexto
-        this.world = context.getWorldContext().getWorld();  // Acessando o mundo do contexto
-        this.assetManager = context.getAssetManager();  // Acessando o asset manager do contexto
-        this.player = context.getPlayer();  // Acessando o player do contexto
-        this.camera = context.getCamera();  // Acessando a câmera do contexto
-        this.mapGraphBuilder = context.getMapGraphBuilder();  // Acessando o MapGraphBuilder do contexto
+        super(context);
+        this.engine = context.getEngine();
+        this.world = context.getWorldContext().getWorld();
+        this.assetManager = context.getAssetManager();
+        this.player = context.getPlayer();
+        this.camera = context.getCamera();
+        this.mapGraphBuilder = context.getMapGraphBuilder();
     }
 
     // Método implementado da classe AbstractInitializer
@@ -38,7 +38,6 @@ public class EnemyInitializer extends AbstractInitializer {
     public void initialize() {
         // Inicializa a nave e retorna o nó onde ela está
         Node spaceshipNode = initializeSpaceship();
-
         // Spawna os inimigos ao redor da nave
         initializeEnemies(spaceshipNode);
     }

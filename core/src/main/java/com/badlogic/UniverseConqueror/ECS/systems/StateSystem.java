@@ -9,28 +9,25 @@ import com.badlogic.UniverseConqueror.ECS.events.IdleEvent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 
-/// Sistema responsável por gerenciar transições de estado com base em saúde e movimento
+// Sistema responsável por gerir transições de estado com base em saúde e movimento
 public class StateSystem extends BaseIteratingSystem {
 
-    /// Construtor define a família de entidades com StateComponent (demais mappers são opcionais)
     public StateSystem() {
         super(Family.all(StateComponent.class).get());
     }
 
-    /// Processa cada entidade por frame
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         StateComponent state = ComponentMappers.state.get(entity);
         HealthComponent health = ComponentMappers.health.get(entity);
         VelocityComponent velocity = ComponentMappers.velocity.get(entity);
 
-        /// Atualiza o tempo acumulado no estado atual
+        // Atualiza o tempo acumulado no estado atual
         state.timeInState += deltaTime;
 
-        /// Caso não tenha vida (entidade inválida ou sem saúde), ignora
         if (health == null || state == null) return;
 
-        /// Se está no estado HURT, verifica se deve sair dele
+        // Se está no estado HURT, verifica se deve sair dele
         if (state.get() == StateComponent.State.HURT) {
             if (state.timeInState >= health.hurtDuration) {
                 state.set(StateComponent.State.IDLE);
@@ -39,12 +36,10 @@ public class StateSystem extends BaseIteratingSystem {
             return;
         }
 
-        /// Define se o personagem está ferido (vida abaixo de 25)
         boolean isInjured = health.currentHealth < 25f;
-        /// Verifica se há movimento ativo
         boolean moving = velocity != null && velocity.velocity.len2() > 0.1f;
 
-        /// Transições de estado com base na saúde e no movimento
+        // Transições de estado com base na saúde e no movimento
         switch (state.currentState) {
             case WALK:
                 if (isInjured) {

@@ -17,14 +17,14 @@ public class SpaceshipFactory {
         this.assetManager = assetManager;
     }
 
-    /// Cria a entidade da nave espacial, com textura, corpo e componentes necessários
+    // Cria a entidade da nave espacial, com textura, corpo e componentes necessários
     public Entity createSpaceship(Vector2 position, Engine engine, World world) {
         Entity spaceship = new Entity();
 
-        /// Carrega a textura da nave
+        // Carrega a textura da nave
         Texture texture = assetManager.get(AssetPaths.ITEM_SPACESHIP, Texture.class);
 
-        /// Adiciona componentes básicos
+        // Adiciona componentes básicos
         PositionComponent positionComponent = new PositionComponent(position);
         spaceship.add(positionComponent);
 
@@ -40,17 +40,17 @@ public class SpaceshipFactory {
         spaceship.add(new TargetComponent());
         spaceship.add(new EndLevelComponent());
 
-        /// Cria e adiciona o corpo físico (Box2D)
+        // Cria e adiciona o corpo físico (Box2D)
         BodyComponent bodyComponent = new BodyComponent();
         bodyComponent.body = createBody(world, position, texture, spaceship);
         spaceship.add(bodyComponent);
 
-        /// Adiciona ao engine
+        // Adiciona ao engine
         engine.addEntity(spaceship);
         return spaceship;
     }
 
-    /// Cria o corpo físico da nave (Box2D)
+    // Cria o corpo físico da nave (Box2D)
     private Body createBody(World world, Vector2 position, Texture texture, Entity entity) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
@@ -58,7 +58,7 @@ public class SpaceshipFactory {
 
         Body body = world.createBody(bodyDef);
 
-        /// Define a forma de colisão da nave
+        // Define a forma de colisão da nave
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(20f, 20f);
 

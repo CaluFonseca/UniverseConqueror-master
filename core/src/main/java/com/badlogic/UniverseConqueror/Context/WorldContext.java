@@ -65,7 +65,6 @@ public class WorldContext {
         this.mapRenderer = mapRenderer;
     }
 
-
     public MapCollisionHandler getCollisionHandler() {
         return collisionHandler;
     }

@@ -16,12 +16,12 @@ public abstract class AbstractInitializer {
      * @param context O contexto do jogo, que contém informações e sistemas do jogo.
      */
     public AbstractInitializer(GameContext context) {
-        this.context = context;  /// Inicializa o contexto com a referência passada.
+        this.context = context;
     }
 
     /**
      * Método abstrato para inicializar os componentes do jogo.
      * Subclasses devem implementar esse método para realizar a inicialização dos seus respectivos componentes.
      */
-    public abstract void initialize();  /// Método que deve ser implementado pelas subclasses para realizar a inicialização.
+    public abstract void initialize();
 }

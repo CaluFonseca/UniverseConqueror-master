@@ -10,6 +10,7 @@ import com.badlogic.gdx.assets.AssetManager;
 
 import java.util.EnumMap;
 
+//Gestão de Screens
 public class DefaultScreenManager implements ScreenManager {
 
     private final GameLauncher game;
@@ -22,6 +23,7 @@ public class DefaultScreenManager implements ScreenManager {
         this.assetManager = assetManager;
     }
 
+    //Exibe um ecrã do jogo com base no tipo fornecido e argumentos adicionais.
     @Override
     public void show(ScreenType type) {
         show(type, (Object[]) null);
@@ -36,6 +38,7 @@ public class DefaultScreenManager implements ScreenManager {
         }
     }
 
+    //Recupera ou cria um ecrã com base no tipo fornecido.
     private Screen getOrCreateScreen(ScreenType type, Object... args) {
         switch (type) {
             case MAIN_MENU:
@@ -43,7 +46,7 @@ public class DefaultScreenManager implements ScreenManager {
 
             case GAME:
                 GameStateManager.delete();
-                return new GameScreen(game, assetManager); // nova instância sempre
+                return new GameScreen(game, assetManager);
             case PAUSE:
                 return screenCache.computeIfAbsent(type, t -> new PauseScreen(game, (GameScreen) currentScreen, assetManager));
             case GAME_OVER:
@@ -68,6 +71,7 @@ public class DefaultScreenManager implements ScreenManager {
         }
     }
 
+    //Retorna a tela atual que está sendo exibida.
     @Override
     public Screen getCurrent() {
         return currentScreen;

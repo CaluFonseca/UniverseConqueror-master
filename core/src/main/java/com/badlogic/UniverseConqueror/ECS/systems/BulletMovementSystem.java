@@ -5,7 +5,7 @@ import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 
-/// Sistema que move projéteis com base na física Box2D
+// Sistema que move projéteis com base na física Box2D
 public class BulletMovementSystem extends BaseIteratingSystem {
 
     public BulletMovementSystem() {
@@ -19,8 +19,8 @@ public class BulletMovementSystem extends BaseIteratingSystem {
         PositionComponent position = ComponentMappers.position.get(entity);
 
         if (physics.body != null && physics.body.isActive()) {
-            physics.body.setLinearVelocity(velocity.velocity);     // Aplica a velocidade física
-            position.position.set(physics.body.getPosition());     // Atualiza a posição lógica
+            physics.body.setLinearVelocity(velocity.velocity);
+            position.position.set(physics.body.getPosition());
         }
     }
 }

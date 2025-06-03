@@ -10,7 +10,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-
+//Spawn UFO
 public class UfoSpawner implements Spawner<Void> {
 
     private final PooledEngine engine;
@@ -30,7 +30,10 @@ public class UfoSpawner implements Spawner<Void> {
         this.camera = camera;
         this.mapGraphBuilder = mapGraphBuilder;
     }
-
+/**
+ * Método responsável por gerar os inimigos do tipo "UFO".
+ * Cria três inimigos em posições aleatórias válidas no mapa.
+ **/
     @Override
     public Void spawn() {
         for (int i = 0; i < 3; i++) {

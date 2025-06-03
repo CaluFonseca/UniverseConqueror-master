@@ -5,7 +5,7 @@ import com.badlogic.UniverseConqueror.ECS.utils.ComponentMappers;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 
-/// Sistema que move entidades com base em sua velocidade e atualiza posição lógica
+// Sistema que move entidades com base na velocidade e atualiza posição lógica
 public class MovementSystem extends BaseIteratingSystem {
 
     public MovementSystem() {
@@ -20,10 +20,10 @@ public class MovementSystem extends BaseIteratingSystem {
         AnimationComponent animation = ComponentMappers.animation.get(entity);
 
         if (physics.body != null && velocity != null) {
-            // Aplica a velocidade ao corpo físico
+
             physics.body.setLinearVelocity(velocity.velocity);
 
-            // Atualiza orientação do personagem com base na direção da velocidade
+
             if (animation != null) {
                 float vx = velocity.velocity.x;
                 if (vx > 0.01f) {
@@ -33,7 +33,7 @@ public class MovementSystem extends BaseIteratingSystem {
                 }
             }
 
-            // Atualiza TransformComponent com a posição física atual
+
             transform.position.set(
                 physics.body.getPosition().x,
                 physics.body.getPosition().y,

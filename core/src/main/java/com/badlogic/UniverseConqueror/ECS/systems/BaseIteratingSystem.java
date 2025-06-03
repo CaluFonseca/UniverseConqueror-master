@@ -9,16 +9,9 @@ import com.badlogic.ashley.systems.IteratingSystem;
  * acesso fácil a mappers comuns.
  */
 public abstract class BaseIteratingSystem extends IteratingSystem {
-
-
     public BaseIteratingSystem(com.badlogic.ashley.core.Family family) {
         super(family);
     }
-
-//    protected <T extends Component> ComponentMapper<T> mapperFor(Class<T> type) {
-//        return ComponentMapper.getFor(type);
-//    }
-
 
     @Override
     protected abstract void processEntity(Entity entity, float deltaTime);

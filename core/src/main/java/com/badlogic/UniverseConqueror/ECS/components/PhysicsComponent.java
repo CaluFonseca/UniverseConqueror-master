@@ -6,13 +6,13 @@ import com.badlogic.gdx.math.Vector2;
 
 public class PhysicsComponent implements Component {
 
-    /// Corpo físico do Box2D associado à entidade
+    // Corpo físico do Box2D associado à entidade
     public Body body;
 
-    /// Velocidade atual aplicada ao corpo
+    // Velocidade atual aplicada ao corpo
     public Vector2 velocity = new Vector2();
 
-    /// Massa do corpo (padrão: 1f)
+    // Massa do corpo (padrão: 1f)
     public float mass = 1f;
 
     public PhysicsComponent() {}

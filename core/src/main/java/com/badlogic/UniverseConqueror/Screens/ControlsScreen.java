@@ -5,10 +5,10 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 
-/// ecrã de controles do jogo, herdando da BaseInfosScreen
+// ecrã de controles do jogo, herdando da BaseInfosScreen
 public class ControlsScreen extends BaseInfosScreen implements BaseScreen {
 
-    /// Construtor que passa o texto dos controles para a classe base
+    // Construtor que passa o texto dos controles para a classe base
     public ControlsScreen(Game game, AssetManager assetManager) {
         super(game,
             "Controlos do Jogo: \n" +
@@ -28,7 +28,7 @@ public class ControlsScreen extends BaseInfosScreen implements BaseScreen {
             assetManager);
     }
 
-    /// Chama o método show da superclasse (inicializa input processor, etc)
+    // Chama o método show da superclasse (inicializa input processor, etc)
     @Override
     public void show() {
         super.show();
@@ -36,7 +36,7 @@ public class ControlsScreen extends BaseInfosScreen implements BaseScreen {
 
     @Override
     public void initializeUI() {
-
+        super.initializeUI();
     }
 
     @Override

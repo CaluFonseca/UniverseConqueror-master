@@ -4,24 +4,24 @@ import com.badlogic.ashley.core.Component;
 
 public class JumpComponent implements Component {
 
-    /// Indica se o personagem está no ar
+    // Indica se o personagem está no ar
     public boolean isJumping = false;
 
-    /// Força aplicada no pulo
+    // Força aplicada no pulo
     public float jumpForce = 500f;
 
-    /// Indica se o personagem pode pular (ex.: impedir múltiplos pulos no ar)
+    // Indica se o personagem pode pular
     public boolean canJump = true;
 
-    /// Duração total atual do pulo
+    // Duração total atual do pulo
     public float jumpDuration = 0f;
 
-    /// Tempo atual desde que o pulo começou
+    // Tempo atual desde que o pulo começou
     public float currentJumpTime = 0f;
 
-    /// Tempo máximo permitido para o pulo durar
+    // Tempo máximo permitido para o pulo durar
     public float maxJumpTime = 0.5f;
 
-    /// Posição vertical do chão (para controle de término do pulo)
+    // Posição vertical do chão (para controle de término do pulo)
     public float groundY = 0f;
 }

@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Component;
 
 public class StateComponent implements Component {
 
-    /// Enum que representa os estados possíveis de uma entidade
+    // Enum que representa os estados possíveis de uma entidade
     public enum State {
         IDLE,
         WALK,
@@ -25,24 +25,24 @@ public class StateComponent implements Component {
         FLY
     }
 
-    /// Estado atual da entidade
+    // Estado atual da entidade
     public State currentState = State.IDLE;
 
-    /// Último estado anterior ao atual
+    // Último estado anterior ao atual
     public State previousState = State.IDLE;
 
-    /// Tempo acumulado no estado atual
+    // Tempo acumulado no estado atual
     public float timeInState = 0f;
 
-    /// Tempo restante do ataque especial (se aplicável)
+    // Tempo restante do ataque especial
     public float superAttackTimeLeft = 0f;
 
-    /// Atualiza o tempo no estado
+    // Atualiza o tempo no estado
     public void update(float delta) {
         timeInState += delta;
     }
 
-    /// Define um novo estado para a entidade (não altera se já estiver em DEATH)
+    // Define um novo estado para a entidade
     public void set(State newState) {
         if (currentState == State.DEATH) return;
 
@@ -53,7 +53,7 @@ public class StateComponent implements Component {
         }
     }
 
-    /// Retorna o estado atual da entidade
+    // Retorna o estado atual da entidade
     public State get() {
         return currentState;
     }

@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 
 /**
  * A classe `PlayerInitializer` é responsável por inicializar o jogador no jogo.
- * Ela usa o `MapGraphBuilder` para encontrar uma posição viável no mapa para o jogador
+ * Usa o `MapGraphBuilder` para encontrar uma posição viável no mapa para o jogador
  * e cria a entidade do jogador utilizando a `PlayerFactory`.
  */
 public class PlayerInitializer extends AbstractInitializer {
@@ -17,32 +17,31 @@ public class PlayerInitializer extends AbstractInitializer {
     /**
      * Construtor da classe `PlayerInitializer`. Inicializa o contexto do jogo.
      *
-     * @param context O contexto do jogo, necessário para acessar sistemas e recursos.
+     * @param context O contexto do jogo, necessário para aceder sistemas e recursos.
      */
     public PlayerInitializer(GameContext context) {
-        super(context);  /// Chama o construtor da classe pai para inicializar o contexto
+        super(context);
     }
 
     @Override
     public void initialize() {
-        // Acessa o MapGraphBuilder a partir do contexto
-        MapGraphBuilder mapGraphBuilder = context.getMapGraphBuilder();  /// Obtém o construtor do mapa do contexto
-        int mapWidth = mapGraphBuilder.getWidth();  /// Obtém a largura do mapa
-        int mapHeight = mapGraphBuilder.getHeight();  /// Obtém a altura do mapa
+        MapGraphBuilder mapGraphBuilder = context.getMapGraphBuilder();
+        int mapWidth = mapGraphBuilder.getWidth();
+        int mapHeight = mapGraphBuilder.getHeight();
 
         // Inicializa a posição de spawn do jogador no centro do mapa
         Node spawnNode = mapGraphBuilder.nodes[mapWidth / 2][mapHeight / 2];
 
         // Verifica se o nó de spawn é caminhável. Caso contrário, procura um nó próximo que seja caminhável.
         if (!spawnNode.walkable) {
-            outer:  /// Rótulo para sair do laço de busca
-            for (int x = mapWidth / 2 - 2; x <= mapWidth / 2 + 2; x++) {  /// Percorre uma área ao redor do centro
+            outer:
+            for (int x = mapWidth / 2 - 2; x <= mapWidth / 2 + 2; x++) {
                 for (int y = mapHeight / 2 - 2; y <= mapHeight / 2 + 2; y++) {
-                    if (x >= 0 && y >= 0 && x < mapWidth && y < mapHeight) {  /// Verifica se as coordenadas estão dentro do mapa
-                        Node node = mapGraphBuilder.nodes[x][y];  /// Obtém o nó da posição
-                        if (node.walkable) {  /// Se o nó for caminhável
-                            spawnNode = node;  /// Define esse nó como o local de spawn
-                            break outer;  /// Sai do laço de busca
+                    if (x >= 0 && y >= 0 && x < mapWidth && y < mapHeight) {
+                        Node node = mapGraphBuilder.nodes[x][y];
+                        if (node.walkable) {
+                            spawnNode = node;
+                            break outer;
                         }
                     }
                 }
@@ -53,19 +52,19 @@ public class PlayerInitializer extends AbstractInitializer {
         Vector2 spawnPosition = mapGraphBuilder.toWorldPosition(spawnNode);
 
         // Define o centro do mapa para ser a posição do jogador
-        context.getWorldContext().setCenterX(spawnPosition.x + 5);  /// Ajusta o centro do mapa para a posição do jogador
-        context.getWorldContext().setCenterY(spawnPosition.y + 5);  /// Ajusta o centro do mapa para a posição do jogador
+        context.getWorldContext().setCenterX(spawnPosition.x + 5);
+        context.getWorldContext().setCenterY(spawnPosition.y + 5);
 
         // Cria a entidade do jogador utilizando a `PlayerFactory`
         Entity player = PlayerFactory.createPlayer(
-            context.getEngine(),  /// Passa a engine do ECS
-            spawnPosition,  /// Posição do jogador no mapa
-            context.getWorldContext().getWorld(),  /// Mundo físico do jogo
-            context.getAssetManager()  /// AssetManager para carregar recursos do jogador
+            context.getEngine(),
+            spawnPosition,
+            context.getWorldContext().getWorld(),
+            context.getAssetManager()
         );
 
         // Adiciona a entidade do jogador à engine do ECS
         context.getEngine().addEntity(player);
-        context.setPlayer(player);  /// Define a entidade do jogador no contexto do jogo
+        context.setPlayer(player);
     }
 }

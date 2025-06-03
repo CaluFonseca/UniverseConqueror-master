@@ -8,7 +8,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 
-/// Sistema responsável por controlar o ciclo de ataque do jogador (e outros atacantes, se houver)
+// Sistema responsável por controlar o ciclo de ataque do jogador
 public class AttackSystem extends BaseIteratingSystem {
 
     public AttackSystem() {
@@ -36,10 +36,6 @@ public class AttackSystem extends BaseIteratingSystem {
                 }
 
                 EventBus.get().notify(new AttackEndedEvent(entity));
-            }
-        } else {
-            if (attack.canAttack()) {
-                // Lógica opcional de ataque automático
             }
         }
     }
@@ -76,7 +72,6 @@ public class AttackSystem extends BaseIteratingSystem {
 
 
     public void setEngine(Engine engine) {
-//        super.setEngine(engine);
     }
 
     private Entity getPlayerEntity() {

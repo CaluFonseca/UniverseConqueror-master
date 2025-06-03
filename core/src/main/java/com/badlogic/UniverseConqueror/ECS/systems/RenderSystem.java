@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import static com.badlogic.UniverseConqueror.Utils.Constants.MIN_FLIP_THRESHOLD;
 
-/// Sistema que renderiza entidades com animações, exceto UFOs.
+// Sistema que renderiza entidades com animações, exceto UFOs.
 public class RenderSystem extends BaseRenderSystem {
 
 

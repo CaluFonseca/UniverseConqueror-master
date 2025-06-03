@@ -5,7 +5,7 @@ import com.badlogic.UniverseConqueror.ECS.events.*;
 import com.badlogic.UniverseConqueror.Interfaces.GameEvent;
 import com.badlogic.UniverseConqueror.Interfaces.Observer;
 
-/// Observador responsável por reproduzir sons com base nos eventos do jogo.
+// Observador responsável por reproduzir sons com base nos eventos do jogo.
 public class SoundObserver implements Observer {
 
     private final SoundManager soundManager;
@@ -16,48 +16,43 @@ public class SoundObserver implements Observer {
 
     @Override
     public void onNotify(GameEvent event) {
-        /// Som de ataque (normal ou super)
+        // Som de ataque
         if (event instanceof AttackStartedEvent attackEvent) {
             String soundKey = attackEvent.isSuperAttack ? "superattack" : "attack";
             soundManager.play(soundKey);
 
-            /// Som de pulo
+            // Som de pulo
         } else if (event instanceof JumpEvent) {
             soundManager.play("jump");
 
-            /// Som de arma sem munição
+            // Som de arma sem munição
         } else if (event instanceof NoAmmoEvent) {
             soundManager.play("empty_gun");
 
-            /// Som de caminhada
+            // Som de caminhada
         } else if (event instanceof WalkEvent) {
             soundManager.play("walk");
 
-            /// Som de movimento rápido
+            // Som de movimento rápido
         } else if (event instanceof FastMoveEvent) {
             soundManager.play("fastmove");
 
-            /// Encerramento de ataque, para sons contínuos
+            // Fim de ataque, para sons contínuos
         } else if (event instanceof AttackEndedEvent) {
             soundManager.stop("attack");
             soundManager.stop("superattack");
 
-            /// Som de coleta de item
+            // Som de coleta de item
         } else if (event instanceof ItemCollectedEvent) {
             soundManager.play("item");
 
-            /// Evento de morte do jogador (sons podem ser parados aqui se desejado)
+            // Evento de morte do jogador
         } else if (event instanceof DeathEvent) {
             // soundManager.stop();
             // MusicManager.getInstance().stop();
         }
-
-        /// Evento de ficar parado (opcional parar sons contínuos)
         else if (event instanceof IdleEvent) {
-            // soundManager.stop("walk");
-            // soundManager.stop("attack");
-            // soundManager.stop("superattack");
-            // soundManager.stop("fastmove");
+
         }
     }
 }

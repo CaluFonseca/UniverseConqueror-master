@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 public class PlayerFactory {
 
-    /// Cria e retorna a entidade do jogador, com todos os componentes necessários.
+    // Cria e retorna a entidade do jogador, com todos os componentes necessários.
     public static Entity createPlayer(PooledEngine engine,
                                       Vector2 position,
                                       World world,
@@ -21,7 +21,7 @@ public class PlayerFactory {
 
         Entity entity = engine.createEntity();
 
-        /// Transformação e posição
+        // Transformação e posição
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(position.x, position.y, 0);
         entity.add(transform);
@@ -30,20 +30,20 @@ public class PlayerFactory {
         positionComponent.position.set(position.x, position.y);
         entity.add(positionComponent);
 
-        /// Física
+        // Física
         PhysicsComponent physicsComponent = engine.createComponent(PhysicsComponent.class);
         BodyComponent bodyComponent = createBody(position, world);
         physicsComponent.body = bodyComponent.body;
         entity.add(physicsComponent);
         entity.add(bodyComponent);
 
-        /// Velocidade e estado
+        // Velocidade e estado
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
         StateComponent state = engine.createComponent(StateComponent.class);
         entity.add(velocity);
         entity.add(state);
 
-        /// Carrega as animações com o AnimationLoader
+        // Carrega as animações com o AnimationLoader
         AnimationLoader animationLoader = new AnimationLoader(assetManager);
         ObjectMap<StateComponent.State, Animation<TextureRegion>> animations = animationLoader.loadAnimations();
 
@@ -51,36 +51,36 @@ public class PlayerFactory {
         animationComponent.setAnimations(animations);
         entity.add(animationComponent);
 
-        /// Sons
+        // Sons
         SoundComponent sound = engine.createComponent(SoundComponent.class);
         entity.add(sound);
 
-        /// Outros componentes
+        // Outros componentes
         entity.add(engine.createComponent(AttackComponent.class));
         entity.add(engine.createComponent(JumpComponent.class));
         entity.add(engine.createComponent(PlayerComponent.class));
         entity.add(engine.createComponent(CameraComponent.class));
         entity.add(engine.createComponent(HealthComponent.class));
 
-        /// Associa o corpo à entidade
+        // Associa o corpo à entidade
         bodyComponent.body.setUserData(entity);
 
         return entity;
     }
 
-    /// Cria o corpo físico do jogador com Box2D
+    // Cria o corpo físico do jogador com Box2D
     public static BodyComponent createBody(Vector2 position, World world) {
         BodyDef bodyDef = new BodyDef();
-        bodyDef.position.set(position); /// Define a posição inicial do corpo no mundo
-        bodyDef.type = BodyDef.BodyType.DynamicBody; /// Tipo dinâmico para corpos que se movem
+        bodyDef.position.set(position);
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
 
         Body body = world.createBody(bodyDef);
 
-        /// Cria a forma de colisão (retângulo centrado)
+        // Cria a forma de colisão
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(40f, 40f);
 
-        /// Define as propriedades físicas do corpo
+        // Define as propriedades físicas do corpo
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
@@ -89,10 +89,10 @@ public class PlayerFactory {
 
         body.createFixture(fixtureDef);
 
-        /// Libera recursos da forma
+        // Libera recursos da forma
         shape.dispose();
 
-        /// Cria e retorna o componente de corpo
+        // Cria e retorna o componente de corpo
         BodyComponent bodyComponent = new BodyComponent();
         bodyComponent.body = body;
         return bodyComponent;

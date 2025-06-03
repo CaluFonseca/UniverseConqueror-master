@@ -8,12 +8,12 @@ import java.util.Queue;
 
 public class PathComponent implements Component {
 
-    /// Tipos de destino possíveis para o caminho (ex: buscar item ou ir à nave)
+    // Tipos de destino possíveis para o caminho
     public enum PathType { ITEM, SPACESHIP }
 
-    /// Fila de pontos (waypoints) que a entidade deve seguir
+    // Fila de pontos (waypoints) que a entidade deve seguir
     public Queue<Vector2> waypoints = new LinkedList<>();
 
-    /// Tipo atual do caminho, padrão é buscar item
+    // Tipo atual do caminho, padrão é buscar item
     public PathType type = PathType.ITEM;
 }

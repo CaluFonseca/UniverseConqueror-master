@@ -1,5 +1,5 @@
-/// Classe responsável por processar colisões de um mapa isométrico em um jogo usando TiledMap e Box2D.
-/// Extrai retângulos de colisão e "saltáveis" (jumpable) e os converte em corpos físicos no mundo Box2D.
+// Classe responsável por processar colisões de um mapa isométrico em um jogo usando TiledMap e Box2D.
+// Extrai retângulos de colisão e "saltáveis" (jumpable) e os converte em corpos físicos no mundo Box2D.
 
 package com.badlogic.UniverseConqueror.Utils;
 
@@ -13,25 +13,14 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class MapCollisionHandler {
-
-    /// Retângulos de colisão padrão (ex: paredes, obstáculos).
     private final Array<Rectangle> collisionRects;
-
-    /// Retângulos de camadas que podem ser atravessadas pulando.
     private final Array<Rectangle> jumpableRects;
-
-    /// Dimensões dos tiles do mapa.
     private final float tileWidth;
     private final float tileHeight;
-
-    /// Camadas do TiledMap para colisão e "jumpable".
     private TiledMapTileLayer layer;
     private TiledMapTileLayer jumpableLayer;
 
-    /// Construtor que processa o mapa e extrai retângulos das camadas especificadas.
-    /// @param map mapa TiledMap
-    /// @param layerName nome da camada de colisão
-    /// @param jumpableLayerName nome da camada de tiles puláveis
+    // Construtor que processa o mapa e extrai retângulos das camadas especificadas.
     public MapCollisionHandler(TiledMap map, String layerName, String jumpableLayerName) {
         collisionRects = new Array<>();
         jumpableRects = new Array<>();
@@ -93,8 +82,7 @@ public class MapCollisionHandler {
         }
     }
 
-    /// Cria corpos estáticos no mundo Box2D a partir dos retângulos coletados.
-    /// Colisores normais são sólidos, enquanto "jumpables" são sensores.
+    // Cria corpos estáticos no mundo Box2D a partir dos retângulos coletados.
     public void createBox2DBodies(World world) {
         for (Rectangle rect : collisionRects) {
             createIsometricDiamond(world, rect, 256f, 128f, (short) 0x0001, false, 4f);
@@ -105,14 +93,7 @@ public class MapCollisionHandler {
         }
     }
 
-    /// Cria um corpo com forma de losango isométrico para simular o tile.
-    /// @param world mundo Box2D
-    /// @param pixelPosition posição do retângulo em pixels
-    /// @param widthPx largura do tile em pixels
-    /// @param heightPx altura do tile em pixels
-    /// @param categoryBits categoria do filtro de colisão
-    /// @param isSensor se o corpo deve ser um sensor
-    /// @param ppm fator de conversão pixel-to-meter
+    // Cria um corpo com forma de losango isométrico para simular o tile.
     public Body createIsometricDiamond(World world, Rectangle pixelPosition, float widthPx, float heightPx, short categoryBits, boolean isSensor, float ppm) {
         Vector2 position = new Vector2(pixelPosition.x, pixelPosition.y);
 
@@ -153,7 +134,7 @@ public class MapCollisionHandler {
         return body;
     }
 
-    /// Cria um corpo retangular Box2D a partir de um retângulo.
+    // Cria um corpo retangular Box2D a partir de um retângulo.
     private void createBox2DBody(World world, Rectangle rect, short categoryBits, boolean isSensor) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
@@ -175,12 +156,12 @@ public class MapCollisionHandler {
         shape.dispose();
     }
 
-    /// Retorna a lista de retângulos da camada de colisão.
+    // Retorna a lista de retângulos da camada de colisão.
     public Array<Rectangle> getCollisionRects() {
         return collisionRects;
     }
 
-    /// Retorna a lista de retângulos da camada pulável.
+    // Retorna a lista de retângulos da camada pulável.
     public Array<Rectangle> getJumpableRects() {
         return jumpableRects;
     }
