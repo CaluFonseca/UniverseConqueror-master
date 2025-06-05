@@ -80,4 +80,12 @@ public class WorldContext {
     public void setShapeRenderer(ShapeRenderer shapeRenderer) {
         this.shapeRenderer = shapeRenderer;
     }
+
+    public float getMapWidth() {
+        return map.getProperties().get("width", Integer.class);
+    }
+
+    public float getMapHeight() {
+        return map.getProperties().get("height", Integer.class);
+    }
 }

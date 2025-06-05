@@ -6,6 +6,7 @@ import com.badlogic.UniverseConqueror.Utils.AssetPaths;
 import com.badlogic.UniverseConqueror.Context.GameContext;
 import com.badlogic.UniverseConqueror.Context.HUDContext;
 import com.badlogic.UniverseConqueror.Utils.Joystick;
+import com.badlogic.UniverseConqueror.Utils.Minimap;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
@@ -63,6 +64,7 @@ public class UIInitializer extends AbstractInitializer {
         initializeJoystick();
         initializeCameraIcon();
         initializeEnemyCounter();
+        initializeMinimap();
     }
 
     /**
@@ -209,5 +211,32 @@ public class UIInitializer extends AbstractInitializer {
         killsTable.add(killsStack).size(50, 60).pad(10);
 
         context.getStage().addActor(killsTable);
+    }
+
+    /**
+     * Inicializa o minimapa com marcador de jogador.
+     */
+    private void initializeMinimap() {
+        float minimapWidth = 150;
+        float minimapHeight = 150;
+        float margin = 10;
+
+        float x = Gdx.graphics.getWidth() - minimapWidth - margin;
+        float y = margin;
+
+        Minimap minimap = new Minimap(
+            context.getAssetManager().get(AssetPaths.MINIMAP_BACKGROUND, Texture.class),
+            context.getAssetManager().get(AssetPaths.PLAYER_MARKER, Texture.class),
+            x, y,
+            minimapWidth, minimapHeight,
+            context.getPlayer()
+        );
+
+        minimap.setWorldSize(
+            context.getWorldContext().getMapWidth(),
+            context.getWorldContext().getMapHeight()
+        );
+
+        context.getStage().addActor(minimap);
     }
 }

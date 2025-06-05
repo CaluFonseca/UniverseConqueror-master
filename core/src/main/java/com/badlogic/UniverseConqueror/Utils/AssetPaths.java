@@ -95,4 +95,8 @@ public class AssetPaths {
     public static final String UFO_HURT = "ufo/hurt/frame-%02d.png";
     public static final String UFO_DEATH = "ufo/death/frame-%02d.png";
     public static final String UFO_FLY = "ufo/fly/frame-%02d.png";
+
+    //MiniMap
+    public static final String MINIMAP_BACKGROUND = "minimap.png";
+    public static final String PLAYER_MARKER = "marker.png";
 }

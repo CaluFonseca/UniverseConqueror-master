@@ -17,13 +17,10 @@ import com.badlogic.gdx.physics.box2d.World;
  */
 public class WorldInitializer extends AbstractInitializer {
 
-    GameScreen screen;  // Referência ao ecrã principal do jogo (GameScreen)
+    GameScreen screen;
 
     /**
      * Construtor da classe `WorldInitializer`.
-     *
-     * @param context O contexto do jogo, necessário para aceder sistemas e recursos.
-     * @param screen Oecrã do jogo, utilizada para modificar ou configurar o ecrã principal.
      */
     public WorldInitializer(GameContext context, GameScreen screen) {
         super(context);
@@ -62,4 +59,6 @@ public class WorldInitializer extends AbstractInitializer {
         // Define um renderizador de formas para desenhar as colisões e outros elementos gráficos
         context.getWorldContext().setShapeRenderer(new ShapeRenderer());
     }
+
+
 }

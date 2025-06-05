@@ -1,5 +1,7 @@
 package com.badlogic.UniverseConqueror.Utils;
 
+import com.badlogic.UniverseConqueror.ECS.components.PositionComponent;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -12,14 +14,14 @@ public class Minimap extends Actor {
     private Vector2 minimapPosition;
     private float minimapWidth;
     private float minimapHeight;
-    private Character player;
+    private Entity player;
     private float worldWidth;
     private float worldHeight;
 
     // Construtor que inicializa as texturas, posição e tamanho do minimapa
-    public Minimap(String minimapTexturePath, String characterMarkerPath, float x, float y, float width, float height, Character player) {
-        this.minimapTexture = new Texture(minimapTexturePath);
-        this.characterMarker = new Texture(characterMarkerPath);
+    public Minimap(Texture minimapTexturePath, Texture characterMarkerPath, float x, float y, float width, float height, Entity  player) {
+        this.minimapTexture = minimapTexturePath;
+        this.characterMarker = characterMarkerPath;
         this.minimapPosition = new Vector2(x, y);
         this.minimapWidth = width;
         this.minimapHeight = height;
@@ -54,7 +56,13 @@ public class Minimap extends Actor {
 
     // Retorna a posição atual do jogador no mundo
     private Vector2 getCharacterPosition() {
-     return null;
+        if (player != null) {
+            PositionComponent pos = player.getComponent(PositionComponent.class);
+            if (pos != null) {
+                return pos.position;
+            }
+        }
+        return null;
     }
 
     // Libera os recursos das texturas ao finalizar o uso

@@ -165,6 +165,7 @@ public class GameScreen implements Screen, BaseScreen {
     @Override
     public void initializeUI() {
         new UIInitializer(gameContext).initialize();
+
     }
 
     //Inicializa a entrada do jogador, configurando os controles.

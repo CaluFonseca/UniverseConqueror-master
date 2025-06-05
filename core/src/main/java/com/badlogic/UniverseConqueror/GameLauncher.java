@@ -90,6 +90,10 @@ public class GameLauncher extends Game {
         assetManager.load(PARTICLE_EXPLOSION, ParticleEffect.class);
         assetManager.load(FIREBALL_PARTICLE_IMAGE, Texture.class);
 
+        //MiniMap
+        assetManager.load(MINIMAP_BACKGROUND, Texture.class);
+        assetManager.load(PLAYER_MARKER, Texture.class);
+
         //Animações do jogador
         queueAnimationTextures(assetManager);
 

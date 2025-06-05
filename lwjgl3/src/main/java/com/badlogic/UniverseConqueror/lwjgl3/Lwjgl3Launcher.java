@@ -17,7 +17,7 @@ public class Lwjgl3Launcher {
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
-        configuration.setTitle("UniverseConquer");
+        configuration.setTitle("UniverseConqueror");
         // Vsync limits the frames per second to what your hardware can display, and helps eliminate
         // ssssssssscreen tearing.
         configuration.useVsync(true);
