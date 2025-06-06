@@ -73,6 +73,7 @@ public class GameScreen implements Screen, BaseScreen {
             player = restoredPlayer;
             gameStateService.setPlayer(player);
             pathfinder = gameContext.getPathfinder();
+            gameContext.setRestoredState(true);
         }
 
         initializeUI();

@@ -18,7 +18,7 @@ public class Timer {
     // Inicia o temporizador, reiniciando o tempo acumulado.
     public void start() {
         running = true;
-        time = 0;
+//        time = 0;
     }
 
     // Para o temporizador, mantendo o tempo acumulado.

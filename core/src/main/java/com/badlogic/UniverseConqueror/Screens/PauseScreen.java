@@ -101,6 +101,7 @@ public class PauseScreen extends BaseUIScreen {
     //Retoma o jogo com restauração do estado atual.
     private void resumeWithRestore() {
         playClickSound();
+        MusicManager.getInstance().stop();
         GameScreen restoredGame = new GameScreen(game, assetManager);
         game.setScreen(restoredGame);
     }

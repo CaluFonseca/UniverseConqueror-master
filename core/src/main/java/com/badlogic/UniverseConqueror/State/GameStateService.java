@@ -1,6 +1,7 @@
 package com.badlogic.UniverseConqueror.State;
 
 import com.badlogic.UniverseConqueror.ECS.components.*;
+import com.badlogic.UniverseConqueror.ECS.entity.EnemyFactory;
 import com.badlogic.UniverseConqueror.ECS.entity.ItemFactory;
 import com.badlogic.UniverseConqueror.ECS.entity.PlayerFactory;
 import com.badlogic.UniverseConqueror.ECS.systems.*;
@@ -167,7 +168,7 @@ public class GameStateService {
 
         // Atualiza sistema de input para usar o jogador restaurado
         playerInputSystem.setPlayer(player);
-
+        System.out.println("Tempo salvo no GameState: " + state.gameTime);
         playingTimer.setTime(state.gameTime);
 
         for (SavedItemData itemData : state.remainingItems) {
@@ -190,15 +191,17 @@ public class GameStateService {
 
         }
 
-        // --- 5. Restaurar inimigos ---
-//        for (SavedEnemyData enemyData : state.enemies) {
-//            Entity enemy = EnemyFactory.createEnemyFromData(engine, world, assetManager, player, camera, enemyData);
-//            engine.addEntity(enemy);
-//        }
+        for (SavedEnemyData enemyData : state.enemies) {
+            Entity enemy = EnemyFactory.createEnemyFromData(engine, world, assetManager, player, camera, enemyData);
+            engine.addEntity(enemy);
+        }
+
         SpriteBatch batchUfo = new SpriteBatch();
         engine.addSystem(new UfoRenderSystem(batchUfo, camera));
         itemCollectionSystem.setCollectedCount(state.collectedItemCount);
-
+        if (!playingTimer.isRunning()) {
+            playingTimer.start();
+        }
         restoredState = true;
         if (ufoSpawnerSystem != null) {
             ufoSpawnerSystem.resetTimer();
