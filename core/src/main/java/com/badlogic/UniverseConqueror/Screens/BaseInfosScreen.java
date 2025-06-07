@@ -111,9 +111,7 @@ public abstract class BaseInfosScreen implements Screen,
     }
 
     @Override
-    public void hide() {
-        dispose();
-    }
+    public void hide() {}
 
     @Override public void pause() {}
     @Override public void resume() {}

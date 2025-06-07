@@ -62,7 +62,7 @@ public class MainMenuScreen extends BaseUIScreen {
             screenManager.show(ScreenType.CONTROLS);
         });
 
-        TextButton creditsButton = createButton("Créditos", () -> {
+        TextButton creditsButton = createButton("Creditos", () -> {
             MusicManager.getInstance().stop();
             screenManager.show(ScreenType.CREDITS);
         });
