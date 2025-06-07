@@ -164,4 +164,4 @@ Thumbs.db
 **/resource-config.json
 
 # Arquivo de save do jogo
-/savegame.json
+savegame.json
