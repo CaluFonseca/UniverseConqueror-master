@@ -4,6 +4,7 @@ import com.badlogic.UniverseConqueror.Audio.MusicManager;
 import com.badlogic.UniverseConqueror.GameLauncher;
 import com.badlogic.UniverseConqueror.Interfaces.ScreenManager;
 import com.badlogic.UniverseConqueror.Interfaces.ScreenType;
+import com.badlogic.UniverseConqueror.State.GameStateManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -32,6 +33,7 @@ public class MainMenuScreen extends BaseUIScreen {
 
         TextButton playButton = createButton("Play", () -> {
             MusicManager.getInstance().stop();
+            GameStateManager.delete();
             screenManager.show(ScreenType.GAME);
         });
 

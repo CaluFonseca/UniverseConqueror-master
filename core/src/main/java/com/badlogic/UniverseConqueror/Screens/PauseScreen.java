@@ -110,6 +110,7 @@ public class PauseScreen extends BaseUIScreen {
     public void restartGame() {
         SoundManager.getInstance().stop();
         MusicManager.getInstance().stop();
+        GameStateManager.delete();
         game.startNewGame();
     }
 
