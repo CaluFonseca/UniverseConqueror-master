@@ -1,0 +1,362 @@
+{
+playerPosition: {
+	x: 3875.1025
+	y: -577.0616
+}
+playerHealth: 97
+playerAttack: 200
+gameTime: 17.899355
+remainingItems: [
+	{
+		name: Vida
+		position: {
+			x: 3712
+			y: -192
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 1664
+			y: -448
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 8320
+			y: -704
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 6784
+			y: 1216
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 8832
+			y: -1728
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 3200
+			y: -320
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 4992
+			y: 192
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 8192
+			y: 1920
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 2816
+			y: 640
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 8064
+			y: 448
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 8320
+			y: 1856
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 4480
+			y: -2112
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 2432
+			y: -1088
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 2944
+			y: 448
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 11264
+			y: 384
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 9984
+			y: 640
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 3712
+			y: 448
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 3456
+			y: -960
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 6784
+			y: 3008
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 7424
+			y: -1664
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 5376
+			y: 2048
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 6016
+			y: -1216
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 5632
+			y: 256
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 7680
+			y: -1024
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 1024
+			y: 512
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 4736
+			y: -1472
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 4992
+			y: -704
+		}
+	}
+	{
+		name: Vida
+		position: {
+			x: 3328
+			y: 640
+		}
+	}
+	{
+		name: Ataque
+		position: {
+			x: 9600
+			y: -1472
+		}
+	}
+	{
+		name: SuperAtaque
+		position: {
+			x: 4864
+			y: -1152
+		}
+	}
+]
+spaceshipPosition: {
+	x: 3200
+	y: -64
+}
+enemies: [
+	{
+		position: {
+			x: 3196.3174
+			y: 185.14926
+		}
+		patrolStart: {
+			x: 3196.3174
+			y: 185.14926
+		}
+		patrolEnd: {
+			x: 3196.3174
+			y: 185.14926
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 3645.2573
+			y: -64.68613
+		}
+		patrolStart: {
+			x: 3645.2573
+			y: -64.68613
+		}
+		patrolEnd: {
+			x: 3645.2573
+			y: -64.68613
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 3570.4915
+			y: -250.03978
+		}
+		patrolStart: {
+			x: 3570.4915
+			y: -250.03978
+		}
+		patrolEnd: {
+			x: 3570.4915
+			y: -250.03978
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 3200
+			y: -256.06223
+		}
+		patrolStart: {
+			x: 3200
+			y: -256.06223
+		}
+		patrolEnd: {
+			x: 3200
+			y: -256.06223
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 2754.7393
+			y: -64.795135
+		}
+		patrolStart: {
+			x: 2754.7393
+			y: -64.795135
+		}
+		patrolEnd: {
+			x: 2754.7393
+			y: -64.795135
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 2828.6968
+			y: 120.88596
+		}
+		patrolStart: {
+			x: 2828.6968
+			y: 120.88596
+		}
+		patrolEnd: {
+			x: 2828.6968
+			y: 120.88596
+		}
+		type: patrol
+	}
+	{
+		position: {
+			x: 7555.112
+			y: 195.26857
+		}
+		patrolStart: {
+			x: 7555.112
+			y: 195.26857
+		}
+		patrolEnd: {
+			x: 7555.112
+			y: 195.26857
+		}
+		type: ufo
+	}
+	{
+		position: {
+			x: 9884.449
+			y: 700.09344
+		}
+		patrolStart: {
+			x: 9884.449
+			y: 700.09344
+		}
+		patrolEnd: {
+			x: 9884.449
+			y: 700.09344
+		}
+		type: ufo
+	}
+	{
+		position: {
+			x: 6716.7637
+			y: 940.48834
+		}
+		patrolStart: {
+			x: 6716.7637
+			y: 940.48834
+		}
+		patrolEnd: {
+			x: 6716.7637
+			y: 940.48834
+		}
+		type: ufo
+	}
+]
+}
