@@ -8,10 +8,10 @@ public class Constants {
     public static final float PPM = 128f;
 
     // Velocidade padrão de movimento do jogador
-    public static final float SPEED = 100f;
+    public static final float SPEED = 120f;
 
     // Velocidade padrão de movimento dos UFO em CHASE.
-    public static final float SPEED_UFO_ENEMY = 75f;
+    public static final float SPEED_UFO_ENEMY = 60f;
 
     // Velocidade padrão de movimento dos ENEMY em PATROL.
     public static final float SPEED_ENEMY = 60f;
