@@ -12,7 +12,7 @@ public class CreditsScreen extends BaseInfosScreen implements BaseScreen {
         super(game,
             "Cláudio Fonseca - 20240628 \n" +
                 "Fernando Simões - 20241477 \n" +
-                "Paulo Ferreira - \n" +
+                "Paulo Ferreira - 20240614\n" +
                 "Vítor Hugo Freitas - 20241067",
             assetManager);
     }
