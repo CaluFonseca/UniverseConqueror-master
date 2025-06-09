@@ -46,7 +46,7 @@ public class EndScreen extends BaseUIScreen implements NavigableScreen {
         table.setFillParent(true);
         table.center();
 
-        Label titleLabel = new Label("Fim de Nível", skin, "title");
+        Label titleLabel = new Label("Fim de Nivel", skin, "title");
         Label timeLabel = new Label("Tempo de jogo: " + String.format("%.2f", totalTime) + "s", skin);
         Label itemLabel = new Label("Itens coletados: " + collectedItems, skin);
         Label healthLabel = new Label("Vida restante: " + remainingHealth, skin);
