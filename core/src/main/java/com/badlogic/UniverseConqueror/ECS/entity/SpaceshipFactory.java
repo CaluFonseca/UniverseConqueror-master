@@ -21,7 +21,7 @@ public class SpaceshipFactory {
     public Entity createSpaceship(Vector2 position, Engine engine, World world) {
         Entity spaceship = new Entity();
 
-        // Carrega a textura da nave
+        // Carrega a textura da nave espacial
         Texture texture = assetManager.get(AssetPaths.ITEM_SPACESHIP, Texture.class);
 
         // Adiciona componentes básicos
